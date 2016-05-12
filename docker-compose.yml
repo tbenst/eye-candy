@@ -1,0 +1,12 @@
+web:
+  restart: always
+  build: .
+  command: python runserver.py
+  ports:
+   - "5000:5000"
+  volumes:
+   - .:/www
+  links:
+   - redis
+redis:
+  image: redis

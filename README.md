@@ -1,0 +1,1 @@
+coffee --watch --compile -o eyecandy/static/ eyecandy/coffee/
