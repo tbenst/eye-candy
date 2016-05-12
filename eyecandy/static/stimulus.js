@@ -97,9 +97,11 @@ const accessorInitialState = {
     barWidth: 20,
     pos: { x: 0, y:0 },
     orientation: 0,
+    stage: new Container(),
+    time: 0,
 }
 
-function accessorReducer(state = accessorInitialState, action) {
+function eyeCandyApp(state = accessorInitialState, action) {
     switch (action.type) {
         case SET_STATUS:
             return Object.assign({}, state, {
@@ -141,73 +143,40 @@ function accessorReducer(state = accessorInitialState, action) {
             return Object.assign({}, state, {
                 stage: action.stage
             })
+        case ADD_CHILD:
+            return Object.assign({}, state, {
+                stage: addChildHelper(state.stage)
+            })
+        case TICK:
+            return tickReducer(state)
     default:
       return state
     }
 }
 
-function stageReducerHelper(state, action) {
-    switch (action.type) {
-        case ADD_CHILD:
-            return state
-    }
-}
-
-function stageReducer(state={stage: new Container()}, action) {
-    switch (action.type) {
-        case ADD_CHILD:
-            return Object.assign({}, state, {
-                stage: stageReducerHelper(state.stage, action)
-            })
-        // case REMOVE_CHILD:
-        //     return Object.assign({}, state, {
-        //         stage: Object.assign({}, state.stage {
-        //             children: [...state.stage.children, {
-        //                 action.child
-        //             }]
-        //         })
-        //     })
-        default:
-            return state
-    }
+function addChildHelper(stage) {
+    // TODO
+    return stage
 }
 
 function tickReducer(state={time: 0}, action) {
-    switch (action.type) {
-        case TICK:
-            // switch on stimulusType
-            switch(store.getState()['stimulusType']) {
-                case StimulusTypes.OS_BAR:
-                    return Object.assign({}, state, {
-                        time: state.time + 1,
-                        stage: tickOSBar(state.stage),
-                    })                
-                // return Object.assign({}, state, {
-                //     time: state.time + 1,
-                //     stimuli: state.stimuli.map(stimulus => {
-                //         stimulus.graphic.position()
-                //         return Object.assign({}, stimulus, {
-                //             graphic: rect
-                //         })
-                //     })
-                // })
-            }
-        default:
-            return state
+    switch(store.getState()['stimulusType']) {
+        case StimulusTypes.OS_BAR:
+            return Object.assign({}, state, {
+                time: state.time + 1,
+                stage: tickOSBar(state.stage),
+            })                
+        // return Object.assign({}, state, {
+        //     time: state.time + 1,
+        //     stimuli: state.stimuli.map(stimulus => {
+        //         stimulus.graphic.position()
+        //         return Object.assign({}, stimulus, {
+        //             graphic: rect
+        //         })
+        //     })
+        // })
     }
 }
-
-function reduceReducers(...reducers) {
-    return (previous, current) =>
-        reducers.reduce(
-            (prev, r) => r(p, current),
-            previous
-        );
-}
-
-eyeCandyApp = reduceReducers({
-    accessorReducer, stageReducer, tickReducer,
-})
 
 // TICK
 
