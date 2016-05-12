@@ -4,27 +4,18 @@ const Container = PIXI.Container,
     WebGLRenderer = PIXI.WebGLRenderer,
     loader = PIXI.loader,
     resources = PIXI.loader.resources,
-    Sprite = PIXI.Sprite;
+    Graphics = PIXI.Graphics;
 
 /****** REDUX (GLOBAL STATE) ******/
 
 const createStore = Redux.createStore;
-const r = Redux.r;
 const combineReducers = Redux.combineReducers;
 
 // ACTIONS
 
 const TICK = 'TICK'
 const SET_STATUS = 'SET_STATUS'
-// TODO CHANGE MODE TO STIMULUS_TYPE
-const SET_STIMULUS_TYPE = 'SET_STIMULUS_TYPE'
-const SET_SPEED = 'SET_SPEED'
-const SET_PRE_TIME = 'SET_PRE_TIME'
-const SET_INTER_TIME = 'SET_INTER_TIME'
-const SET_POST_TIME = 'SET_POST_TIME'
-const SET_BAR_WIDTH = 'SET_BAR_WIDTH'
-const SET_POS = 'SET_POS'
-const SET_ORIENTATION = 'SET_ORIENTATION'
+const SET_STIMULUS = 'SET_STIMULUS'
 // stage holds Pixi graphics state to render
 const SET_STAGE = 'SET_STAGE'
 const ADD_CHILD = 'ADD_CHILD'
@@ -37,10 +28,6 @@ const Statuses = {
 }
 
 const Stimuli = {
-    BAR: 'BAR',
-}
-
-const StimulusTypes = {
     OS_BAR: 'OS_BAR',
 }
 
@@ -60,26 +47,26 @@ function tick() {
     return { type: TICK}
 }
 
-function addChild() {
-    var rect = new PIXI.Graphics();
+function addChild(graphic) {
+    var rect = new Graphics();
 
     rect.beginFill(0xFFFFFF);
 
     // draw a rectangle
     rect.drawRect(0, 0, 300, 200);
-    // rect.generateTexture;
-    return { type: ADD_CHILD, child: rect }
+    // TODO make generic
+    return { type: ADD_CHILD, graphic: rect }
+    // return { type: ADD_CHILD, graphic: graphic }
 }
 
 const setStatus = makeActionCreatorAccessor(SET_STATUS, 'status')
-const setStimulusType = makeActionCreatorAccessor(SET_STIMULUS_TYPE, 'stimulusType')
-const setSpeed = makeActionCreatorAccessor(SET_SPEED, 'speed')
-const setPreTime = makeActionCreatorAccessor(SET_PRE_TIME, 'time')
-const setInterTime = makeActionCreatorAccessor(SET_INTER_TIME, 'time')
-const setPostTime = makeActionCreatorAccessor(SET_POST_TIME, 'time')
-const setBarWidth = makeActionCreatorAccessor(SET_BAR_WIDTH, 'barWidth')
-const setSetPos = makeActionCreatorAccessor(SET_POS, 'pos')
-const setOrientation = makeActionCreatorAccessor(SET_ORIENTATION, 'orientation')
+const setStimulus = makeActionCreatorAccessor(SET_STIMULUS, 'stimulus')
+// const setSpeed = makeActionCreatorAccessor(SET_SPEED, 'speed')
+// const setPreTime = makeActionCreatorAccessor(SET_PRE_TIME, 'time')
+// const setInterTime = makeActionCreatorAccessor(SET_INTER_TIME, 'time')
+// const setPostTime = makeActionCreatorAccessor(SET_POST_TIME, 'time')
+// const setBarWidth = makeActionCreatorAccessor(SET_BAR_WIDTH, 'barWidth')
+// const setOrientation = makeActionCreatorAccessor(SET_ORIENTATION, 'orientation')
 const setStage = makeActionCreatorAccessor(SET_STAGE, 'stage')
 
 
@@ -89,15 +76,16 @@ const accessorInitialState = {
     windowHeight: window.innerHeight,
     windowWidth: window.innerWidth,
     status: Statuses.STOPPED,
-    stimulusType: StimulusTypes.OS_BAR,
-    speed: 1,
-    preTime: 0,
-    interTime: 0,
-    postTime: 0,
-    barWidth: 20,
-    pos: { x: 0, y:0 },
-    orientation: 0,
-    stage: new Container(),
+    stimulus: {
+        stimulusType: Stimuli.OS_BAR,
+        speed: 1,
+        preTime: 0,
+        interTime: 0,
+        postTime: 0,
+        barWidth: 20,
+        orientation: 0,
+    },
+    stage: new Container,
     time: 0,
 }
 
@@ -107,37 +95,9 @@ function eyeCandyApp(state = accessorInitialState, action) {
             return Object.assign({}, state, {
                 status: action.status
             })
-        case SET_STIMULUS_TYPE:
+        case SET_STIMULUS:
             return Object.assign({}, state, {
-                stimulusType: action.mode
-            })
-        case SET_SPEED:
-            return Object.assign({}, state, {
-                speed: action.speed
-            })
-        case SET_PRE_TIME:
-            return Object.assign({}, state, {
-                preTime: action.time
-            })
-        case SET_INTER_TIME:
-            return Object.assign({}, state, {
-                interTime: action.time
-            })
-        case SET_POST_TIME:
-            return Object.assign({}, state, {
-                postTime: action.time
-            })
-        case SET_BAR_WIDTH:
-            return Object.assign({}, state, {
-                barWidth: action.width
-            })
-        case SET_POS:
-            return Object.assign({}, state, {
-                pos: action.pos
-            })
-        case SET_ORIENTATION:
-            return Object.assign({}, state, {
-                orientation: action.orientation
+                stimulus: action.stimulus
             })
         case SET_STAGE:
             return Object.assign({}, state, {
@@ -145,23 +105,27 @@ function eyeCandyApp(state = accessorInitialState, action) {
             })
         case ADD_CHILD:
             return Object.assign({}, state, {
-                stage: addChildHelper(state.stage)
+                stage: addChildHelper(state.stage, action)
             })
         case TICK:
-            return tickReducer(state)
+            return tickReducer(state, action)
     default:
       return state
     }
 }
 
-function addChildHelper(stage) {
-    // TODO
-    return stage
+function addChildHelper(stage, action) {
+    return Object.assign({}, stage, {
+        children: [
+            ...stage.children,
+            action.graphic
+        ]
+    })
 }
 
-function tickReducer(state={time: 0}, action) {
-    switch(store.getState()['stimulusType']) {
-        case StimulusTypes.OS_BAR:
+function tickReducer(state, action) {
+    switch(store.getState()['stimulus']['stimulusType']) {
+        case Stimuli.OS_BAR:
             return Object.assign({}, state, {
                 time: state.time + 1,
                 stage: tickOSBar(state.stage),
@@ -189,7 +153,7 @@ function tickOSBar(stage) {
 function tickOSBarHelper(children) {
     return children.map(bar => {
         return Object.assign({}, bar, {
-
+            position: {x: 24, y: 24}
         })
     })
 }
@@ -209,9 +173,7 @@ let unsubscribe = store.subscribe(() =>
 
 store.dispatch(setStatus('STARTED'))
 store.dispatch(setStatus('STOPPED'))
-store.dispatch(setPreTime('10'))
-store.dispatch(tick())
-store.dispatch(tick())
+store.dispatch(addChild('removeME'))
 store.dispatch(tick())
 
 // Stop listening to state updates
@@ -221,7 +183,6 @@ unsubscribe()
 
 // Create the renderer, can use autoDetectRenderer for Canvas fallback
 let renderer = new WebGLRenderer(
-  // 1140, 912,
   store.getState()['windowWidth'], store.getState()['windowHeight'],
   {antialias: false, transparent: false, resolution: 1}
 );
@@ -244,9 +205,39 @@ function mainLoop() {
     requestAnimationFrame(mainLoop);
 }
 
-mainLoop();
+// mainLoop();
 
 
+
+
+
+
+
+var stage = new Container()
+stage.addChild(store.getState()['stage'])
+renderer.render(stage);
+
+
+
+
+
+
+
+var stage = new Container()
+var rect = new Graphics()
+rect.beginFill(0xFFFFFF);
+rect.drawRect(0, 0, 300, 200);
+stage.addChild(rect)
+renderer.render(stage);
+
+
+var stage = new Container()
+var rect = new Graphics()
+rect.beginFill(0xFFFFFF);
+rect.drawRect(0, 0, 300, 200);
+stage.addChild(rect)
+renderDisplayObject(rect, renderTarget)
+// renderer.render(stage);
 
 
 
