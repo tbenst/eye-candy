@@ -1,36 +1,76 @@
-/****** PIXI SETUP ******/
+const PI = Math.PI
+const pow = Math.pow
+const sqrt = Math.sqrt
+const sin = Math.sin
+const cos = Math.cos
 
-const Container = PIXI.Container,
-    WebGLRenderer = PIXI.WebGLRenderer,
-    loader = PIXI.loader,
-    resources = PIXI.loader.resources,
-    Graphics = PIXI.Graphics;
-
-/****** REDUX (GLOBAL STATE) ******/
+/************************************************
+REDUX (GLOBAL STATE)
+************************************************/
 
 const createStore = Redux.createStore;
 const combineReducers = Redux.combineReducers;
 
+/***********************************************/
 // ACTIONS
 
 const TICK = 'TICK'
 const SET_STATUS = 'SET_STATUS'
 const SET_STIMULUS = 'SET_STIMULUS'
-// stage holds Pixi graphics state to render
-const SET_STAGE = 'SET_STAGE'
-const ADD_CHILD = 'ADD_CHILD'
-const REMOVE_CHILD = 'REMOVE_CHILD'
+const SET_PROGRAM = 'SET_PROGRAM'
+const SET_GRAPHICS = 'SET_GRAPHICS'
+const ADD_GRAPHIC = 'ADD_GRAPHIC'
+const REMOVE_GRAPHIC = 'REMOVE_GRAPHIC'
+const SET_SIGNAL_LIGHT = 'SET_SIGNAL_LIGHT'
 
 // Define states for readability
-const Statuses = {
+const STATUS = {
     STARTED: 'STARTED',
     STOPPED: 'STOPPED',
 }
 
-const Stimuli = {
-    OS_BAR: 'OS_BAR',
+const PROGRAM = {
+    ORIENTATION_SELECTIVITY: 'ORIENTATION_SELECTIVITY',
+    /*
+    {
+        programType: PROGRAM.ORIENTATION_SELECTIVITY,
+        speed: 1,
+        preTime: 0,
+        interTime: 0,
+        postTime: 0,
+        barWidth: 20,
+        orientations: [0, PI/2, PI, 3*PI/2]
+    }
+    */
+    MOVING_BAR: 'MOVING_BAR'
+    /*
+    {
+        programType: PROGRAM.MOVING_BAR,
+        speed: 1,
+        preTime: 0,
+        interTime: 0,
+        postTime: 0,
+        barWidth: 20,
+    }
+    */
+}
+const STIMULUS = {
+    BAR: 'BAR',
+    /*
+    {
+        position: {x: 0, y: 0},
+        size: {width: 20, height: 10},
+        speed: 1,
+        angle: 0,
+    }
+    */
 }
 
+const GRAPHIC = {
+    BAR: 'BAR'
+}
+
+/***********************************************/
 // ACTION CREATORS
 
 function makeActionCreatorAccessor(type, ...argNames) {
@@ -47,45 +87,48 @@ function tick() {
     return { type: TICK}
 }
 
-function addChild(graphic) {
-    var rect = new Graphics();
+function addGraphic(graphic) {
 
-    rect.beginFill(0xFFFFFF);
-
-    // draw a rectangle
-    rect.drawRect(0, 0, 300, 200);
-    // TODO make generic
-    return { type: ADD_CHILD, graphic: rect }
-    // return { type: ADD_CHILD, graphic: graphic }
+    return { type: ADD_GRAPHIC, graphic: 'TODO' }
 }
 
 const setStatus = makeActionCreatorAccessor(SET_STATUS, 'status')
 const setStimulus = makeActionCreatorAccessor(SET_STIMULUS, 'stimulus')
-// const setSpeed = makeActionCreatorAccessor(SET_SPEED, 'speed')
-// const setPreTime = makeActionCreatorAccessor(SET_PRE_TIME, 'time')
-// const setInterTime = makeActionCreatorAccessor(SET_INTER_TIME, 'time')
-// const setPostTime = makeActionCreatorAccessor(SET_POST_TIME, 'time')
-// const setBarWidth = makeActionCreatorAccessor(SET_BAR_WIDTH, 'barWidth')
-// const setOrientation = makeActionCreatorAccessor(SET_ORIENTATION, 'orientation')
-const setStage = makeActionCreatorAccessor(SET_STAGE, 'stage')
+const setProgram = makeActionCreatorAccessor(SET_PROGRAM, 'program')
+const setGraphics = makeActionCreatorAccessor(SET_GRAPHICS, 'graphics')
+const setSignalLight = makeActionCreatorAccessor(SET_SIGNAL_LIGHT, 'signalLight')
 
 
+/***********************************************/
 // REDUCERS
 
 const accessorInitialState = {
     windowHeight: window.innerHeight,
     windowWidth: window.innerWidth,
-    status: Statuses.STOPPED,
+    status: STATUS.STOPPED,
+    // program: {
+    //     programType: PROGRAM.MOVING_BAR,
+    //     speed: 1,
+    //     preTime: 0,
+    //     interTime: 0,
+    //     postTime: 0,
+    //     barWidth: 20,
+    // },
+    // stimulus: {},
+    program: {},
     stimulus: {
-        stimulusType: Stimuli.OS_BAR,
-        speed: 1,
-        preTime: 0,
-        interTime: 0,
-        postTime: 0,
-        barWidth: 20,
-        orientation: 0,
+        stimulusType: STIMULUS.BAR,
     },
-    stage: new Container,
+    graphics: [{
+        graphicType: GRAPHIC.BAR,
+        color: '#FFFFFF',
+        position: {x: 0, y: 0},
+        size: {width: 50, height: 50},
+        speed: 1,
+        angle: 0,
+    }],
+    // signalLight in range(0,255)
+    signalLight: 0,
     time: 0,
 }
 
@@ -99,13 +142,17 @@ function eyeCandyApp(state = accessorInitialState, action) {
             return Object.assign({}, state, {
                 stimulus: action.stimulus
             })
-        case SET_STAGE:
+        case SET_GRAPHICS:
             return Object.assign({}, state, {
-                stage: action.stage
+                graphics: action.graphics
             })
-        case ADD_CHILD:
+        case ADD_GRAPHIC:
             return Object.assign({}, state, {
-                stage: addChildHelper(state.stage, action)
+                graphics: [...state.graphics, action.graphic]
+            })
+        case SET_SIGNAL_LIGHT:
+            return Object.assign({}, state, {
+                signalLight: action.signalLight
             })
         case TICK:
             return tickReducer(state, action)
@@ -114,21 +161,12 @@ function eyeCandyApp(state = accessorInitialState, action) {
     }
 }
 
-function addChildHelper(stage, action) {
-    return Object.assign({}, stage, {
-        children: [
-            ...stage.children,
-            action.graphic
-        ]
-    })
-}
-
 function tickReducer(state, action) {
     switch(store.getState()['stimulus']['stimulusType']) {
-        case Stimuli.OS_BAR:
+        case STIMULUS.BAR:
             return Object.assign({}, state, {
                 time: state.time + 1,
-                stage: tickOSBar(state.stage),
+                graphics: tickBar(state.graphics),
             })                
         // return Object.assign({}, state, {
         //     time: state.time + 1,
@@ -142,22 +180,24 @@ function tickReducer(state, action) {
     }
 }
 
+/***********************************************/
 // TICK
 
-function tickOSBar(stage) {
-    return Object.assign({}, stage, {
-        children: tickOSBarHelper(stage.children)
-    })
-}
-
-function tickOSBarHelper(children) {
-    return children.map(bar => {
+function tickBar(graphics) {
+    return graphics.map(bar => {
         return Object.assign({}, bar, {
-            position: {x: 24, y: 24}
+            position: tickPosition(bar.position, bar.speed, bar.angle),
         })
     })
 }
 
+function tickPosition(position, speed, angle) {
+    const new_x = position.x + speed * cos(angle)
+    const new_y = position.y + speed * sin(angle)
+    return { x: new_x, y: new_y }
+}
+
+/***********************************************/
 // STORE
 
 let store = createStore(eyeCandyApp)
@@ -171,112 +211,58 @@ let unsubscribe = store.subscribe(() =>
   console.log(store.getState())
 )
 
-store.dispatch(setStatus('STARTED'))
-store.dispatch(setStatus('STOPPED'))
-store.dispatch(addChild('removeME'))
-store.dispatch(tick())
+store.dispatch(setStatus(STATUS.STARTED))
+store.dispatch(setStatus(STATUS.STOPPED))
+//  offstore.dispatch(tick())
 
 // Stop listening to state updates
 unsubscribe()
 
-/****** RENDER *****/
+/************************************************
+// LOGIC
+************************************************/
 
-// Create the renderer, can use autoDetectRenderer for Canvas fallback
-let renderer = new WebGLRenderer(
-  store.getState()['windowWidth'], store.getState()['windowHeight'],
-  {antialias: false, transparent: false, resolution: 1}
-);
-
-// fill window
-renderer.view.style.position = "absolute";  
-renderer.view.style.display = "block";
-// renderer.autoResize = true;
-// renderer.resize(WIDTH, HEIGHT);
-
-// Add the canvas to the HTML document
-document.body.appendChild(renderer.view);
-
-// make red line around renderer
-// renderer.view.style.border = "1px dashed red";
-
-function mainLoop() {
-    renderer.render(store.getState()['stage']);
-    store.dispatch(tick())
-    requestAnimationFrame(mainLoop);
+// ensure bar always spans window regardless of angle and
+function getDiagonalLength() {
+    return sqrt(pow(store.getState()['windowWidth'], 2) +
+        pow(store.getState()['windowHeight'], 2))
 }
 
-// mainLoop();
+
+/************************************************
+CANVAS
+************************************************/
+
+const canvas=document.getElementById("eyecandy");
+canvas.width=store.getState()['windowWidth']
+canvas.height=store.getState()['windowHeight']
+var context = canvas.getContext("2d");
+
+function render() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    store.getState().graphics.forEach(graphic => {
+        switch (graphic.graphicType) {
+            case GRAPHIC.BAR:
+                // might need to translate first if rotation
+                context.fillStyle = graphic.color
+                context.fillRect(graphic.position.x, graphic.position.y, graphic.size.width, graphic.size.height);
+                // context.rotate(graphic.angle)
+        }
+    })
+}
 
 
-
-
-
-
-
-var stage = new Container()
-stage.addChild(store.getState()['stage'])
-renderer.render(stage);
-
-
-
-
-
-
-
-var stage = new Container()
-var rect = new Graphics()
-rect.beginFill(0xFFFFFF);
-rect.drawRect(0, 0, 300, 200);
-stage.addChild(rect)
-renderer.render(stage);
-
-
-var stage = new Container()
-var rect = new Graphics()
-rect.beginFill(0xFFFFFF);
-rect.drawRect(0, 0, 300, 200);
-stage.addChild(rect)
-renderDisplayObject(rect, renderTarget)
-// renderer.render(stage);
-
-
-
-// // CREATE SHAPES 
-
-// // BUILD RECTANGLE
-// var rect = new PIXI.Graphics();
-
-// rect.beginFill(0xFFFFFF);
-
-// // draw a rectangle
-// rect.drawRect(0, 0, 300, 200);
-// rect.generateTexture;
-// stage.addChild(rect);
-
-// // Tell the `renderer` to `render` the `stage`
-// renderer.render(stage);
-
-
-// /****** UPDATE WORLD ******/
-// function updateWorld() {
-//   // // check FPS
-//   // var thisLoop = new Date;
-//   // var fps = 1000 / (thisLoop - lastLoop);
-//   // lastLoop = thisLoop;
-//   // console.log(fps)
-
-//   // move circle
-//   rect.x = rect.x + 4;
-//   rect.y = rect.y + 4;
-// }
-
-
-// /****** ANIMATE ******/
-// mainLoop();
-
-// var lastLoop = new Date;
-// function mainLoop() {
-//     renderer.render(stage);
-//     updateWorld();
-//     requestAnimationFrame(mainLoop);
-// }
+/************************************************
+ANIMATE
+************************************************/
+var lastTime = window.performance.now()
+function mainLoop() {
+    var curTime = window.performance.now()
+    console.log(curTime - lastTime)
+    lastTime = curTime
+    store.dispatch(tick())
+    render()
+    requestAnimationFrame(mainLoop)
+}
+mainLoop()
+// render()
