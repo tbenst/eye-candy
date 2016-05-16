@@ -8,8 +8,7 @@ const cos = Math.cos
 REDUX (GLOBAL STATE)
 ************************************************/
 
-const createStore = Redux.createStore;
-const combineReducers = Redux.combineReducers;
+const createStore = Redux.createStore
 
 /***********************************************/
 // ACTIONS
@@ -55,7 +54,7 @@ const PROGRAM = {
     */
 }
 const STIMULUS = {
-    BAR: 'BAR',
+    BAR: 'BAR'
     /*
     {
         position: {x: 0, y: 0},
@@ -74,13 +73,13 @@ const GRAPHIC = {
 // ACTION CREATORS
 
 function makeActionCreatorAccessor(type, ...argNames) {
-  return function(...args) {
-    let action = { type }
-    argNames.forEach((arg, index) => {
-      action[argNames[index]] = args[index]
-    })
-    return action
-  }
+    return function(...args) {
+        let action = { type }
+        argNames.forEach((arg, index) => {
+            action[argNames[index]] = args[index]
+        })
+        return action
+    }
 }
 
 function tick() {
@@ -118,18 +117,20 @@ const accessorInitialState = {
     program: {},
     stimulus: {
         stimulusType: STIMULUS.BAR,
+        lifespan: 500
     },
     graphics: [{
         graphicType: GRAPHIC.BAR,
         color: '#FFFFFF',
-        position: {x: 0, y: 0},
-        size: {width: 50, height: 50},
-        speed: 1,
-        angle: 0,
+        // Note: height of the Rectangle is bar width
+        size: {width: 20, height: getDiagonalLength()},
+        speed: 10,
+        angle: PI/6
+        // origin: {x: 0, y: 0}
     }],
     // signalLight in range(0,255)
     signalLight: 0,
-    time: 0,
+    time: 0
 }
 
 function eyeCandyApp(state = accessorInitialState, action) {
@@ -185,17 +186,22 @@ function tickReducer(state, action) {
 
 function tickBar(graphics) {
     return graphics.map(bar => {
+        let newPosition = undefined
+        if (bar.position === undefined) {
+            newPosition = {r: window.innerHeight, theta: -bar.angle}
+        } else {
+            newPosition = {r: bar.position.r-bar.speed, 
+                theta: bar.position.theta}
+        }
+
         return Object.assign({}, bar, {
-            position: tickPosition(bar.position, bar.speed, bar.angle),
+            position: newPosition,
+            origin: {x: bar.size.width*cos(newPosition.theta)/2 + newPosition.r*cos(newPosition.theta),
+                y: bar.size.width*sin(newPosition.theta)/2 + newPosition.r*sin(newPosition.theta)}
         })
     })
 }
 
-function tickPosition(position, speed, angle) {
-    const new_x = position.x + speed * cos(angle)
-    const new_y = position.y + speed * sin(angle)
-    return { x: new_x, y: new_y }
-}
 
 /***********************************************/
 // STORE
@@ -207,16 +213,19 @@ let store = createStore(eyeCandyApp)
 
 // Every time the state changes, log it
 // Note that subscribe() returns a function for unregistering the listener
-let unsubscribe = store.subscribe(() =>
-  console.log(store.getState())
+let unsubscribe = store.subscribe(() => {
+        console.log(store.getState().graphics[0].origin)
+        // console.log(store.getState().graphics[0].position)
+        console.log(store.getState().graphics[0])
+    }
 )
 
 store.dispatch(setStatus(STATUS.STARTED))
-store.dispatch(setStatus(STATUS.STOPPED))
+// store.dispatch(setStatus(STATUS.STOPPED))
 //  offstore.dispatch(tick())
 
 // Stop listening to state updates
-unsubscribe()
+// unsubscribe()
 
 /************************************************
 // LOGIC
@@ -224,8 +233,8 @@ unsubscribe()
 
 // ensure bar always spans window regardless of angle and
 function getDiagonalLength() {
-    return sqrt(pow(store.getState()['windowWidth'], 2) +
-        pow(store.getState()['windowHeight'], 2))
+    return sqrt(pow(window.innerWidth, 2) +
+        pow(window.innerHeight, 2))
 }
 
 
@@ -234,19 +243,30 @@ CANVAS
 ************************************************/
 
 const canvas=document.getElementById("eyecandy");
-canvas.width=store.getState()['windowWidth']
-canvas.height=store.getState()['windowHeight']
 var context = canvas.getContext("2d");
+const WIDTH = store.getState()['windowWidth']
+const HEIGHT = store.getState()['windowHeight']
+context.canvas.width  = WIDTH
+context.canvas.height = HEIGHT
 
 function render() {
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, WIDTH, HEIGHT);
     store.getState().graphics.forEach(graphic => {
         switch (graphic.graphicType) {
             case GRAPHIC.BAR:
                 // might need to translate first if rotation
+                context.save()
+                // Set new origin: add half the width and translate polar
+                context.translate(graphic.origin.x,
+                    graphic.origin.y)
+                // context.translate(50,800)
                 context.fillStyle = graphic.color
-                context.fillRect(graphic.position.x, graphic.position.y, graphic.size.width, graphic.size.height);
-                // context.rotate(graphic.angle)
+                // Rotate rectangle to be perpendicular with Center of Canvas
+                context.rotate(-graphic.angle)
+                // Draw a rectangle, adjusting for Bar width
+                context.fillRect(-graphic.size.width/2, -graphic.size.height/2,
+                    graphic.size.width, graphic.size.height)
+                context.restore()
         }
     })
 }
@@ -257,9 +277,9 @@ ANIMATE
 ************************************************/
 var lastTime = window.performance.now()
 function mainLoop() {
-    var curTime = window.performance.now()
-    console.log(curTime - lastTime)
-    lastTime = curTime
+    // var curTime = window.performance.now()
+    // console.log(curTime - lastTime)
+    // lastTime = curTime
     store.dispatch(tick())
     render()
     requestAnimationFrame(mainLoop)
