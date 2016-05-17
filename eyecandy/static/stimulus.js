@@ -9,6 +9,7 @@ REDUX (GLOBAL STATE)
 ************************************************/
 
 const createStore = Redux.createStore
+const applyMiddleware = Redux.applyMiddleware
 
 /***********************************************/
 // PROGRAMS
@@ -177,7 +178,7 @@ const accessorInitialState = {
 /***********************************************/
 // REDUCERS
 
-function eyeCandyApp(state = accessorInitialState, action) {
+function eyeCandyApp(state, action) {
     switch (action.type) {
         case SET_STATUS:
             return Object.assign({}, state, {
@@ -280,24 +281,39 @@ function tickBar(bar, timeDelta) {
 /***********************************************/
 // STORE
 
-let store = createStore(eyeCandyApp)
+function logger({ getState }) {
+  return (next) => (action) => {
+    console.log('will dispatch', action)
+
+    // Call the next dispatch method in the middleware chain.
+    let returnValue = next(action)
+
+    console.log('state after dispatch', getState())
+
+    // This will likely be the action itself, unless
+    // a middleware further in chain changed it.
+    return returnValue
+  }
+}
+
+let store = createStore(eyeCandyApp, accessorInitialState, applyMiddleware( logger ))
 // let store = createStore(todoApp, window.STATE_FROM_SERVER)
 
 // TEST
 
 // Every time the state changes, log it
 // Note that subscribe() returns a function for unregistering the listener
-let unsubscribe = store.subscribe(() => {
-        console.log(store.getState())
-    }
-)
+// let unsubscribe = store.subscribe(() => {
+//         console.log(store.getState())
+//     }
+// )
 
-store.dispatch(setStatus(STATUS.STARTED))
-// store.dispatch(setStatus(STATUS.STOPPED))
-//  offstore.dispatch(tick())
+// store.dispatch(setStatus(STATUS.STARTED))
+// // store.dispatch(setStatus(STATUS.STOPPED))
+// //  offstore.dispatch(tick())
 
-// Stop listening to state updates
-unsubscribe()
+// // Stop listening to state updates
+// unsubscribe()
 
 /************************************************
 // LOGIC
