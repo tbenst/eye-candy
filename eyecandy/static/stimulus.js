@@ -14,8 +14,9 @@ const createStore = Redux.createStore
 // ACTIONS
 
 const TICK = 'TICK'
+const STIMULUS_TICK = 'STIMULUS_TICK'
 const SET_STATUS = 'SET_STATUS'
-const SET_STIMULUS = 'SET_STIMULUS'
+const GET_NEW_STIMULUS = 'GET_NEW_STIMULUS'
 const SET_PROGRAM = 'SET_PROGRAM'
 const SET_GRAPHICS = 'SET_GRAPHICS'
 const ADD_GRAPHIC = 'ADD_GRAPHIC'
@@ -26,6 +27,13 @@ const SET_SIGNAL_LIGHT = 'SET_SIGNAL_LIGHT'
 const STATUS = {
     STARTED: 'STARTED',
     STOPPED: 'STOPPED',
+    FINISHED: 'FINISHED'
+}
+
+const SIGNAL_LIGHT = {
+    FRAME_A: 'FRAME_A',
+    FRAME_B: 'FRAME_B',
+    NEW_STIM: 'NEW_STIM'
 }
 
 const PROGRAM = {
@@ -82,8 +90,31 @@ function makeActionCreatorAccessor(type, ...argNames) {
     }
 }
 
-function tick() {
-    return { type: TICK}
+function tick(timeDelta) {
+    store.dispatch(stimulusTick())
+    state = store.getState()
+    // check if stimulus expired then update signal light
+    if (state.stimulus.age >= state.stimulus.lifespan) {
+        store.dispatch(getNewStimulus())
+        // TODO generate new graphics?
+        store.dispatch(setSignalLight(SIGNAL_LIGHT.NEW_STIM))
+    } else {
+        if (state.signalLight===SIGNAL_LIGHT.FRAME_A) {
+            store.dispatch(setSignalLight(SIGNAL_LIGHT.FRAME_B))
+        } else {
+            store.dispatch(setSignalLight(SIGNAL_LIGHT.FRAME_A))            
+        }
+    }
+
+    store.dispatch(globalTick(timeDelta))
+}
+
+function stimulusTick(timeDelta) {
+    return {type: STIMULUS_TICK, timeDelta: timeDelta}
+}
+
+function globalTick(timeDelta) {
+    return { type: TICK, timeDelta: timeDelta}
 }
 
 function addGraphic(graphic) {
@@ -91,8 +122,12 @@ function addGraphic(graphic) {
     return { type: ADD_GRAPHIC, graphic: 'TODO' }
 }
 
+function getNewStimulus(GET_NEW_STIMULUS, stimulus) {
+    return {type: GET_NEW_STIMULUS}
+}
+
+
 const setStatus = makeActionCreatorAccessor(SET_STATUS, 'status')
-const setStimulus = makeActionCreatorAccessor(SET_STIMULUS, 'stimulus')
 const setProgram = makeActionCreatorAccessor(SET_PROGRAM, 'program')
 const setGraphics = makeActionCreatorAccessor(SET_GRAPHICS, 'graphics')
 const setSignalLight = makeActionCreatorAccessor(SET_SIGNAL_LIGHT, 'signalLight')
@@ -125,8 +160,7 @@ const accessorInitialState = {
         // Note: height of the Rectangle is bar width
         size: {width: 20, height: getDiagonalLength()},
         speed: 10,
-        angle: PI/6
-        // origin: {x: 0, y: 0}
+        angle: -3*PI/4
     }],
     // signalLight in range(0,255)
     signalLight: 0,
@@ -139,9 +173,10 @@ function eyeCandyApp(state = accessorInitialState, action) {
             return Object.assign({}, state, {
                 status: action.status
             })
-        case SET_STIMULUS:
+        case GET_NEW_STIMULUS:
+            const nextStimulus = state.program.next()
             return Object.assign({}, state, {
-                stimulus: action.stimulus
+                stimulus: nextStimulus  
             })
         case SET_GRAPHICS:
             return Object.assign({}, state, {
@@ -157,47 +192,73 @@ function eyeCandyApp(state = accessorInitialState, action) {
             })
         case TICK:
             return tickReducer(state, action)
+        case STIMULUS_TICK:
+            return Object.assign({}, state, {
+                stimulus: stimulusTickReducer(state.stimulus, action.timeDelta)
+            })
     default:
       return state
     }
 }
 
+function stimulusTickReducer(stimulus, timeDelta) {
+    return Object.assign({}, stimulus, {
+        age: stimulus.age + timeDelta
+    })
+}
+
 function tickReducer(state, action) {
-    switch(store.getState()['stimulus']['stimulusType']) {
-        case STIMULUS.BAR:
-            return Object.assign({}, state, {
-                time: state.time + 1,
-                graphics: tickBar(state.graphics),
-            })                
-        // return Object.assign({}, state, {
-        //     time: state.time + 1,
-        //     stimuli: state.stimuli.map(stimulus => {
-        //         stimulus.graphic.position()
-        //         return Object.assign({}, stimulus, {
-        //             graphic: rect
-        //         })
-        //     })
-        // })
-    }
+    // switch(store.getState()['stimulus']['stimulusType']) {
+    //     case STIMULUS.BAR:
+    //         return Object.assign({}, state, {
+    //             time: ,
+    //             graphics: tickBar(state.graphics, action.timeDelta),
+    //         }) 
+
+    // return Object.assign({}, state, {
+    //     time: newTime,
+        
+    // })               
+
+    return Object.assign({}, state, {
+        time: state.time + action.timeDelta,
+        graphics: state.graphics.map(graphic => {
+            graphic.graphic.position()
+            return Object.assign({}, graphic, {
+                graphic: rect
+            })
+        }).filter((x) => {return x})
+    })
 }
 
 /***********************************************/
-// TICK
+// MIDDLEWARE
 
-function tickBar(graphics) {
+
+/***********************************************/
+// GRAPHICS TICK
+
+function graphicTickReducer(state, action) {
+    switch ()
+}
+
+function tickBar(graphics, timeDelta) {
     return graphics.map(bar => {
         let newPosition = undefined
         if (bar.position === undefined) {
-            newPosition = {r: window.innerHeight, theta: -bar.angle}
+            newPosition = {r: getDiagonalLength(), theta: -bar.angle}
         } else {
-            newPosition = {r: bar.position.r-bar.speed, 
+            newPosition = {r: bar.position.r - bar.speed*timeDelta, 
                 theta: bar.position.theta}
         }
 
         return Object.assign({}, bar, {
             position: newPosition,
-            origin: {x: bar.size.width*cos(newPosition.theta)/2 + newPosition.r*cos(newPosition.theta),
-                y: bar.size.width*sin(newPosition.theta)/2 + newPosition.r*sin(newPosition.theta)}
+            // compensate for bar width & height, translate from polar & translate from center
+            origin: {x: bar.size.width*cos(newPosition.theta) +
+                        newPosition.r*cos(newPosition.theta) + WIDTH/2,
+                     y: bar.size.width*sin(newPosition.theta) +
+                        newPosition.r*sin(newPosition.theta) + HEIGHT/2}
         })
     })
 }
@@ -225,7 +286,7 @@ store.dispatch(setStatus(STATUS.STARTED))
 //  offstore.dispatch(tick())
 
 // Stop listening to state updates
-// unsubscribe()
+unsubscribe()
 
 /************************************************
 // LOGIC
@@ -249,20 +310,27 @@ const HEIGHT = store.getState()['windowHeight']
 context.canvas.width  = WIDTH
 context.canvas.height = HEIGHT
 
+
+
 function render() {
     context.clearRect(0, 0, WIDTH, HEIGHT);
+
+    // TODO remove
+    context.strokeStyle = '#ff0000'
+    context.beginPath()
+    context.arc(WIDTH/2,HEIGHT/2,300,0,2*PI)
+    context.stroke()
+
     store.getState().graphics.forEach(graphic => {
         switch (graphic.graphicType) {
             case GRAPHIC.BAR:
                 // might need to translate first if rotation
                 context.save()
-                // Set new origin: add half the width and translate polar
                 context.translate(graphic.origin.x,
                     graphic.origin.y)
-                // context.translate(50,800)
                 context.fillStyle = graphic.color
                 // Rotate rectangle to be perpendicular with Center of Canvas
-                context.rotate(-graphic.angle)
+                context.rotate(graphic.position.theta)
                 // Draw a rectangle, adjusting for Bar width
                 context.fillRect(-graphic.size.width/2, -graphic.size.height/2,
                     graphic.size.width, graphic.size.height)
@@ -271,6 +339,11 @@ function render() {
     })
 }
 
+function* sampleGen() {
+    for (var i = 0; i <= 3; i++) {
+        yield i
+    }
+}
 
 /************************************************
 ANIMATE
@@ -280,7 +353,7 @@ function mainLoop() {
     // var curTime = window.performance.now()
     // console.log(curTime - lastTime)
     // lastTime = curTime
-    store.dispatch(tick())
+    store.dispatch(tick(1))
     render()
     requestAnimationFrame(mainLoop)
 }
