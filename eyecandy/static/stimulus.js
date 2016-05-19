@@ -18,8 +18,10 @@ expect(1).toBe(1)
 ************************************************/
 
 // program = easyGen()
-program = orientationSelectivityGen([10, 100], [10, 100], 25)
+program = orientationSelectivityGen([500, 1000], [10, 100], 25)
 // program = orientationSelectivityGen([5], [1000], 2)
+
+// Use this program for aligning projector with MEA
 // program = targetGen()
 
 /***********************************************/
@@ -51,6 +53,8 @@ function* easyGen() {
 // if you want to modify the function (e.g. change the wait times),
 // please copy and create a new function to avoid confusion in
 // analysis
+// 
+// speed is pixels / second, width is pixels, angle is radians
 function* orientationSelectivityGen(speeds, widths, numRepeat,
     barColor='white', backgroundColor='black',
     angles=[0, PI/4, PI/2, 3*PI/4, PI, 5*PI/4, 3*PI/2, 7*PI/4]) {
@@ -66,7 +70,7 @@ function* orientationSelectivityGen(speeds, widths, numRepeat,
 
                 for (var k = 0; k < angles.length; k++) {
                     yield {stimulusType: STIMULUS.BAR,
-                        lifespan: (getDiagonalLength() + widths[j])/speeds[i],
+                        lifespan: (getDiagonalLength() + widths[j])/speeds[i]*120,
                         backgroundColor: backgroundColor,
                         width: widths[j],
                         barColor: barColor,
@@ -321,7 +325,7 @@ function tickBar(bar, timeDelta) {
     if (bar.position === undefined) {
         newPosition = {r: getDiagonalLength()/2, theta: -bar.angle}
     } else {
-        newPosition = {r: bar.position.r - bar.speed*timeDelta, 
+        newPosition = {r: bar.position.r - bar.speed/120*timeDelta, 
             theta: bar.position.theta}
     }
     const state = store.getState()
@@ -460,8 +464,7 @@ function* sampleGen() {
 var lastTime = window.performance.now()
 function mainLoop() {
     var curTime = window.performance.now()
-    console.log(curTime - lastTime)
-    lastTime = curTime
+
     switch (store.getState().status) {
         case STATUS.STOPPED:
             return 'STOPPED'
@@ -470,7 +473,22 @@ function mainLoop() {
             document.body.style.backgroundColor = 'black'
             return  'FINISHED'
     }
-    tickAC(1)
+
+    const frameTime = curTime - lastTime
+    console.log(frameTime)
+    lastTime = curTime
+
+    // adjust for dropped frames
+    if (frameTime < 10) {
+        // 120Hz
+        tickAC(1)
+    } else if (frameTime < 20) {
+        tickAC(2)
+    } else {
+        const toTick = Math.round(frameTime/(1000/120))
+        tickAC(toTick)
+    }
+
     render()
     requestAnimationFrame(mainLoop)
 }
@@ -482,10 +500,10 @@ STORE
 
 
 // USE THIS FOR NO LOGGER
-let store = createStore(eyeCandyApp, accessorInitialState)
+// let store = createStore(eyeCandyApp, accessorInitialState)
 
 // USE THIS FOR LOGGER
-// let store = createStore(eyeCandyApp, accessorInitialState, applyMiddleware( logger ))
+let store = createStore(eyeCandyApp, accessorInitialState, applyMiddleware( logger ))
 
 // GET FROM SERVER (NOT OPERATIONAL)
 // let store = createStore(todoApp, window.STATE_FROM_SERVER)
