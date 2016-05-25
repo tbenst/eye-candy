@@ -1,0 +1,28 @@
+{
+  "name": "eyecandy",
+  "version": "0.2.0",
+  "description": "stimulus generator ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tbenst/eye-candy.git"
+  },
+  "author": "Tyler Benster",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tbenst/eye-candy/issues"
+  },
+  "homepage": "https://github.com/tbenst/eye-candy#readme",
+  "devDependencies": {
+    "babel-cli": "^6.9.0",
+    "babel-core": "^6.9.0",
+    "babel-polyfill": "^6.9.0",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2"
+  }
+}
