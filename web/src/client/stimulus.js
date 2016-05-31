@@ -369,7 +369,7 @@ function logger({ getState }) {
 // LOGIC
 ************************************************/
 
-// ensure bar always spans window regardless of angle and
+// ensure bar always spans window regardless of angle
 function getDiagonalLength() {
     return sqrt(pow(store.getState()['windowHeight'], 2) +
         pow(store.getState()['windowHeight'], 2))

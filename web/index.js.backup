@@ -1,0 +1,21 @@
+import { rollup } from 'rollup';
+import babel from 'rollup-plugin-babel';
+
+rollup({
+  entry: 'main.js',
+  plugins: [
+    babel({
+      exclude: 'node_modules/**'
+    })
+  ]
+}).then(...)
+
+
+rollup({
+  entry: 'main.js',
+  plugins: [
+    babel({
+      exclude: 'node_modules/**'
+    })
+  ]
+}).then(...)

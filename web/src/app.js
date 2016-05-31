@@ -1,6 +1,11 @@
-const Koa = require('koa');
+// const Koa = require('koa');
+// const router = require('koa-router')();
+// const path = require('path')
+
+require("babel-polyfill");
+import Koa from 'koa';
 const router = require('koa-router')();
-const path = require('path')
+import path from 'path'
 
 import co from 'co';
 import render from 'koa-ejs';
@@ -8,7 +13,7 @@ import render from 'koa-ejs';
 
 const app = new Koa();
 render(app, {
-  root: path.join(__dirname, '../view'),
+  root: path.join(__dirname, './view'),
   layout: 'template',
   viewExt: 'html',
   cache: false,
@@ -17,7 +22,7 @@ render(app, {
 
 app.context.render = co.wrap(app.context.render);
 
-router.get('/', async ctx => {
+router.get('/', async (ctx) => {
     await ctx.render('stimulus');
     // ctx.body = 'Hello ty';
 });
