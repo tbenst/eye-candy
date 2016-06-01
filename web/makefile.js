@@ -20,21 +20,21 @@ rollup.rollup({
 
 
 
-rollup.rollup({
-    entry: 'src/view/stimulus.js',
-    plugins: [ json(), babel({
-        exclude: 'node_modules/**'
-    }), commonjs(),
-    nodeResolve({
-        jsnext: true,
-        browser: true
-    })],
-}).then( function ( bundle ) {
-    bundle.write({
-        format: 'umd',
-        dest: 'view/js/stimulus.js'
-    });
-}).catch( function (argument) {
-    console.log(argument)
-});
+// rollup.rollup({
+//     entry: 'src/view/stimulus.js',
+//     plugins: [ json(), babel({
+//         exclude: 'node_modules/**'
+//     }), commonjs(),
+//     nodeResolve({
+//         jsnext: true,
+//         browser: true
+//     })],
+// }).then( function ( bundle ) {
+//     bundle.write({
+//         format: 'umd',
+//         dest: 'view/js/stimulus.js'
+//     });
+// }).catch( function (argument) {
+//     console.log(argument)
+// });
 

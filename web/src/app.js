@@ -2,7 +2,7 @@
 // const router = require('koa-router')();
 // const path = require('path')
 
-require("babel-polyfill");
+// require("babel-polyfill");
 import Koa from 'koa';
 const router = require('koa-router')();
 import path from 'path'
@@ -14,7 +14,7 @@ const serve = require('koa-static');
 
 const app = new Koa();
 render(app, {
-    root: path.join(__dirname, './view'),
+    root: path.join(__dirname, '../view'),
     layout: 'template',
     viewExt: 'html',
     cache: false,
@@ -27,12 +27,6 @@ router.get('/', async (ctx) => {
     await ctx.render('stimulus');
     // ctx.body = 'Hello ty';
 });
-
-// router.get('/stimulus', async (ctx) => {
-//     // ctx.body = 'Hello ty';
-//     serve('stimulus/stimulus.html')
-// });
-
 
 app
     .use(serve('view'))
