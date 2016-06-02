@@ -1,3 +1,6 @@
+// const Redux = 'redux'
+require("babel-polyfill");
+import 'whatwg-fetch';
 
 const PI = Math.PI
 const pow = Math.pow
@@ -23,7 +26,8 @@ const applyMiddleware = Redux.applyMiddleware
 // Use this program for aligning projector with MEA
 // program = targetGen()
 
-
+/***********************************************/
+// PROGRAMS
 
 function* targetGen() {
     yield {stimulusType: STIMULUS.TARGET, lifespan: 6000,
@@ -96,7 +100,6 @@ const SET_GRAPHICS = 'SET_GRAPHICS'
 const ADD_GRAPHIC = 'ADD_GRAPHIC'
 const UPDATE_GRAPHICS = 'UPDATE_GRAPHICS'
 const SET_SIGNAL_LIGHT = 'SET_SIGNAL_LIGHT'
-const SET_STIMULUS_QUEUE = 'SET_STIMULUS_QUEUE'
 
 // Define states for readability
 const STATUS = {
@@ -125,26 +128,14 @@ const GRAPHIC = {
 }
 
 /***********************************************/
-//INITIAL STATE
-
-const accessorInitialState = {
-    windowHeight: window.innerHeight,
-    windowWidth: window.innerWidth,
-    status: STATUS.STOPPED,
-    signalLight: SIGNAL_LIGHT.FRAME_A,
-    time: 0
-    // graphics
-    // stimulus
-}
-/***********************************************/
 // ACTION CREATORS
 
 
-function stimulustickAC(timeDelta) {
+function stimulusTickAC(timeDelta) {
     return {type: STIMULUS_TICK, timeDelta: timeDelta}
 }
 
-function timetickAC(timeDelta) {
+function timeTickAC(timeDelta) {
     return { type: TIME_TICK, timeDelta: timeDelta}
 }
 
@@ -172,33 +163,12 @@ function makeAccessorAC(type, ...argNames) {
 }
 
 const setStatus = makeAccessorAC(SET_STATUS, 'status')
-const setStimulusQueue makeAccessorAC(SET_STIMULUS_QUEUE, 'stimulusQueue')
+// const setProgram = makeAccessorAC(SET_PROGRAM, 'program')
 const setGraphics = makeAccessorAC(SET_GRAPHICS, 'graphics')
 const setSignalLight = makeAccessorAC(SET_SIGNAL_LIGHT, 'signalLight')
 
 /***********************************************/
 // DISPATCHERS
-
-function graphicsDispatcher(width, barColor, backgroundColor, speed, angle) {
-    switch (store.getState().stimulus.stimulusType) {
-        case GRAPHIC.BAR:
-            movingBarDispatcher(width, barColor, backgroundColor,
-                speed, angle)
-            break
-        case GRAPHIC.TARGET:
-            store.dispatch(setGraphics([{
-                graphicType: GRAPHIC.TARGET
-            }]))
-        }
-}
-
-function movingBarDispatcher(width, barColor, backgroundColor, speed, angle) {
-    // TODO change to addGraphicAC for flexibility
-    store.dispatch(setGraphics([{
-        graphicType: GRAPHIC.BAR, color: barColor, size: {width: width,
-            height: getDiagonalLength()}, speed: speed, angle: angle
-    }]))
-}
 
 function tickDispatcher(timeDelta) {
     // check if stimulus expired then update signal light
@@ -230,27 +200,45 @@ function tickDispatcher(timeDelta) {
                 break
         }
     }
-    store.dispatch(stimulustickAC(timeDelta))
-    store.dispatch(timetickAC(timeDelta))
+    store.dispatch(stimulusTickAC(timeDelta))
+    store.dispatch(timeTickAC(timeDelta))
     store.dispatch(updateGraphicsAC(timeDelta))
 }
 
-function queueNewStimulusDispatcher() {
-    const queueStimulus = NextStimulus()
-    let newQueue = Object.assign({}, store.getState().stimulusQueue)
-    newQueue.push(nextStimulus)
-    const newStimulus = newQueue.shift
-    store.dispatch(setStimulusQueue(newQueue))
-    store.dispatch()
+function graphicsDispatcher(width, barColor, backgroundColor, speed, angle) {
+    switch (store.getState().stimulus.stimulusType) {
+        case GRAPHIC.BAR:
+            movingBarDispatcher(width, barColor, backgroundColor,
+                speed, angle)
+            break
+        case GRAPHIC.TARGET:
+            store.dispatch(setGraphics([{
+                graphicType: GRAPHIC.TARGET
+            }]))
+        }
 }
 
-function getNewStimulusDispatcher() {
-    let newQueue = Object.assign({}, store.getState().stimulusQueue)
-    const newStimulus = newQueue.shift
-    store.dispatch(setStimulusQueue(newQueue))
-    return newStimulus
+function movingBarDispatcher(width, barColor, backgroundColor, speed, angle) {
+    // TODO change to addGraphicAC for flexibility
+    store.dispatch(setGraphics([{
+        graphicType: GRAPHIC.BAR, color: barColor, size: {width: width,
+            height: getDiagonalLength()}, speed: speed, angle: angle
+    }]))
 }
 
+
+/***********************************************/
+//INITIAL STATE
+
+const accessorInitialState = {
+    windowHeight: window.innerHeight,
+    windowWidth: window.innerWidth,
+    status: STATUS.STOPPED,
+    signalLight: SIGNAL_LIGHT.FRAME_A,
+    time: 0
+    // graphics
+    // stimulus
+}
 
 
 /***********************************************/
@@ -262,20 +250,15 @@ function eyeCandyApp(state, action) {
             return Object.assign({}, state, {
                 status: action.status
             })
-        case SET_STIMULUS_QUEUE:
-            return Object.assign({}, state, {
-                status: action.stimulusQueue
-            })
         case GET_NEW_STIMULUS:
-            queueNewStimulusDispatcher()
-            const newStimulus = getNewStimulusDispatcher()
-            if (newStimulus.done===true) {
+            const nextStimulus = program.next()
+            if (nextStimulus.done===true) {
                 return Object.assign({}, state, {
                     status: STATUS.FINISHED    
                 })  
             } else {
                 return Object.assign({}, state, {
-                    stimulus: getNewStimulusReducer(newStimulus.value)
+                    stimulus: getNewStimulusReducer(nextStimulus.value)
                 })
             }
         case SET_GRAPHICS:
@@ -523,10 +506,10 @@ STORE
 
 
 // USE THIS FOR NO LOGGER
-// let store = createStore(eyeCandyApp, accessorInitialState)
+let store = createStore(eyeCandyApp, accessorInitialState)
 
 // USE THIS FOR LOGGER
-let store = createStore(eyeCandyApp, accessorInitialState, applyMiddleware( logger ))
+// let store = createStore(eyeCandyApp, accessorInitialState, applyMiddleware( logger ))
 
 // GET FROM SERVER (NOT OPERATIONAL)
 // let store = createStore(todoApp, window.STATE_FROM_SERVER)
@@ -567,39 +550,14 @@ const testBar = {
         'y': 493
     }
 }
-
-
-/***********************************************/
-// PROGRAM
-
-fetch('/new-program', {method: 'POST'})
-let stimulusQueue = []
-const queueBuffer = 5
-for (var i = 0; i < queueBuffer; i++) {
-    NextStimulus()
-}
-validateStimulusQueue()
-
-function validateStimulusQueue() {
-    if (stimulusQueue.length < queueBuffer) {
-        window.setTimeout(validateStimulusQueue,100);
-    }
-}
-
-async function NextStimulus() {
-    return await (await fetch('/next-stimulus')).json()
-    stimulusQueue.push(nextStimulus)
-}
-
-
 /************************************************
 RUN
 ************************************************/
 
-
-
 async function callbackLoop() {
-    var data = await (await fetch('/program')).json()
+    var gists = await get('https://api.github.com/gists/public');
+    // var data = await (await fetch('/program')).json()
+    let data = 10
     console.log( data )
     window.setTimeout(callbackLoop,1000);
 }

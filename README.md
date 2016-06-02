@@ -1,12 +1,5 @@
-coffee --watch --compile -o eyecandy/static/ eyecandy/coffee/
+To run, must Download Google Chrome Canary and start using the following flags: --js-flags="-harmony-async-await"
 
-## Reset Canvas
-// Store the current transformation matrix
-context.save();
+Mac:
+/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary --js-flags="-harmony-async-await"
 
-// Use the identity matrix while clearing the canvas
-context.setTransform(1, 0, 0, 1, 0, 0);
-context.clearRect(0, 0, canvas.width, canvas.height);
-
-// Restore the transform
-context.restore();
