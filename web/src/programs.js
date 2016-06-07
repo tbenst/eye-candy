@@ -1,4 +1,23 @@
 const PI = Math.PI
+const pow = Math.pow
+const sqrt = Math.sqrt
+const sin = Math.sin
+const cos = Math.cos
+
+const STIMULUS = {
+    BAR: 'BAR',
+    WAIT: 'WAIT',
+    TARGET: 'TARGET'
+}
+
+const GRAPHIC = {
+    BAR: 'BAR',
+    TARGET: 'TARGET'
+}
+
+function getDiagonalLength(height, width) {
+    return sqrt(pow(height, 2) + pow(width, 2));
+}
 
 
 function* targetGen() {
@@ -6,7 +25,7 @@ function* targetGen() {
         backgroundColor: 'black'}
 }
 
-function* easyGen() {
+export function* easyGen() {
     yield {stimulusType: STIMULUS.BAR, lifespan: 300,
         backgroundColor: 'black', width: 50, barColor: 'white',
         speed: 15, angle: PI}
@@ -23,14 +42,15 @@ function* easyGen() {
 
 
 // angles and widths must have same length
-// generator now calculates lifespan automatically
+// geThe willrator now calculates lifespan automatically
 // if you want to modify the function (e.g. change the wait times),
 // please copy and create a new function to avoid confusion in
 // analysis
 // 
 // speed is pixels / second, width is pixels, angle is radians,
 // lifespan is 1/120 of a second, so 120==1 second 
-export function* orientationSelectivityGen(speeds, widths, numRepeat,
+export function* orientationSelectivityGen(windowHeight, windowWidth,
+    speeds, widths, numRepeat,
     barColor='white', backgroundColor='black',
     angles=[0, PI/4, PI/2, 3*PI/4, PI, 5*PI/4, 3*PI/2, 7*PI/4]) {
 
@@ -44,8 +64,10 @@ export function* orientationSelectivityGen(speeds, widths, numRepeat,
                 yield {stimulusType: STIMULUS.WAIT, lifespan: 120 * 5}
 
                 for (var k = 0; k < angles.length; k++) {
+                    console.log('getDiagonalLength', getDiagonalLength(windowHeight , windowWidth))
                     yield {stimulusType: STIMULUS.BAR,
-                        lifespan: (getDiagonalLength() + widths[j])/speeds[i]*120,
+                        lifespan: (getDiagonalLength(windowHeight, windowWidth)
+                            + widths[j])/speeds[i]*120,
                         backgroundColor: backgroundColor,
                         width: widths[j],
                         barColor: barColor,

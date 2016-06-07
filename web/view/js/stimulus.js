@@ -91,7 +91,7 @@ function* orientationSelectivityGen(speeds, widths, numRepeat,
 const TIME_TICK = 'TIME_TICK'
 const STIMULUS_TICK = 'STIMULUS_TICK'
 const SET_STATUS = 'SET_STATUS'
-const GET_NEW_STIMULUS = 'GET_NEW_STIMULUS'
+const SET_STIMULUS = 'SET_STIMULUS'
 const SET_GRAPHICS = 'SET_GRAPHICS'
 const ADD_GRAPHIC = 'ADD_GRAPHIC'
 const UPDATE_GRAPHICS = 'UPDATE_GRAPHICS'
@@ -125,18 +125,6 @@ const GRAPHIC = {
 }
 
 /***********************************************/
-//INITIAL STATE
-
-const accessorInitialState = {
-    windowHeight: window.innerHeight,
-    windowWidth: window.innerWidth,
-    status: STATUS.STOPPED,
-    signalLight: SIGNAL_LIGHT.FRAME_A,
-    time: 0
-    // graphics
-    // stimulus
-}
-/***********************************************/
 // ACTION CREATORS
 
 
@@ -157,10 +145,6 @@ function updateGraphicsAC(timeDelta) {
     return  { type: UPDATE_GRAPHICS, timeDelta: timeDelta}
 }
 
-function getNewStimulusAC() {
-    return {type: GET_NEW_STIMULUS}
-}
-
 function makeAccessorAC(type, ...argNames) {
     return function(...args) {
         let action = { type }
@@ -171,10 +155,11 @@ function makeAccessorAC(type, ...argNames) {
     }
 }
 
-const setStatus = makeAccessorAC(SET_STATUS, 'status')
-const setStimulusQueue makeAccessorAC(SET_STIMULUS_QUEUE, 'stimulusQueue')
-const setGraphics = makeAccessorAC(SET_GRAPHICS, 'graphics')
-const setSignalLight = makeAccessorAC(SET_SIGNAL_LIGHT, 'signalLight')
+const setStatusAC = makeAccessorAC(SET_STATUS, 'status')
+const setStimulusQueueAC = makeAccessorAC(SET_STIMULUS_QUEUE, 'stimulusQueue')
+const setStimulusAC = makeAccessorAC(SET_STIMULUS, 'stimulus')
+const setGraphicsAC = makeAccessorAC(SET_GRAPHICS, 'graphics')
+const setSignalLightAC = makeAccessorAC(SET_SIGNAL_LIGHT, 'signalLight')
 
 /***********************************************/
 // DISPATCHERS
@@ -186,7 +171,7 @@ function graphicsDispatcher(width, barColor, backgroundColor, speed, angle) {
                 speed, angle)
             break
         case GRAPHIC.TARGET:
-            store.dispatch(setGraphics([{
+            store.dispatch(setGraphicsAC([{
                 graphicType: GRAPHIC.TARGET
             }]))
         }
@@ -194,7 +179,7 @@ function graphicsDispatcher(width, barColor, backgroundColor, speed, angle) {
 
 function movingBarDispatcher(width, barColor, backgroundColor, speed, angle) {
     // TODO change to addGraphicAC for flexibility
-    store.dispatch(setGraphics([{
+    store.dispatch(setGraphicsAC([{
         graphicType: GRAPHIC.BAR, color: barColor, size: {width: width,
             height: getDiagonalLength()}, speed: speed, angle: angle
     }]))
@@ -205,28 +190,29 @@ function tickDispatcher(timeDelta) {
     const state = store.getState()
     if (state.stimulus===undefined ||
         state.stimulus.age >= state.stimulus.lifespan) {
-        store.dispatch(getNewStimulusAC())
+
+        newStimulusDispatcher()
         let state = store.getState()
         graphicsDispatcher(state.stimulus.width, state.stimulus.barColor,
                 state.stimulus.backgroundColor, state.stimulus.speed,
                 state.stimulus.angle)
-        store.dispatch(setSignalLight(SIGNAL_LIGHT.NEW_STIM))
+        store.dispatch(setSignalLightAC(SIGNAL_LIGHT.NEW_STIM))
     } else {
         switch(state.signalLight) {
             case SIGNAL_LIGHT.FRAME_A:
-                store.dispatch(setSignalLight(SIGNAL_LIGHT.FRAME_B))
+                store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_B))
                 break
             case SIGNAL_LIGHT.FRAME_B:
-                store.dispatch(setSignalLight(SIGNAL_LIGHT.FRAME_A))
+                store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_A))
                 break
             case SIGNAL_LIGHT.NEW_STIM:
-                store.dispatch(setSignalLight(SIGNAL_LIGHT.NEW_STIM_A))
+                store.dispatch(setSignalLightAC(SIGNAL_LIGHT.NEW_STIM_A))
                 break
             case SIGNAL_LIGHT.NEW_STIM_A:
-                store.dispatch(setSignalLight(SIGNAL_LIGHT.NEW_STIM_B))
+                store.dispatch(setSignalLightAC(SIGNAL_LIGHT.NEW_STIM_B))
                 break
             case SIGNAL_LIGHT.NEW_STIM_B:
-                store.dispatch(setSignalLight(SIGNAL_LIGHT.FRAME_A))
+                store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_A))
                 break
         }
     }
@@ -235,19 +221,24 @@ function tickDispatcher(timeDelta) {
     store.dispatch(updateGraphicsAC(timeDelta))
 }
 
-function queueNewStimulusDispatcher() {
-    const queueStimulus = NextStimulus()
-    let newQueue = Object.assign({}, store.getState().stimulusQueue)
-    newQueue.push(nextStimulus)
-    const newStimulus = newQueue.shift
-    store.dispatch(setStimulusQueue(newQueue))
-    store.dispatch()
+function newStimulusDispatcher() {
+    queueNewStimulusDispatcher()
+    const newStimulus = getNewStimulusDispatcher()
+    store.dispatch(setStimulusAC(newStimulus))
+}
+
+async function queueNewStimulusDispatcher() {
+    const queueStimulus = await nextStimulus()
+
+    let newQueue = store.getState().stimulusQueue.slice(0)
+    newQueue.push(queueStimulus)
+    store.dispatch(setStimulusQueueAC(newQueue))
 }
 
 function getNewStimulusDispatcher() {
-    let newQueue = Object.assign({}, store.getState().stimulusQueue)
-    const newStimulus = newQueue.shift
-    store.dispatch(setStimulusQueue(newQueue))
+    let newQueue = store.getState().stimulusQueue.slice(0)
+    const newStimulus = newQueue.shift()
+    store.dispatch(setStimulusQueueAC(newQueue))
     return newStimulus
 }
 
@@ -264,18 +255,16 @@ function eyeCandyApp(state, action) {
             })
         case SET_STIMULUS_QUEUE:
             return Object.assign({}, state, {
-                status: action.stimulusQueue
+                stimulusQueue: action.stimulusQueue
             })
-        case GET_NEW_STIMULUS:
-            queueNewStimulusDispatcher()
-            const newStimulus = getNewStimulusDispatcher()
-            if (newStimulus.done===true) {
+        case SET_STIMULUS:
+            if (action.stimulus.done===true) {
                 return Object.assign({}, state, {
                     status: STATUS.FINISHED    
                 })  
             } else {
                 return Object.assign({}, state, {
-                    stimulus: getNewStimulusReducer(newStimulus.value)
+                    stimulus: getNewStimulusReducer(action.stimulus.value)
                 })
             }
         case SET_GRAPHICS:
@@ -301,6 +290,10 @@ function eyeCandyApp(state, action) {
         case STIMULUS_TICK:
             return Object.assign({}, state, {
                 stimulus: stimulusTickReducer(state.stimulus, action.timeDelta)
+            })
+        case SET_STIMULUS_QUEUE:
+            return Object.assign({}, state, {
+                stimulusQueue: action.stimulusQueue
             })
     default:
       return state
@@ -383,7 +376,6 @@ function logger({ getState }) {
   }
 }
 
-
 /************************************************
 // LOGIC
 ************************************************/
@@ -400,6 +392,13 @@ ANIMATE
 ************************************************/
 
 function render() {
+    const status = store.getState().status
+    if (status === STATUS.STARTED) {
+        renderHelper()
+    }
+}
+
+function renderHelper() {
     context.clearRect(0, 0, WIDTH, HEIGHT)
     const state = store.getState()
     document.body.style.backgroundColor = state.stimulus.backgroundColor
@@ -488,31 +487,35 @@ var lastTime = window.performance.now()
 function renderLoop() {
     var curTime = window.performance.now()
 
+    const frameTime = curTime - lastTime
+    lastTime = curTime
+
+
     switch (store.getState().status) {
         case STATUS.STOPPED:
-            return 'STOPPED'
+            context.clearRect(0, 0, WIDTH, HEIGHT)
+            document.body.style.backgroundColor = 'black'
+            break
         case STATUS.FINISHED:
             context.clearRect(0, 0, WIDTH, HEIGHT)
             document.body.style.backgroundColor = 'black'
             return  'FINISHED'
+        case STATUS.STARTED:
+
+            // adjust for dropped frames
+            if (frameTime < 10) {
+                // 120 Hz
+                tickDispatcher(1)
+            } else if (frameTime < 20) {
+                // 60 Hz
+                tickDispatcher(2)
+            } else {
+                const toTick = Math.round(frameTime/(1000/120))
+                tickDispatcher(toTick)
+            }
+            render()
+            break
     }
-
-    const frameTime = curTime - lastTime
-    lastTime = curTime
-
-    // adjust for dropped frames
-    if (frameTime < 10) {
-        // 120 Hz
-        tickDispatcher(1)
-    } else if (frameTime < 20) {
-        // 60 Hz
-        tickDispatcher(2)
-    } else {
-        const toTick = Math.round(frameTime/(1000/120))
-        tickDispatcher(toTick)
-    }
-
-    render()
     requestAnimationFrame(renderLoop)
 }
 
@@ -520,6 +523,15 @@ function renderLoop() {
 /************************************************
 STORE
 ************************************************/
+
+const accessorInitialState = {
+    windowHeight: window.innerHeight,
+    windowWidth: window.innerWidth,
+    status: STATUS.STOPPED,
+    signalLight: SIGNAL_LIGHT.FRAME_A,
+    time: 0,
+    stimulusQueue: []
+}
 
 
 // USE THIS FOR NO LOGGER
@@ -572,23 +584,35 @@ const testBar = {
 /***********************************************/
 // PROGRAM
 
-fetch('/new-program', {method: 'POST'})
-let stimulusQueue = []
-const queueBuffer = 5
-for (var i = 0; i < queueBuffer; i++) {
-    NextStimulus()
-}
-validateStimulusQueue()
+async function getProgram(queueBuffer) {
+    await fetch('/new-program', {
+        method: 'POST',
+        headers: {
+            windowHeight: store.getState()['windowHeight'],
+            windowWidth: store.getState()['windowWidth']
+        }
+    })
 
-function validateStimulusQueue() {
-    if (stimulusQueue.length < queueBuffer) {
-        window.setTimeout(validateStimulusQueue,100);
+    for (var i = 0; i < queueBuffer; i++) {
+        await queueNewStimulusDispatcher()
     }
 }
 
-async function NextStimulus() {
-    return await (await fetch('/next-stimulus')).json()
-    stimulusQueue.push(nextStimulus)
+getProgram(5)
+validateStimulusQueue(5)
+
+function validateStimulusQueue(queueBuffer) {
+    if (store.getState().stimulusQueue.length < queueBuffer) {
+        window.setTimeout(validateStimulusQueue,100);
+    } else {
+        store.dispatch(setStatusAC(STATUS.STARTED))
+    }
+}
+
+async function nextStimulus() {
+   return await (await fetch('/next-stimulus', {
+        method: 'POST'
+   })).json()
 }
 
 
@@ -598,12 +622,12 @@ RUN
 
 
 
-async function callbackLoop() {
-    var data = await (await fetch('/program')).json()
-    console.log( data )
-    window.setTimeout(callbackLoop,1000);
-}
+// async function callbackLoop() {
+//     var data = await (await fetch('/program')).json()
+//     console.log( data )
+//     window.setTimeout(callbackLoop,1000);
+// }
 
-store.dispatch(setStatus(STATUS.STARTED))
+
 renderLoop()
-callbackLoop()
+// callbackLoop()
