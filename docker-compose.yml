@@ -1,11 +1,11 @@
 web:
   restart: always
   build: .
-  command: python runserver.py
+  command: ./node_modules/babel-cli/bin/babel-node.js src/app.js
   ports:
-   - "5000:5000"
-  volumes:
-   - .:/www
+   - "3000:3000"
+  # volumes:
+  #  - .:/web
   links:
    - redis
 redis:
