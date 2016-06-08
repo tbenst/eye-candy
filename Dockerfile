@@ -6,5 +6,5 @@ COPY web/src /www/src
 COPY web/package.json /www
 COPY web/view /www/view
 COPY web/static /www/static
-RUN npm install
 WORKDIR /www
+RUN npm install
