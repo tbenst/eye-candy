@@ -22,8 +22,9 @@ function getDiagonalLength(height, width) {
     return sqrt(pow(height, 2) + pow(width, 2));
 }
 
-export function calcLifespan(speed, width) {
-    return (getDiagonalLength(store.windowHeight, store.windowWidth)
+export function calcLifespan(speed, width, session) {
+    console.log('calcLifespan', session)
+    return (getDiagonalLength(session.windowHeight, session.windowWidth)
                         + width)/speed*120
 }
 
@@ -60,7 +61,7 @@ export function* easyGen() {
 export function* orientationSelectivityGen(
     speeds, widths, numRepeat,
     barColor='white', backgroundColor='black',
-    angles=[0, PI/4, PI/2, 3*PI/4, PI, 5*PI/4, 3*PI/2, 7*PI/4]) {
+    angles=[0, PI/4, PI/2, 3*PI/4, PI, 5*PI/4, 3*PI/2, 7*PI/4], session) {
 
     // initial wait time
     yield {stimulusType: STIMULUS.WAIT, lifespan: 120 * 15}
@@ -73,7 +74,7 @@ export function* orientationSelectivityGen(
 
                 for (var k = 0; k < angles.length; k++) {
                     yield {stimulusType: STIMULUS.BAR,
-                        lifespan: (getDiagonalLength(store.windowHeight, store.windowWidth)
+                        lifespan: (getDiagonalLength(session.windowHeight, session.windowWidth)
                             + widths[j])/speeds[i]*120,
                         backgroundColor: backgroundColor,
                         width: widths[j],
@@ -98,7 +99,7 @@ function movingBarSC(lifespan, backgroundColor, barColor, speed, width, angle) {
             barColor: barColor,
             speed: speed,
             angle: angle}
-    console.log('movingBarSC', ret)
+    // console.log('movingBarSC', ret)
     return ret
 }
 
@@ -107,14 +108,15 @@ function solidSC(time, backgroundColor='white') {
             lifespan: 120 * time}
 }
 
-export function stimulusCreator(stimulusJSON) {
-    const stimulus = jsonValueToNum(stimulusJSON)
-    switch (Object.keys(stimulus)[0]) {
+export function stimulusCreator(stimulusJSON, session) {
+    console.log('stimulusCreator', stimulusJSON)
+    const stimType = Object.keys(stimulusJSON)[0]
+    const stimulus = jsonValueToNum(stimulusJSON[stimType])
+    switch (stimType.toUpperCase()) {
         case STIMULUS.BAR:
             const speed = stimulus.speed
             const width = stimulus.width
-            return movingBarSC(calcLifespan(store.windowHeight, store.windowWidth,
-                speed, width),
+            return movingBarSC(calcLifespan(speed, width, session),
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle)
         case STIMULUS.SOLID:
@@ -129,6 +131,7 @@ export function stimulusCreator(stimulusJSON) {
 }
 
 function jsonValueToNum(myJSON) {
+    // console.log('jsonValueToNum', myJSON)
     const keys = Object.keys(myJSON)
     let retJSON = Object.assign({}, myJSON)
     for (var i = 0; i < keys.length; i++) {

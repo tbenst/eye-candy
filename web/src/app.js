@@ -38,7 +38,7 @@ var session = koaSession({
 app.keys = ['8r92scsdf6', 'jnt356gc'];
 app
     // .use(convert(session))
-    .use(session)
+    .use(convert(session))
     .use(bodyParser());
 
 io.use(koaSocketSession(app, session))
@@ -61,13 +61,14 @@ router.get('/', async (ctx) => {
 //     ctx.body = "yes" //{x: 'test'}
 // });
 
-router.post('/window', async (ctx) => {
-    ctx.session.windowHeight = ctx.request.header.windowHeight
-    ctx.session.windowWidth = ctx.request.header.windowWidth
+router.get('/window', (ctx) => {
+    console.log('window', ctx.request.header.windowwidth)
+    ctx.session.windowHeight = ctx.request.header.windowheight
+    ctx.session.windowWidth = ctx.request.header.windowwidth
     ctx.status = 200    
 });
 
-router.post('/next-stimulus', function (ctx) {
+router.post('/next-stimulus',  (ctx) => {
     // TODO this may not work
     ctx.body = ctx.session.program.next()
     ctx.status = 200
@@ -87,23 +88,33 @@ router.get('/t.html', (ctx) => {
 })
 
 router.post('/test.html', ctx => {
-    ctx.session.program = buildGenerator(ctx.request.body.stimulusYAML)
+    ctx.session.program = buildGenerator(ctx.request.body.stimulusYAML,
+        ctx.session)
     let stimulusQueue = []
     for (var i = 0; i < 5; i++) {
         stimulusQueue.push(ctx.session.program.next())
     }
     // TODO
-    // io.emit('run', stimulusQueue)
+    io.broadcast('run', stimulusQueue)
     // ctx.body = ctx.session.windowHeight
     console.log('stimulusQueue', stimulusQueue)
     ctx.body = stimulusQueue
 })
 
 // IO
+// var clients = [];
+io.on('connection', function (ctx) {
+  console.log( 'User connected!!!' )
+  // clients.push(socket.id);
+});
 
-io.on( 'connection', ( ctx, data ) => {
-  console.log( 'User connected!!!', data )
-})
+
+io.on("disconnect", function(ctx) {
+    //https://github.com/LearnBoost/socket.io-client/issues/251
+    console.log( 'User disconnected' )
+    // socket.socket.reconnect();
+
+});
 
 io.on('window', (ctx, data) => {
     console.log('in window')

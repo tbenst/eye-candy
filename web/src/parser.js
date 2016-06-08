@@ -9,7 +9,7 @@ const STIMULUS = {
     TARGET: 'TARGET'
 }
 
-export function* buildGenerator(formYAML) {
+export function* buildGenerator(formYAML, session) {
 	const userProgram = yaml.safeLoad(formYAML)
 
 	for (var i = 0; i < userProgram.length; i++) {
@@ -21,14 +21,14 @@ export function* buildGenerator(formYAML) {
 			let n = nestedGen.next()
 			while (n.done === false) {
 				let toYield = {}
-				toYield[stimType] = stimulusCreator(fillInItems(stimulus, n.value))
+				toYield[stimType] = fillInItems(stimulus, n.value)
 				// get name/key of stimulus
 				// console.log('buildGenerator', stimulus, n.value, fillInItems(stimulus, n.value))
-				yield toYield
+				yield stimulusCreator(toYield, session)
 				n = nestedGen.next()
 			}
 		} else {
-			yield stimulusCreator(stimulus)
+			yield stimulusCreator(stimJSON, session)
 		}
 	}
 }

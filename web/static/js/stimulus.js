@@ -596,7 +596,7 @@ const testBar = {
 var socket = io();
 
 fetch('/window', {
-    method: 'POST',
+    method: 'GET',
     headers: {
         windowHeight: store.getState()['windowHeight'],
         windowWidth: store.getState()['windowWidth']
