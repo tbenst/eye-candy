@@ -494,6 +494,7 @@ function* sampleGen() {
 
 var lastTime = window.performance.now()
 function renderLoop() {
+    console.log('in renderLoop')
     var curTime = window.performance.now()
 
     const frameTime = curTime - lastTime
@@ -508,7 +509,7 @@ function renderLoop() {
         case STATUS.FINISHED:
             context.clearRect(0, 0, WIDTH, HEIGHT)
             document.body.style.backgroundColor = 'black'
-            return  'FINISHED'
+            break
         case STATUS.STARTED:
 
             // adjust for dropped frames
@@ -596,11 +597,12 @@ const testBar = {
 var socket = io();
 
 fetch('/window', {
-    method: 'GET',
+    method: 'POST',
     headers: {
         windowHeight: store.getState()['windowHeight'],
         windowWidth: store.getState()['windowWidth']
-    }
+    },
+    credentials: 'include'
 })
 
 socket.on('run', (stimulusQueue) => {
@@ -614,7 +616,10 @@ socket.on('reset', () => {
 
 socket.on('target', () => {
     store.dispatch(resetAC())
-    store.dispatch(setStimulusAC(targetGen()))
+    store.dispatch(setStimulusQueueAC(
+        [{stimulusType: STIMULUS.TARGET, lifespan: 60000,
+        backgroundColor: 'black'}]))
+    store.dispatch(setStatusAC(STATUS.STARTED))
 })
 
 // const queueBuffer = 5
@@ -653,7 +658,8 @@ socket.on('target', () => {
 
 async function nextStimulus() {
    return await (await fetch('/next-stimulus', {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include'
    })).json()
 }
 

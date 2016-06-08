@@ -26,9 +26,10 @@ import {buildGenerator} from './parser'
 
 const app = new Koa();
 const io = new IO()
+const store = new redisStore({host: 'redis'})
 
 var session = koaSession({
-    store: redisStore({host: 'redis'}),
+    store: store,
     secret: '1nkj98sdfa1',
     resave: true,
     saveUninitialized: true
@@ -61,64 +62,61 @@ router.get('/', async (ctx) => {
 //     ctx.body = "yes" //{x: 'test'}
 // });
 
-router.get('/window', (ctx) => {
-    console.log('window', ctx.request.header.windowwidth)
-    ctx.session.windowHeight = ctx.request.header.windowheight
-    ctx.session.windowWidth = ctx.request.header.windowwidth
-    ctx.status = 200    
+router.post('/window', (ctx) => {
+    var session = ctx.session;
+    session.windowHeight = ctx.request.header.windowheight
+    session.windowWidth = ctx.request.header.windowwidth
+    ctx.body = session;   
 });
 
 router.post('/next-stimulus',  (ctx) => {
-    // TODO this may not work
-    ctx.body = ctx.session.program.next()
+    // console.log('next-stimulus', ctx.session)
+    ctx.body = program.next()
     ctx.status = 200
 });
 
 router.get('/count', ctx => {
+    // console.log('count', ctx.req)
     var session = ctx.session;
     session.count = session.count || 0;
     session.count++;
     ctx.body = session;
 })
 
-router.get('/t.html', (ctx) => {
-    // ctx.body = 'yes'
-    console.log('session windowHeight', ctx.session.windowHeight)
-    ctx.status = 200
-})
+let program
 
-router.post('/test.html', ctx => {
-    ctx.session.program = buildGenerator(ctx.request.body.stimulusYAML,
+router.post('/start-program', ctx => {
+
+    program = buildGenerator(ctx.request.body.programYAML,
         ctx.session)
     let stimulusQueue = []
     for (var i = 0; i < 5; i++) {
-        stimulusQueue.push(ctx.session.program.next())
+        stimulusQueue.push(program.next())
     }
-    // TODO
+    // console.log(stimulusQueue)
     io.broadcast('run', stimulusQueue)
     // ctx.body = ctx.session.windowHeight
-    console.log('stimulusQueue', stimulusQueue)
-    ctx.body = stimulusQueue
+    ctx.status = 200
 })
 
 // IO
 // var clients = [];
 io.on('connection', function (ctx) {
-  console.log( 'User connected!!!' )
+  // console.log( 'User connected!!!' )
   // clients.push(socket.id);
 });
 
 
 io.on("disconnect", function(ctx) {
     //https://github.com/LearnBoost/socket.io-client/issues/251
-    console.log( 'User disconnected' )
-    // socket.socket.reconnect();
+    // console.log( 'User disconnected' )
+    socket.socket.reconnect();
 
 });
 
 io.on('window', (ctx, data) => {
-    console.log('in window')
-    console.log('got windowHeight', data.windowHeight)
+    // console.log('in window')
+    // console.log('got windowHeight', data.windowHeight)
     ctx.session.windowHeight = data.windowHeight
     ctx.session.windowWidth = data.windowWidth
 })
@@ -127,10 +125,17 @@ io.on('test', (ctx) => {
     var session = ctx.session;
     session.count = session.count || 0;
     session.count++;
-    console.log('test', ctx.session)
-    console.log('test get windowHeight', ctx.session.windowHeight)
+    // console.log('test', ctx.session)
+    // console.log('test get windowHeight', ctx.session.windowHeight)
 })
 
+io.on('reset', ctx => {
+    io.broadcast('reset')
+})
+
+io.on('target', ctx => {
+    io.broadcast('target')
+})
 
 io.attach( app )
 

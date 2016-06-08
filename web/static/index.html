@@ -1,19 +1,32 @@
 <!doctype html>
-<title>Eye Candy</title>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Eye Candy</title>
+	<script src="js/socket.io.js"></script>
+</head>
+<body>
+
 <!-- <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> -->
 <h1>Eye Candy</h1>
-<form action="/test.html" method="post" id="stimulus">
-  Stimulus YAML:<br>
-  <textarea name="stimulusYAML" cols="60" rows="20"></textarea><br>
-  <input type="submit" value="Start stimulus">
+<form action="/start-program" method="post" id="stimulus">
+  Program YAML:<br>
+  <textarea name="programYAML" cols="60" rows="20"></textarea><br>
+  <input type="submit" value="Start program">
 </form>
+<button type="button" onclick="JavaScript: resetButton()">
+Reset
+</button>
+<!-- <button type="button" onclick="JavaScript: targetButton()">
+Target
+</button> -->
 
 <h2>Example YAML:</h2>
 <pre>
 ---
 - bar:
     width: 10
-    speed: 20
+    speed: 500
     angle: PI
     barColor: white
     backgroundColor: black
@@ -27,3 +40,7 @@
     - [10, 100]
     - [500, 1000]
     - [0, PI/4, PI/2, 3*PI/4, PI, 5*PI/4, 3*PI/2, 7*PI/4]</pre>
+
+    <script src="js/remoteControl.js"></script>
+</body>
+</html>
