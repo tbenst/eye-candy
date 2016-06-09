@@ -4,10 +4,6 @@ function resetButton() {
     socket.emit('reset')
 }
 
-function targetButton() {
-    socket.emit('reset')
-}
-
 function startButton() {
 	fetch('/start-program', {
 		method: 'post',

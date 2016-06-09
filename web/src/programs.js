@@ -105,11 +105,13 @@ function movingBarSC(lifespan, backgroundColor, barColor, speed, width, angle) {
 
 function solidSC(time, backgroundColor='white') {
     return {stimulusType: STIMULUS.SOLID,
-            lifespan: 120 * time}
+            lifespan: 120 * time,
+            backgroundColor: backgroundColor
+        }
 }
 
 export function stimulusCreator(stimulusJSON, session) {
-    // console.log('stimulusCreator', stimulusJSON)
+    console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
     const stimulus = jsonValueToNum(stimulusJSON[stimType])
     switch (stimType.toUpperCase()) {
@@ -135,7 +137,7 @@ function jsonValueToNum(myJSON) {
     const keys = Object.keys(myJSON)
     let retJSON = Object.assign({}, myJSON)
     for (var i = 0; i < keys.length; i++) {
-        if (['angle', 'speed', 'width'].includes(keys[i])) {
+        if (['angle', 'speed', 'width', 'time'].includes(keys[i])) {
             retJSON[keys[i]] = valueToNum(retJSON[keys[i]])
         }
     }

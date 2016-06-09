@@ -15,16 +15,22 @@ export function* buildGenerator(formYAML, session) {
 	for (var i = 0; i < userProgram.length; i++) {
 		const stimJSON = userProgram[i]
 		const stimType = Object.keys(stimJSON)[0]
-		const stimulus = stimJSON[stimType]
-		if (stimJSON.with_nested != undefined) {
+		// const stimulus = stimJSON[stimType]
+		if (stimType === 'with_nested') {
 			let nestedGen = buildNestedGen(stimJSON.with_nested)
 			let n = nestedGen.next()
 			while (n.done === false) {
-				let toYield = {}
-				toYield[stimType] = fillInItems(stimulus, n.value)
-				// get name/key of stimulus
-				// console.log('buildGenerator', stimulus, n.value, fillInItems(stimulus, n.value))
-				yield stimulusCreator(toYield, session)
+				let list = stimJSON.list
+				for (var j = 0; j < list.length; j++) {
+					console.log('on list item ', list[j])
+					const innerStimType = Object.keys(list[j])[0]
+					const stimulus = list[j][innerStimType]
+					let toYield = {}
+					toYield[innerStimType] = fillInItems(stimulus, n.value)
+					// get name/key of stimulus
+					// console.log('buildGenerator', stimulus, n.value, fillInItems(stimulus, n.value))
+					yield stimulusCreator(toYield, session)
+				}
 				n = nestedGen.next()
 			}
 		} else {
