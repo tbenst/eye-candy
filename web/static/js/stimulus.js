@@ -494,7 +494,6 @@ function* sampleGen() {
 
 var lastTime = window.performance.now()
 function renderLoop() {
-    console.log('in renderLoop')
     var curTime = window.performance.now()
 
     const frameTime = curTime - lastTime
@@ -545,10 +544,10 @@ const storeInitialState = {
 
 
 // USE THIS FOR NO LOGGER
-// let store = createStore(eyeCandyApp, storeInitialState)
+let store = createStore(eyeCandyApp, storeInitialState)
 
 // USE THIS FOR LOGGER
-let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
+// let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
 
 // GET FROM SERVER (NOT OPERATIONAL)
 // let store = createStore(todoApp, window.STATE_FROM_SERVER)

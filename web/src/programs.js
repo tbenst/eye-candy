@@ -110,6 +110,13 @@ function solidSC(time, backgroundColor='white') {
         }
 }
 
+function waitSC(time) {
+    return {stimulusType: STIMULUS.WAIT,
+            lifespan: 120 * time,
+            backgroundColor: 'black'
+        }
+}
+
 export function stimulusCreator(stimulusJSON, session) {
     // console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
@@ -125,7 +132,7 @@ export function stimulusCreator(stimulusJSON, session) {
             return solidSC(stimulus.time,
                           stimulus.backgroundColor)
         case STIMULUS.WAIT:
-            return {stimulusType: STIMULUS.WAIT, lifespan: 120 * stimulus.time}
+            return waitSC(stimulus.time)
         case STIMULUS.TARGET:
             return {stimulusType: STIMULUS.TARGET, lifespan: 120 * stimulus.time,
                 backgroundColor: 'black'}
