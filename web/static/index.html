@@ -11,26 +11,26 @@
 <h1>Eye Candy</h1>
 <form action="/start-program" method="post" id="stimulus">
   Program YAML:<br>
-  <textarea name="programYAML" cols="60" rows="20">---
-- bar:
-    width: 10
-    speed: 500
-    angle: PI
-    barColor: white
-    backgroundColor: black
-- with_nested:
+  <textarea name="programYAML" cols="60" rows="20">- with_nested:
     - [10, 100]
     - [500, 1000]
-    - [0, PI/4, PI/2]
+    - [0, PI/4, PI/2, 3*PI/4, PI, 5*PI/4, 3*PI/2, 7*PI/4, 5*PI/4, 3*PI/4, 3*PI/2, PI/2, 7*PI/4, PI/4, 0, PI]
   list:
+    - wait:
+        time: 1
+    - solid:
+        time: 1
+        backgroundColor: white
+    - wait:
+        time: 2
     - bar:
        width: items[0]
        speed: items[1]
        angle: items[2]
        barColor: white
        backgroundColor: black
-    - wait: time=2
-    - solid: time=2 backgroundColor=white</textarea><br>
+
+</textarea><br>
   <input type="submit" value="Start program">
 </form>
 <button type="button" onclick="JavaScript: resetButton()">
@@ -41,25 +41,9 @@ Target
 </button> -->
 
 <h2>Example YAML:</h2>
-<pre>
-(old)
----
-- bar:
-    width: 10
-    speed: 500
-    angle: PI
-    barColor: white
-    backgroundColor: black
-- bar:
-    width: items[0]
-    speed: items[1]
-    angle: items[2]
-    barColor: white
-    backgroundColor: black
-  with_nested:
-    - [10, 100]
-    - [500, 1000]
-    - [0, PI/4, PI/2, 3*PI/4, PI, 5*PI/4, 3*PI/2, 7*PI/4]</pre>
+<pre> Top level argument is one of ['bar', 'solid', 'wait', 'with_nested']
+With nested must be followed by a list ('-' on each new line, indented) and also contain the key 'list' at the same level of indendation as with_nested (but with no '-').
+</pre>
 
     <script src="js/remoteControl.js"></script>
 </body>

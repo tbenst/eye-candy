@@ -63,7 +63,7 @@ router.get('/', async (ctx) => {
 // });
 
 router.post('/window', (ctx) => {
-    console.log('got window')
+    // console.log('got window')
     var session = ctx.session;
     session.windowHeight = ctx.request.header.windowheight
     session.windowWidth = ctx.request.header.windowwidth
@@ -94,7 +94,7 @@ router.post('/start-program', ctx => {
     for (var i = 0; i < 5; i++) {
         stimulusQueue.push(program.next())
     }
-    console.log(stimulusQueue)
+    // console.log(stimulusQueue)
     io.broadcast('run', stimulusQueue)
     ctx.body = stimulusQueue
     ctx.status = 200

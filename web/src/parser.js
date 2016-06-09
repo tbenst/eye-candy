@@ -22,7 +22,7 @@ export function* buildGenerator(formYAML, session) {
 			while (n.done === false) {
 				let list = stimJSON.list
 				for (var j = 0; j < list.length; j++) {
-					console.log('on list item ', list[j])
+					// console.log('on list item ', list[j])
 					const innerStimType = Object.keys(list[j])[0]
 					const stimulus = list[j][innerStimType]
 					let toYield = {}

@@ -23,7 +23,7 @@ function getDiagonalLength(height, width) {
 }
 
 export function calcLifespan(speed, width, session) {
-    console.log('calcLifespan', session)
+    // console.log('calcLifespan', session)
     return (getDiagonalLength(session.windowHeight, session.windowWidth)
                         + width)/speed*120
 }
@@ -111,7 +111,7 @@ function solidSC(time, backgroundColor='white') {
 }
 
 export function stimulusCreator(stimulusJSON, session) {
-    console.log('stimulusCreator', stimulusJSON)
+    // console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
     const stimulus = jsonValueToNum(stimulusJSON[stimType])
     switch (stimType.toUpperCase()) {
