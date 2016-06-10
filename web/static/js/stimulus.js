@@ -1,4 +1,3 @@
-
 const PI = Math.PI
 const pow = Math.pow
 const sqrt = Math.sqrt
@@ -12,81 +11,10 @@ REDUX (GLOBAL STATE)
 const createStore = Redux.createStore
 const applyMiddleware = Redux.applyMiddleware
 
+
 /***********************************************
-// !!! CHOOSE PROGRAM TO RUN HERE !!!
+ACTIONS
 ************************************************/
-
-// program = easyGen()
-// program = orientationSelectivityGen([500, 1000], [10, 100], 25)
-// program = orientationSelectivityGen([5], [1000], 2)
-
-// Use this program for aligning projector with MEA
-// program = targetGen()
-
-
-
-function* targetGen() {
-    yield {stimulusType: STIMULUS.TARGET, lifespan: 60000,
-        backgroundColor: 'black'}
-}
-
-function* easyGen() {
-    yield {stimulusType: STIMULUS.BAR, lifespan: 300,
-        backgroundColor: 'black', width: 50, barColor: 'white',
-        speed: 15, angle: PI}
-    yield {stimulusType: STIMULUS.BAR, lifespan: 300,
-        backgroundColor: 'black', width: 50, barColor: 'white',
-        speed: 15, angle: PI/2}
-    yield {stimulusType: STIMULUS.BAR, lifespan: 300,
-        backgroundColor: 'black', width: 50, barColor: 'white',
-        speed: 15, angle: 0}
-    yield {stimulusType: STIMULUS.BAR, lifespan: 300,
-        backgroundColor: 'black', width: 50, barColor: 'white',
-        speed: 10, angle: PI}
-}
-
-
-// angles and widths must have same length
-// generator now calculates lifespan automatically
-// if you want to modify the function (e.g. change the wait times),
-// please copy and create a new function to avoid confusion in
-// analysis
-// 
-// speed is pixels / second, width is pixels, angle is radians,
-// lifespan is 1/120 of a second, so 120==1 second 
-function* orientationSelectivityGen(speeds, widths, numRepeat,
-    barColor='white', backgroundColor='black',
-    angles=[0, PI/4, PI/2, 3*PI/4, PI, 5*PI/4, 3*PI/2, 7*PI/4]) {
-
-    // initial wait time
-    yield {stimulusType: STIMULUS.WAIT, lifespan: 120 * 15}
-
-    for (var t = 0; t < numRepeat; t++) {
-        for (var i = 0; i < speeds.length; i++) {
-            for (var j = 0; j < widths.length; j++) {
-                // wait 10 seconds before each group of eight angles
-                yield {stimulusType: STIMULUS.WAIT, lifespan: 120 * 5}
-
-                for (var k = 0; k < angles.length; k++) {
-                    yield {stimulusType: STIMULUS.BAR,
-                        lifespan: (getDiagonalLength() + widths[j])/speeds[i]*120,
-                        backgroundColor: backgroundColor,
-                        width: widths[j],
-                        barColor: barColor,
-                        speed: speeds[i],
-                        angle: angles[k]}
-                    // Wait between bars
-                    yield {stimulusType: STIMULUS.WAIT, lifespan: 120 * 1}
-
-                }
-            }
-        }
-    }
-}
-
-
-/***********************************************/
-// ACTIONS
 
 const TIME_TICK = 'TIME_TICK'
 const STIMULUS_TICK = 'STIMULUS_TICK'
@@ -94,7 +22,8 @@ const SET_STATUS = 'SET_STATUS'
 const SET_STIMULUS = 'SET_STIMULUS'
 const SET_GRAPHICS = 'SET_GRAPHICS'
 const ADD_GRAPHIC = 'ADD_GRAPHIC'
-const UPDATE_GRAPHICS = 'UPDATE_GRAPHICS'
+const REMOVE_GRAPHIC = 'REMOVE_GRAPHIC'
+const GRAPHICS_TICK = 'GRAPHICS_TICK'
 const SET_SIGNAL_LIGHT = 'SET_SIGNAL_LIGHT'
 const SET_STIMULUS_QUEUE = 'SET_STIMULUS_QUEUE'
 const RESET = 'RESET'
@@ -115,10 +44,11 @@ const SIGNAL_LIGHT = {
 }
 
 const STIMULUS = {
-    BAR: 'BAR',
+    MOVING_BAR: 'MOVING_BAR',
     SOLID: 'SOLID',
     WAIT: 'WAIT',
-    TARGET: 'TARGET'
+    TARGET: 'TARGET',
+    GRATING: 'GRATING'
 }
 
 const GRAPHIC = {
@@ -126,11 +56,30 @@ const GRAPHIC = {
     TARGET: 'TARGET'
 }
 
-/***********************************************/
-// ACTION CREATORS
+/***********************************************
+EXAMPLE STIMULUS
+************************************************/
 
+const exampleBar = {stimulusType: STIMULUS.BAR, lifespan: 300,
+        backgroundColor: 'black', width: 50, barColor: 'white',
+        speed: 15, angle: PI, age: 0}
+const exampleSolid = {stimulusType: STIMULUS.SOLID,
+            lifespan: 120 * time,
+            backgroundColor: backgroundColor
+        }
+const exampleWait = {stimulusType: STIMULUS.WAIT,
+            lifespan: 120 * time,
+            backgroundColor: 'black'
+        }
+const exampleGrating = {stimulusType: STIMULUS.GRATING, lifespan: 300,
+        backgroundColor: 'black', width: 50, barColor: 'white',
+        speed: 15, angle: PI, wavelength: 500, age: 0, count: 0}
 
-function stimulustickAC(timeDelta) {
+/***********************************************
+ACTION CREATORS
+************************************************/
+
+function stimulusTickAC(timeDelta) {
     return {type: STIMULUS_TICK, timeDelta: timeDelta}
 }
 
@@ -139,12 +88,15 @@ function timetickAC(timeDelta) {
 }
 
 function addGraphicAC(graphic) {
-
-    return { type: ADD_GRAPHIC, graphic: 'TODO' }
+    return { type: ADD_GRAPHIC, graphic: graphic }
 }
 
-function updateGraphicsAC(timeDelta) {
-    return  { type: UPDATE_GRAPHICS, timeDelta: timeDelta}
+function removeGraphicAC(index) {
+    return { type: REMOVE_GRAPHIC, index: index }
+}
+
+function graphicsTick(timeDelta) {
+    return  { type: GRAPHICS_TICK, timeDelta: timeDelta}
 }
 
 function makeAccessorAC(type, ...argNames) {
@@ -167,29 +119,58 @@ const setStimulusAC = makeAccessorAC(SET_STIMULUS, 'stimulus')
 const setGraphicsAC = makeAccessorAC(SET_GRAPHICS, 'graphics')
 const setSignalLightAC = makeAccessorAC(SET_SIGNAL_LIGHT, 'signalLight')
 
-/***********************************************/
-// DISPATCHERS
+/***********************************************
+DISPATCHERS
+************************************************/
 
 function graphicsDispatcher(width, barColor, backgroundColor, speed, angle) {
-    switch (store.getState().stimulus.stimulusType) {
-        case GRAPHIC.BAR:
-            movingBarDispatcher(width, barColor, backgroundColor,
-                speed, angle)
+    const stimulus = store.getState().stimulus
+    switch (stimulus.stimulusType) {
+        case STIMULUS.BAR:
+            if (graphics.length === 0) {
+                barDispatcher(width, barColor, backgroundColor,
+                    speed, angle)
+            }
             break
-        case GRAPHIC.TARGET:
+        case STIMULUS.TARGET:
             store.dispatch(setGraphicsAC([{
                 graphicType: GRAPHIC.TARGET
             }]))
+        case STIMULUS.GRATING:
+            // aggregate position (distance traveled) spawns new bars
+            // once equal to wavelength
+            if (speed / 120 * time  >= wavelength * count) {
+                barDispatcher(width, barColor, backgroundColor,
+                    speed, angle)
+                // we use count to keep track of how many bars have been
+                // cumulatively dispatched
+                store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
+                    count: stimulus.count + 1
+                })))
+            }
             break
-        }
+    }
 }
 
-function movingBarDispatcher(width, barColor, backgroundColor, speed, angle) {
-    // TODO change to addGraphicAC for flexibility
-    store.dispatch(setGraphicsAC([{
-        graphicType: GRAPHIC.BAR, color: barColor, size: {width: width,
-            height: getDiagonalLength()}, speed: speed, angle: angle
-    }]))
+function barDispatcher(width, barColor, backgroundColor, speed, angle) {
+    store.dispatch(addGraphicAC({
+        graphicType: GRAPHIC.BAR, age: 0, color: barColor, size: {width: width,
+            height: getDiagonalLength()}, speed: speed, angle: angle,
+            lifespan: calcLifespan(speed, width)
+    }))
+}
+function removeGraphicDispatcher(index) {
+    store.dispatch(removeGraphicAC(index))
+}
+
+function cleanupGraphicsDispatcher() {
+    const graphics = store.getState().graphics
+    for (var i = 0; i < graphics.length; i++) {
+        const graphic = graphics[i]
+        if (graphic.age > graphic.lifespan) {
+            removeGraphicDispatcher(i)
+        }
+    }
 }
 
 function tickDispatcher(timeDelta) {
@@ -200,9 +181,6 @@ function tickDispatcher(timeDelta) {
 
         newStimulusDispatcher()
         let state = store.getState()
-        graphicsDispatcher(state.stimulus.width, state.stimulus.barColor,
-                state.stimulus.backgroundColor, state.stimulus.speed,
-                state.stimulus.angle)
         store.dispatch(setSignalLightAC(SIGNAL_LIGHT.NEW_STIM))
     } else {
         switch(state.signalLight) {
@@ -223,9 +201,13 @@ function tickDispatcher(timeDelta) {
                 break
         }
     }
-    store.dispatch(stimulustickAC(timeDelta))
     store.dispatch(timetickAC(timeDelta))
-    store.dispatch(updateGraphicsAC(timeDelta))
+    store.dispatch(stimulusTickAC(timeDelta))
+    store.dispatch(graphicsTick(timeDelta))
+    store.dispatch(graphicsDispatcher(state.stimulus.width, state.stimulus.barColor,
+        state.stimulus.backgroundColor, state.stimulus.speed,
+        state.stimulus.angle))
+    store.dispatch(cleanupGraphicsDispatcher())
 }
 
 function newStimulusDispatcher() {
@@ -251,8 +233,9 @@ function getNewStimulusDispatcher() {
 
 
 
-/***********************************************/
-// REDUCERS
+/***********************************************
+REDUCERS
+************************************************/
 
 function eyeCandyApp(state, action) {
     switch (action.type) {
@@ -282,6 +265,10 @@ function eyeCandyApp(state, action) {
             return Object.assign({}, state, {
                 graphics: [...state.graphics, action.graphic]
             })
+        case REMOVE_GRAPHIC:
+            return Object.assign({}, state, {
+                graphics: [...state.graphics, action.graphic]
+            })
         case SET_SIGNAL_LIGHT:
             return Object.assign({}, state, {
                 signalLight: action.signalLight
@@ -290,7 +277,7 @@ function eyeCandyApp(state, action) {
             return Object.assign({}, state, {
                 time: state.time + action.timeDelta
             })
-        case UPDATE_GRAPHICS:
+        case GRAPHICS_TICK:
             return Object.assign({}, state, {
                 graphics: graphicsReducer(state.graphics, action.timeDelta)
             })
@@ -332,8 +319,9 @@ function graphicsReducer(graphics, timeDelta) {
 }
 
 
-/***********************************************/
-// GRAPHICS TICK
+/***********************************************
+GRAPHICS TICK
+************************************************/
 
 function tickGraphic(graphic, timeDelta) {
     switch (graphic.graphicType) {
@@ -353,10 +341,12 @@ function tickBar(bar, timeDelta) {
         newPosition = {r: bar.position.r - bar.speed/120*timeDelta, 
             theta: bar.position.theta}
     }
+
     const state = store.getState()
 
     return Object.assign({}, bar, {
         position: newPosition,
+        age: bar.age + timeDelta,
         // compensate for bar width & height, translate from polar & translate from center
         // use height on both to make square
         origin: {x: bar.size.width/2*cos(newPosition.theta) +
@@ -367,8 +357,9 @@ function tickBar(bar, timeDelta) {
 }
 
 
-/***********************************************/
-// MIDDLEWARE
+/***********************************************
+MIDDLEWARE
+************************************************/
 
 function logger({ getState }) {
   return (next) => (action) => {
@@ -386,7 +377,7 @@ function logger({ getState }) {
 }
 
 /************************************************
-// LOGIC
+LOGIC
 ************************************************/
 
 // ensure bar always spans window regardless of angle
@@ -395,19 +386,16 @@ function getDiagonalLength() {
         pow(store.getState()['windowHeight'], 2))
 }
 
+function calcLifespan(speed, width) {
+    return (getDiagonalLength() + width ) / speed * 120
+}
+
 
 /************************************************
 ANIMATE
 ************************************************/
 
 function render() {
-    const status = store.getState().status
-    if (status === STATUS.STARTED) {
-        renderHelper()
-    }
-}
-
-function renderHelper() {
     context.clearRect(0, 0, WIDTH, HEIGHT)
     const state = store.getState()
     document.body.style.backgroundColor = state.stimulus.backgroundColor
@@ -459,7 +447,6 @@ function renderHelper() {
 
     context.save()
 
-
     // block right edge from screen
     context.fillStyle = state.stimulus.backgroundColor
     context.fillRect(state.windowHeight, 0,
@@ -485,19 +472,13 @@ function renderHelper() {
     context.restore()
 }
 
-function* sampleGen() {
-    for (var i = 0; i <= 3; i++) {
-        yield i
-    }
-}
 
-
-var lastTime = window.performance.now()
+// var lastTime = window.performance.now()
 function renderLoop() {
-    var curTime = window.performance.now()
+    // var curTime = window.performance.now()
 
-    const frameTime = curTime - lastTime
-    lastTime = curTime
+    // const frameTime = curTime - lastTime
+    // lastTime = curTime
 
 
     switch (store.getState().status) {
@@ -590,8 +571,9 @@ const testBar = {
 }
 
 
-/***********************************************/
-// PROGRAM / server communication
+/***********************************************
+PROGRAM / server communication
+************************************************/
 
 var socket = io();
 
@@ -620,40 +602,6 @@ socket.on('target', () => {
         backgroundColor: 'black'}]))
     store.dispatch(setStatusAC(STATUS.STARTED))
 })
-
-// const queueBuffer = 5
-
-// async function getProgram(queueBuffer) {
-//     console.log('in getProgram')
-//     const response = await (await fetch('/new-program', {
-//         method: 'POST'//,
-//         // headers: {
-//         //     windowHeight: store.getState()['windowHeight'],
-//         //     windowWidth: store.getState()['windowWidth']
-//         // }
-//     })).json()
-
-//     if (response.status==='RUN_PROGRAM') {
-//         for (var i = 0; i < queueBuffer; i++) {
-//             await queueNewStimulusDispatcher()
-//         }
-//     }
-
-// }
-
-// async function callServer() {
-//     while (true) {
-//         console.log('in while loop')
-//         console.log(store.getState())
-//         if (store.getState().stimulusQueue.length < queueBuffer) {
-//             window.setTimeout(getProgram(queueBuffer),1000)
-//         } else {
-//             store.dispatch(setStatusAC(STATUS.STARTED))
-//             break
-//         }
-//     }
-// }
-
 
 async function nextStimulus() {
    return await (await fetch('/next-stimulus', {

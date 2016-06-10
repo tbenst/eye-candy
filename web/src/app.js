@@ -18,9 +18,6 @@ const koaSocketSession = require('koa-socket-session')
 const redisStore = require('koa-redis')
 
 
-
-
-import {orientationSelectivityGen, easyGen} from './programs'
 import {buildGenerator} from './parser'
 // import session from './session'
 
@@ -54,13 +51,6 @@ render(app, {
 
 app.context.render = co.wrap(app.context.render);
 
-router.get('/', async (ctx) => {
-    await ctx.render('index');
-});
-
-// router.get('/stimulus', async (ctx) => {
-//     ctx.body = "yes" //{x: 'test'}
-// });
 
 router.post('/window', (ctx) => {
     // console.log('got window')
