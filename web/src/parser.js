@@ -6,7 +6,8 @@ const STIMULUS = {
     BAR: 'BAR',
     SOLID: 'SOLID',
     WAIT: 'WAIT',
-    TARGET: 'TARGET'
+    TARGET: 'TARGET',
+    GRATING: 'GRATING'
 }
 
 export function* buildGenerator(formYAML, session) {

@@ -10,7 +10,8 @@ const STIMULUS = {
     BAR: 'BAR',
     SOLID: 'SOLID',
     WAIT: 'WAIT',
-    TARGET: 'TARGET'
+    TARGET: 'TARGET',
+    GRATING: 'GRATING'
 }
 
 const GRAPHIC = {
@@ -106,9 +107,9 @@ function barSC(lifespan, backgroundColor, barColor, speed, width, angle) {
 }
 
 function gratingSC(lifespan, backgroundColor, barColor, speed,
-    width, angle, wavelength) {
-    const ret = {stimulusType: STIMULUS.BAR,
-            lifespan: lifespan,
+    width, angle, wavelength, time) {
+    const ret = {stimulusType: STIMULUS.GRATING,
+            lifespan: time * 120,
             backgroundColor: backgroundColor,
             width: width,
             barColor: barColor,
@@ -118,7 +119,7 @@ function gratingSC(lifespan, backgroundColor, barColor, speed,
             age: 0,
             count: 0
         }
-    // console.log('gratingSC', ret)
+    console.log('gratingSC', ret)
     return ret
 }
 
@@ -142,10 +143,10 @@ export function stimulusCreator(stimulusJSON, session) {
     // console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
     const stimulus = jsonValueToNum(stimulusJSON[stimType])
+    const speed = stimulus.speed
+    const width = stimulus.width
     switch (stimType.toUpperCase()) {
         case STIMULUS.BAR:
-            const speed = stimulus.speed
-            const width = stimulus.width
             return barSC(calcLifespan(speed, width, session),
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle)
@@ -158,12 +159,10 @@ export function stimulusCreator(stimulusJSON, session) {
             return {stimulusType: STIMULUS.TARGET, lifespan: 120 * stimulus.time,
                 backgroundColor: 'black'}
         case STIMULUS.GRATING:
-            const speed = stimulus.speed
-            const width = stimulus.width
-            return barSC(calcLifespan(speed, width, session),
+            return gratingSC(calcLifespan(speed, width, session),
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle, stimulus.wavelength,
-                stimulus.count)
+                stimulus.time)
     }
 }
 
@@ -172,7 +171,7 @@ function jsonValueToNum(myJSON) {
     const keys = Object.keys(myJSON)
     let retJSON = Object.assign({}, myJSON)
     for (var i = 0; i < keys.length; i++) {
-        if (['angle', 'speed', 'width', 'time', 'wavelength', 'count'].includes(keys[i])) {
+        if (['angle', 'speed', 'width', 'time', 'wavelength'].includes(keys[i])) {
             retJSON[keys[i]] = valueToNum(retJSON[keys[i]])
         }
     }
