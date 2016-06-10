@@ -119,7 +119,7 @@ function gratingSC(lifespan, backgroundColor, barColor, speed,
             age: 0,
             count: 0
         }
-    console.log('gratingSC', ret)
+    // console.log('gratingSC', ret)
     return ret
 }
 
