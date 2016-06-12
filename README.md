@@ -1,4 +1,4 @@
-To use, please first download the latest [https://www.google.com/chrome/browser/canary.html chrome canary].
+To use, please first download the latest (Chrome Canary)[https://www.google.com/chrome/browser/canary.html]
 
 On Windows, create a chrome canary desktop shortcut & right-click it. Click properties and modify target to: `"C:\[...]\chrome.exe" --js-flags="-harmony-async-await"` with whatever the actual path is instead of [...].
 
