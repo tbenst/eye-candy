@@ -9,7 +9,7 @@ docker-compose build
 docker-compose up
 ```
 
-Now open 172.16.37.82:3000 to run. be sure to open a 172.16.37.82:3000/stimulus.html window too.
+Now open 0.0.0.0:3000 to run. be sure to open a 0.0.0.0:3000/stimulus.html window too.
 example YAML:
 ```
 - with_nested:
