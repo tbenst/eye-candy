@@ -10,12 +10,15 @@ import Koa from 'koa';
 const router = require('koa-router')();
 import path from 'path'
 import co from 'co';
+const cookie = require('cookie')
 import render from 'koa-ejs';
 const serve = require('koa-static');
 const convert = require('koa-convert');
 const IO = require( 'koa-socket' )
 const koaSocketSession = require('koa-socket-session')
 const redisStore = require('koa-redis')
+var uuid = require('node-uuid');
+import logger from 'koa-logger'
 
 
 import {buildGenerator} from './parser'
@@ -62,7 +65,8 @@ router.post('/window', (ctx) => {
 
 router.post('/next-stimulus',  (ctx) => {
     // console.log('next-stimulus', ctx.session)
-    ctx.body = program.next()
+    const sid = cookie.parse(ctx.request.header.cookie)['koa.sid'];
+    ctx.body = program[sid].next()
     ctx.status = 200
 });
 
@@ -74,19 +78,36 @@ router.get('/count', ctx => {
     ctx.body = session;
 })
 
-let program
+let program = {}
 
 router.post('/start-program', ctx => {
-
-    program = buildGenerator(ctx.request.body.programYAML,
-        ctx.session)
+    const sid = cookie.parse(ctx.request.header.cookie)['koa.sid'];
+    program[sid] = buildGenerator(ctx.request.body.programYAML,
+        ctx.session.windowHeight, ctx.session.windowWidth)
     let stimulusQueue = []
     for (var i = 0; i < 5; i++) {
-        stimulusQueue.push(program.next())
+        stimulusQueue.push(program[sid].next())
     }
-    // console.log(stimulusQueue)
+    console.log(ctx)
     io.broadcast('run', stimulusQueue)
     ctx.body = stimulusQueue
+    ctx.status = 200
+})
+
+// Return the program id
+router.post('/analysis/start-program', ctx => {
+    const sid = uuid.v4()
+    const body = ctx.request.body
+    program[sid] = buildGenerator(body.programYAML,
+        body.windowHeight, body.windowWidth)
+    ctx.body = sid
+    ctx.status = 200
+})
+
+// give the next value for a given program (id)
+router.get('/analysis/program/:sid', ctx => {
+    const sid = ctx.params.sid
+    ctx.body = program[sid].next()
     ctx.status = 200
 })
 
@@ -131,7 +152,7 @@ io.on('target', ctx => {
 io.attach( app )
 
 app
-    // .use(logger())
+    .use(logger())
     .use(serve('static'))
     .use(router.routes())
     .use(router.allowedMethods());

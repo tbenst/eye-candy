@@ -23,9 +23,9 @@ function getDiagonalLength(height, width) {
     return sqrt(pow(height, 2) + pow(width, 2));
 }
 
-export function calcLifespan(speed, width, session) {
+export function calcLifespan(speed, width, windowHeight, windowWidth) {
     // console.log('calcLifespan', session)
-    return (getDiagonalLength(session.windowHeight, session.windowWidth)
+    return (getDiagonalLength(windowHeight, windowWidth)
                         + width)/speed*120
 }
 
@@ -139,7 +139,7 @@ function waitSC(time) {
         }
 }
 
-export function stimulusCreator(stimulusJSON, session) {
+export function stimulusCreator(stimulusJSON, windowHeight, windowWidth) {
     // console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
     const stimulus = jsonValueToNum(stimulusJSON[stimType])
@@ -147,7 +147,7 @@ export function stimulusCreator(stimulusJSON, session) {
     const width = stimulus.width
     switch (stimType.toUpperCase()) {
         case STIMULUS.BAR:
-            return barSC(calcLifespan(speed, width, session),
+            return barSC(calcLifespan(speed, width, windowHeight, windowWidth),
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle)
         case STIMULUS.SOLID:
@@ -159,7 +159,7 @@ export function stimulusCreator(stimulusJSON, session) {
             return {stimulusType: STIMULUS.TARGET, lifespan: 120 * stimulus.time,
                 backgroundColor: 'black'}
         case STIMULUS.GRATING:
-            return gratingSC(calcLifespan(speed, width, session),
+            return gratingSC(calcLifespan(speed, width, windowHeight, windowWidth),
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle, stimulus.wavelength,
                 stimulus.time)

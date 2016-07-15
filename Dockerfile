@@ -7,4 +7,5 @@ COPY web/package.json /www
 COPY web/view /www/view
 COPY web/static /www/static
 WORKDIR /www
-RUN npm install --quiet --production
+# RUN npm install --quiet --production
+RUN npm install --quiet

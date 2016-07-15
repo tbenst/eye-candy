@@ -1,5 +1,5 @@
 const yaml = require('js-yaml');
-import {orientationSelectivityGen, calcLifespan, stimulusCreator} from './programs'
+import {orientationSelectivityGen, stimulusCreator} from './programs'
 // import {store} from './store'
 
 const STIMULUS = {
@@ -10,7 +10,7 @@ const STIMULUS = {
     GRATING: 'GRATING'
 }
 
-export function* buildGenerator(formYAML, session) {
+export function* buildGenerator(formYAML, windowHeight, windowWidth) {
 	const userProgram = yaml.safeLoad(formYAML)
 
 	for (var i = 0; i < userProgram.length; i++) {
@@ -30,12 +30,12 @@ export function* buildGenerator(formYAML, session) {
 					toYield[innerStimType] = fillInItems(stimulus, n.value)
 					// get name/key of stimulus
 					// console.log('buildGenerator', stimulus, n.value, fillInItems(stimulus, n.value))
-					yield stimulusCreator(toYield, session)
+					yield stimulusCreator(toYield, windowHeight, windowWidth)
 				}
 				n = nestedGen.next()
 			}
 		} else {
-			yield stimulusCreator(stimJSON, session)
+			yield stimulusCreator(stimJSON, windowHeight, windowWidth)
 		}
 	}
 }
