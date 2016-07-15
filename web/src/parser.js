@@ -15,9 +15,7 @@ export function* buildGenerator(formYAML, windowHeight, windowWidth) {
 
 	for (var i = 0; i < userProgram.length; i++) {
 		const stimJSON = userProgram[i]
-		const stimType = Object.keys(stimJSON)[0]
-		// const stimulus = stimJSON[stimType]
-		if (stimType === 'with_nested') {
+		if ('with_nested' in stimJSON) {
 			let nestedGen = buildNestedGen(stimJSON.with_nested)
 			let n = nestedGen.next()
 			while (n.done === false) {
