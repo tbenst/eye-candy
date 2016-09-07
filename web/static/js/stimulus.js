@@ -504,7 +504,7 @@ function render() {
     context.save()
 
     // block right edge from screen
-    context.fillStyle = state.stimulus.backgroundColor
+    context.fillStyle = 'black'
     context.fillRect(state.windowHeight, 0,
         state.windowWidth - state.windowHeight, state.windowHeight)
 
@@ -522,9 +522,11 @@ function render() {
             context.fillStyle = 'white'
             break
     }
-
-    context.fillRect(state.windowHeight + 120, 0,
-        state.windowWidth - state.windowHeight - 100, state.windowHeight / 6)
+    const extraPixels = state.windowWidth - state.windowHeight
+    const flickerWidth = extraPixels/2
+    const flickerHeight = extraPixels/2
+    context.fillRect(state.windowHeight + extraPixels - flickerWidth, 0,
+        flickerWidth, flickerHeight)
     context.restore()
 }
 
