@@ -501,7 +501,7 @@ function render() {
     context.save()
 
     // block right edge from screen
-    context.fillStyle = state.stimulus.backgroundColor
+    context.fillStyle = "black"
     context.fillRect(state.windowHeight, 0,
         state.windowWidth - state.windowHeight, state.windowHeight)
 
