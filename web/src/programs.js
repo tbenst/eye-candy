@@ -23,10 +23,10 @@ function getDiagonalLength(height, width) {
     return sqrt(pow(height, 2) + pow(width, 2));
 }
 
-export function calcLifespan(speed, width, windowHeight, windowWidth) {
+export function calcLifespan(speed, width, windowHeight, windowWidth, wavelength=0, numberOfBars=0) {
     // console.log('calcLifespan', session)
     return (getDiagonalLength(windowHeight, windowWidth)
-                        + width)/speed*120
+                        + width + (numberOfBars-1) * wavelength)/speed*120
 }
 
 
@@ -107,15 +107,16 @@ function barSC(lifespan, backgroundColor, barColor, speed, width, angle) {
 }
 
 function gratingSC(lifespan, backgroundColor, barColor, speed,
-    width, angle, wavelength, time) {
+    width, angle, wavelength, numberOfBars) {
     const ret = {stimulusType: STIMULUS.GRATING,
-            lifespan: time * 120,
+            lifespan: lifespan,
             backgroundColor: backgroundColor,
             width: width,
             barColor: barColor,
             speed: speed,
             angle: angle,
             wavelength: wavelength,
+            numberOfBars: numberOfBars,
             age: 0,
             count: 0
         }
@@ -159,10 +160,10 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth) {
             return {stimulusType: STIMULUS.TARGET, lifespan: 120 * stimulus.time,
                 backgroundColor: 'black'}
         case STIMULUS.GRATING:
-            return gratingSC(calcLifespan(speed, width, windowHeight, windowWidth),
+            return gratingSC(calcLifespan(speed, width, windowHeight, windowWidth, stimulus.wavelength, stimulus.numberOfBars),
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle, stimulus.wavelength,
-                stimulus.time)
+                stimulus.numberOfBars)
     }
 }
 

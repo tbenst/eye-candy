@@ -187,7 +187,7 @@ function gratingDispatcherHelper() {
     // aggregate position (distance traveled) spawns new bars
     // once equal to wavelength
     // 500 / 120 * 290 >= 300 * 0
-    if (distanceTraveled  >= nextStartDistance) {
+    if (distanceTraveled  >= nextStartDistance && count<stimulus.numberOfBars) {
         console.log('XXX will dispatch new bar ', refOrigin+nextStartDistance)
         const startR = refOrigin + nextStartDistance
         barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
