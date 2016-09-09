@@ -7,7 +7,8 @@ const STIMULUS = {
     SOLID: 'SOLID',
     WAIT: 'WAIT',
     TARGET: 'TARGET',
-    GRATING: 'GRATING'
+    GRATING: 'GRATING',
+    CHECKERBOARD: "CHECKERBOARD"
 }
 
 export function* buildGenerator(formYAML, windowHeight, windowWidth) {

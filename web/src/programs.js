@@ -11,12 +11,14 @@ const STIMULUS = {
     SOLID: 'SOLID',
     WAIT: 'WAIT',
     TARGET: 'TARGET',
-    GRATING: 'GRATING'
+    GRATING: 'GRATING',
+    CHECKERBOARD: "CHECKERBOARD"
 }
 
 const GRAPHIC = {
     BAR: 'BAR',
-    TARGET: 'TARGET'
+    TARGET: 'TARGET',
+    CHECKER: "CHECKER"
 }
 
 function getDiagonalLength(height, width) {
@@ -140,6 +142,17 @@ function waitSC(time) {
         }
 }
 
+function checkerboardSC(time,size,period,squareColor,backgroundColoher) {
+    return {stimulusType: STIMULUS.CHECKERBOARD,
+            lifespan: 120 * time,
+            squareColor: squareColor,
+            backgroundColor: backgroundColor,
+            size: size,
+            period: period,
+            age: 0
+    }
+}
+
 export function stimulusCreator(stimulusJSON, windowHeight, windowWidth) {
     // console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
@@ -164,6 +177,9 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth) {
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle, stimulus.wavelength,
                 stimulus.numberOfBars)
+        case STIMULUS.CHECKERBOARD:
+            return checkerboardSC(stimulus.time,stimulus.size,stimulus.period,
+                stimulus.squareColor,stimulus.backgroundColor)
     }
 }
 

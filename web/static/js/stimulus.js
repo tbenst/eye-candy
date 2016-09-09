@@ -48,11 +48,13 @@ const STIMULUS = {
     SOLID: 'SOLID',
     WAIT: 'WAIT',
     TARGET: 'TARGET',
-    GRATING: 'GRATING'
+    GRATING: 'GRATING',
+    CHECKERBOARD: "CHECKERBOARD"
 }
 
 const GRAPHIC = {
     BAR: 'BAR',
+    CHECKER: "CHECKER",
     TARGET: 'TARGET'
 }
 
@@ -61,6 +63,9 @@ EXAMPLE STIMULUS
 ************************************************/
 
 const exampleBar = {stimulusType: STIMULUS.BAR, lifespan: 300,
+        backgroundColor: 'black', width: 50, barColor: 'white',
+        speed: 15, angle: PI, age: 0}
+const exampleCheckerboard = {stimulusType: STIMULUS.CHECKERBOARD, lifespan: 300,
         backgroundColor: 'black', width: 50, barColor: 'white',
         speed: 15, angle: PI, age: 0}
 const exampleSolid = {stimulusType: STIMULUS.SOLID,
@@ -129,7 +134,7 @@ function graphicsDispatcher() {
     console.log('in graphicsDispatcher', stimulus)
     switch (stimulus.stimulusType) {
         case STIMULUS.BAR:
-            if (state.stimulus.age === 0) {
+            if (stimulus.age === 0) {
                 console.log('len is 0')
                 barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
                     stimulus.speed, stimulus.angle)
@@ -154,6 +159,39 @@ function graphicsDispatcher() {
 
             gratingDispatcherHelper()
             break
+        case STIMULUS.CHECKERBOARD:
+            if (stimulus.age === 0) {
+                checkerboardDispatcher(stimulus.time,stimulus.size,stimulus.period,stimulus.squareColor,stimulus.backgroundColor)
+            } else {
+                 if (stimulus.age > period * count / 2 * 120) {
+                    store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
+                        count: stimulus.count+1,
+                        backgroundColor: stimulus.color,
+                        color: stimulus.backgroundColor
+                    })))
+                 }
+            }
+    }
+}
+
+function checkerboardDispatcher(time,size,period,squareColor,backgroundColor) {
+    const height = store.getState()['windowHeight']
+    const numberOfSquares = Math.ceil(height/size)
+    // we will only create every other square and alternate colors with the background
+    for (var i = 0; i < numberOfSquares; i=i+2) {
+        for (var j = 0; j < numberOfSquares; j=j+2) {
+            store.dispatch(addGraphicAC({
+                graphicType: GRAPHIC.CHECKER,
+                startX: i*size,
+                startY: j*size,
+                size: size,
+                period: period, 
+                color: squareColor,
+                alternateColor: backgroundColor,
+                count: 1,
+                lifespan: time*120
+            }))
+        }
     }
 }
 
@@ -380,11 +418,28 @@ function tickGraphic(graphic, timeDelta) {
     switch (graphic.graphicType) {
         case GRAPHIC.BAR:
             return tickBar(graphic, timeDelta)
+        case GRAPHIC.CHECKER:
+            return tickChecker(graphic,timeDelta)
         default:
             return graphic
     }
 }
 
+function tickChecker(checker, timeDelta) {
+    if (checker.age+timeDelta >= checker.period/2*120) {
+        return Object.assign({}, checker, {
+            age: checker.age + timeDelta - checker.period/2*120,
+            color: checker.alternateColor,
+            alternateColor: checker.color
+
+        })
+    } else {
+        return Object.assign({}, checker, {
+            age: checker.age + timeDelta,
+        })
+
+    }
+}
 
 function tickBar(bar, timeDelta) {
     let newPosition = undefined
@@ -493,6 +548,12 @@ function render() {
 
                     context.rect(0,0,HEIGHT,HEIGHT)
                     context.stroke()
+                    break
+                case GRAPHIC.CHECKER:
+                    context.fillStyle = graphic.color
+                    context.fillRect(graphic.startX, graphic.startY,
+                                     graphic.size, graphic.size)
+                    break
             }
             context.restore()
         })
