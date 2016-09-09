@@ -27,8 +27,15 @@ function getDiagonalLength(height, width) {
 
 export function calcLifespan(speed, width, windowHeight, windowWidth, wavelength=0, numberOfBars=0) {
     // console.log('calcLifespan', session)
-    return (getDiagonalLength(windowHeight, windowWidth)
+    let lifespan
+    if (numberOfBars===undefined) {
+        lifespan = (getDiagonalLength(windowHeight, windowWidth)
+                        + width)/speed*120
+    } else {
+        lifespan = (getDiagonalLength(windowHeight, windowWidth)
                         + width + (numberOfBars-1) * wavelength)/speed*120
+    }
+    return lifespan
 }
 
 

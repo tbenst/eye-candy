@@ -222,29 +222,32 @@ function gratingDispatcherHelper() {
     let count = stimulus.count
     let nextStartDistance = stimulus.wavelength * count
 
-    // aggregate position (distance traveled) spawns new bars
-    // once equal to wavelength
-    // 500 / 120 * 290 >= 300 * 0
-    if (distanceTraveled  >= nextStartDistance && count<stimulus.numberOfBars) {
-        console.log('XXX will dispatch new bar ', refOrigin+nextStartDistance)
-        const startR = refOrigin + nextStartDistance
-        barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
-            stimulus.speed, stimulus.angle, startR)
-        // we use count to keep track of how many bars have been
-        // cumulatively dispatched
-        count = count + 1
-        store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
-            count: count
-        })))
-    }
+    // user can give numberOfBars or time. 
+    if (stimulus.numberOfBars===undefined || count<stimulus.numberOfBars) {
+        // aggregate position (distance traveled) spawns new bars
+        // once equal to wavelength
+        // 500 / 120 * 290 >= 300 * 0
+        if (distanceTraveled  >= nextStartDistance) {
+            console.log('XXX will dispatch new bar ', refOrigin+nextStartDistance)
+            const startR = refOrigin + nextStartDistance
+            barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
+                stimulus.speed, stimulus.angle, startR)
+            // we use count to keep track of how many bars have been
+            // cumulatively dispatched
+            count = count + 1
+            store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
+                count: count
+            })))
+        }
 
-    // need to have bars at least speed / 120 * 3 pixels past originR (3 frames)
-    const bufferDistance = stimulus.speed / 120 * 3
-    nextStartDistance = stimulus.wavelength * count
+        // need to have bars at least speed / 120 * 3 pixels past originR (3 frames)
+        const bufferDistance = stimulus.speed / 120 * 3
+        nextStartDistance = stimulus.wavelength * count
 
-    // This likely creates stack problems with large numbers of bars (eg <10 width and <10 wavelength)
-    if (distanceTraveled  >= nextStartDistance) {
-        gratingDispatcherHelper()
+        // This likely creates stack problems with large numbers of bars (eg <10 width and <10 wavelength)
+        if (distanceTraveled  >= nextStartDistance) {
+            gratingDispatcherHelper()
+        }
     }
 }
 
@@ -562,7 +565,11 @@ function render() {
     context.save()
 
     // block right edge from screen
+<<<<<<< HEAD
     context.fillStyle = "black"
+=======
+    context.fillStyle = 'black'
+>>>>>>> origin/master
     context.fillRect(state.windowHeight, 0,
         state.windowWidth - state.windowHeight, state.windowHeight)
 
@@ -580,9 +587,11 @@ function render() {
             context.fillStyle = 'white'
             break
     }
-
-    context.fillRect(state.windowHeight + 120, 0,
-        state.windowWidth - state.windowHeight - 100, state.windowHeight / 6)
+    const extraPixels = state.windowWidth - state.windowHeight
+    const flickerWidth = extraPixels/2
+    const flickerHeight = extraPixels/2
+    context.fillRect(state.windowHeight + extraPixels - flickerWidth, 0,
+        flickerWidth, flickerHeight)
     context.restore()
 }
 
