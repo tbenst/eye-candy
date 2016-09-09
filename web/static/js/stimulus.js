@@ -161,20 +161,26 @@ function graphicsDispatcher() {
             break
         case STIMULUS.CHECKERBOARD:
             if (stimulus.age === 0) {
-                checkerboardDispatcher(stimulus.time,stimulus.size,stimulus.period,stimulus.squareColor,stimulus.backgroundColor)
+                checkerboardDispatcher(stimulus.time,stimulus.size,stimulus.period,stimulus.color,stimulus.alternateColor)
             } else {
-                 if (stimulus.age > period * count / 2 * 120) {
-                    store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
-                        count: stimulus.count+1,
-                        backgroundColor: stimulus.color,
-                        color: stimulus.backgroundColor
-                    })))
+                 if (stimulus.age > stimulus.period * stimulus.count / 2 * 120) {
+                    if (stimulus.count % 2 == 0) {
+                        store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
+                            count: stimulus.count+1,
+                            backgroundColor: stimulus.alternateColor,
+                        })))
+                    } else {
+                        store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
+                            count: stimulus.count+1,
+                            backgroundColor: stimulus.color,
+                        })))
+                    }
                  }
             }
     }
 }
 
-function checkerboardDispatcher(time,size,period,squareColor,backgroundColor) {
+function checkerboardDispatcher(time,size,period,color,alternateColor) {
     const height = store.getState()['windowHeight']
     const numberOfSquares = Math.ceil(height/size)
     // we will only create every other square and alternate colors with the background
@@ -186,10 +192,28 @@ function checkerboardDispatcher(time,size,period,squareColor,backgroundColor) {
                 startY: j*size,
                 size: size,
                 period: period, 
-                color: squareColor,
-                alternateColor: backgroundColor,
+                color: color,
+                alternateColor: alternateColor,
                 count: 1,
-                lifespan: time*120
+                lifespan: time*120,
+                age: 0
+            }))
+        }
+    }
+
+    for (var i = 1; i < numberOfSquares; i=i+2) {
+        for (var j = 1; j < numberOfSquares; j=j+2) {
+            store.dispatch(addGraphicAC({
+                graphicType: GRAPHIC.CHECKER,
+                startX: i*size,
+                startY: j*size,
+                size: size,
+                period: period, 
+                color: color,
+                alternateColor: alternateColor,
+                count: 1,
+                lifespan: time*120,
+                age: 0
             }))
         }
     }
@@ -565,11 +589,7 @@ function render() {
     context.save()
 
     // block right edge from screen
-<<<<<<< HEAD
     context.fillStyle = "black"
-=======
-    context.fillStyle = 'black'
->>>>>>> origin/master
     context.fillRect(state.windowHeight, 0,
         state.windowWidth - state.windowHeight, state.windowHeight)
 

@@ -149,14 +149,16 @@ function waitSC(time) {
         }
 }
 
-function checkerboardSC(time,size,period,squareColor,backgroundColoher) {
+function checkerboardSC(time,size,period,color,alternateColor) {
     return {stimulusType: STIMULUS.CHECKERBOARD,
             lifespan: 120 * time,
-            squareColor: squareColor,
-            backgroundColor: backgroundColor,
+            color: color,
+            alternateColor: alternateColor,
+            backgroundColor: alternateColor,
             size: size,
             period: period,
-            age: 0
+            age: 0,
+            count: 0
     }
 }
 
@@ -186,7 +188,7 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth) {
                 stimulus.numberOfBars)
         case STIMULUS.CHECKERBOARD:
             return checkerboardSC(stimulus.time,stimulus.size,stimulus.period,
-                stimulus.squareColor,stimulus.backgroundColor)
+                stimulus.color,stimulus.alternateColor)
     }
 }
 
