@@ -25,18 +25,24 @@ function getDiagonalLength(height, width) {
     return sqrt(pow(height, 2) + pow(width, 2));
 }
 
-export function calcLifespan(speed, width, windowHeight, windowWidth, wavelength=0, numberOfBars=0) {
+export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wavelength, numberOfBars, time) {
     // console.log('calcLifespan', session)
     let lifespan
     if (numberOfBars===undefined) {
-        lifespan = (getDiagonalLength(windowHeight, windowWidth)
-                        + width)/speed*120
+        lifespan = time*120
     } else {
         lifespan = (getDiagonalLength(windowHeight, windowWidth)
                         + width + (numberOfBars-1) * wavelength)/speed*120
     }
     return lifespan
 }
+
+export function calcBarLifespan(speed, width, windowHeight, windowWidth) {
+    const lifespan = (getDiagonalLength(windowHeight, windowWidth)
+                    + width)/speed*120
+    return lifespan
+}
+
 
 
 // function* targetGen() {
@@ -170,7 +176,7 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth) {
     const width = stimulus.width
     switch (stimType.toUpperCase()) {
         case STIMULUS.BAR:
-            return barSC(calcLifespan(speed, width, windowHeight, windowWidth),
+            return barSC(calcBarLifespan(speed, width, windowHeight, windowWidth),
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle)
         case STIMULUS.SOLID:
@@ -182,7 +188,7 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth) {
             return {stimulusType: STIMULUS.TARGET, lifespan: 120 * stimulus.time,
                 backgroundColor: 'black'}
         case STIMULUS.GRATING:
-            return gratingSC(calcLifespan(speed, width, windowHeight, windowWidth, stimulus.wavelength, stimulus.numberOfBars),
+            return gratingSC(calcGratingLifespan(speed, width, windowHeight, windowWidth, stimulus.wavelength, stimulus.numberOfBars, stimulus.time),
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle, stimulus.wavelength,
                 stimulus.numberOfBars)
