@@ -619,29 +619,29 @@ function render() {
     } else {
         // Portrait
 
-        // block bottom edge from screen
-        context.fillRect(0, state.windowWidth,
-            state.windowWidth, state.windowHeight - state.windowWidth)
+        // // block bottom edge from screen
+        // context.fillRect(0, state.windowWidth,
+        //     state.windowWidth, state.windowHeight - state.windowWidth)
 
-        // draw flicker
+        // // draw flicker
 
-        switch(state.signalLight) {
-            case SIGNAL_LIGHT.FRAME_A:
-                context.fillStyle = '#949494'
-                break
-            case SIGNAL_LIGHT.FRAME_B:
-                context.fillStyle = '#6C6C6C'
-                break
-            default:
-                // this catches NEW_STIMULUS
-                context.fillStyle = 'white'
-                break
-        }
-        const extraPixels = state.windowHeight - state.windowWidth
-        const flickerWidth = state.windowWidth
-        const flickerHeight = extraPixels/2
-        context.fillRect(0, state.windowWidth + extraPixels - flickerHeight,
-            flickerWidth, flickerHeight)
+        // switch(state.signalLight) {
+        //     case SIGNAL_LIGHT.FRAME_A:
+        //         context.fillStyle = '#949494'
+        //         break
+        //     case SIGNAL_LIGHT.FRAME_B:
+        //         context.fillStyle = '#6C6C6C'
+        //         break
+        //     default:
+        //         // this catches NEW_STIMULUS
+        //         context.fillStyle = 'white'
+        //         break
+        // }
+        // const extraPixels = state.windowHeight - state.windowWidth
+        // const flickerWidth = state.windowWidth
+        // const flickerHeight = extraPixels/2
+        // context.fillRect(0, state.windowWidth + extraPixels - flickerHeight,
+        //     flickerWidth, flickerHeight)
     }
 
     context.restore()
