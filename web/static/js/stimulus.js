@@ -181,7 +181,7 @@ function graphicsDispatcher() {
 }
 
 function checkerboardDispatcher(time,size,period,color,alternateColor) {
-    const height = store.getState()['windowHeight']
+    const height = store.getState()['stimulusLength']
     const numberOfSquares = Math.ceil(height/size)
     // we will only create every other square and alternate colors with the background
     for (var i = 0; i < numberOfSquares; i=i+2) {
@@ -483,11 +483,11 @@ function tickBar(bar, timeDelta) {
         position: newPosition,
         age: bar.age + timeDelta,
         // compensate for bar width & height, translate from polar & translate from center
-        // use height on both to make square
+        // use length on both to make square
         origin: {x: bar.size.width/2*cos(newPosition.theta) +
-                    newPosition.r*cos(newPosition.theta) + state['windowHeight']/2,
+                    newPosition.r*cos(newPosition.theta) + state['stimulusLength']/2,
                  y: bar.size.width/2*sin(newPosition.theta) +
-                    newPosition.r*sin(newPosition.theta) + state['windowHeight']/2}
+                    newPosition.r*sin(newPosition.theta) + state['stimulusLength']/2}
     })
 }
 
@@ -517,8 +517,8 @@ LOGIC
 
 // ensure bar always spans window regardless of angle
 function getDiagonalLength() {
-    return sqrt(pow(store.getState()['windowHeight'], 2) +
-        pow(store.getState()['windowHeight'], 2))
+    return sqrt(pow(store.getState()['stimulusLength'], 2) +
+        pow(store.getState()['stimulusLength'], 2))
 }
 
 function calcLifespan(speed, width, startR) {
@@ -588,30 +588,62 @@ function render() {
 
     context.save()
 
-    // block right edge from screen
     context.fillStyle = "black"
-    context.fillRect(state.windowHeight, 0,
-        state.windowWidth - state.windowHeight, state.windowHeight)
+    
+    if (state.windowWidth>state.windowHeight) {
+        // Landscape
 
-    // draw flicker
+        // block right edge from screen
+        context.fillRect(state.windowHeight, 0,
+            state.windowWidth - state.windowHeight, state.windowHeight)
 
-    switch(state.signalLight) {
-        case SIGNAL_LIGHT.FRAME_A:
-            context.fillStyle = '#949494'
-            break
-        case SIGNAL_LIGHT.FRAME_B:
-            context.fillStyle = '#6C6C6C'
-            break
-        default:
-            // this catches NEW_STIMULUS
-            context.fillStyle = 'white'
-            break
+        // draw flicker
+
+        switch(state.signalLight) {
+            case SIGNAL_LIGHT.FRAME_A:
+                context.fillStyle = '#949494'
+                break
+            case SIGNAL_LIGHT.FRAME_B:
+                context.fillStyle = '#6C6C6C'
+                break
+            default:
+                // this catches NEW_STIMULUS
+                context.fillStyle = 'white'
+                break
+        }
+        const extraPixels = state.windowWidth - state.windowHeight
+        const flickerWidth = extraPixels/2
+        const flickerHeight = extraPixels/2
+        context.fillRect(state.windowHeight + extraPixels - flickerWidth, 0,
+            flickerWidth, flickerHeight)
+    } else {
+        // Portrait
+
+        // block bottom edge from screen
+        context.fillRect(0, state.windowWidth,
+            state.windowWidth, state.windowHeight - state.windowWidth)
+
+        // draw flicker
+
+        switch(state.signalLight) {
+            case SIGNAL_LIGHT.FRAME_A:
+                context.fillStyle = '#949494'
+                break
+            case SIGNAL_LIGHT.FRAME_B:
+                context.fillStyle = '#6C6C6C'
+                break
+            default:
+                // this catches NEW_STIMULUS
+                context.fillStyle = 'white'
+                break
+        }
+        const extraPixels = state.windowHeight - state.windowWidth
+        const flickerWidth = state.windowWidth
+        const flickerHeight = extraPixels/2
+        context.fillRect(0, state.windowWidth + extraPixels - flickerHeight,
+            flickerWidth, flickerHeight)
     }
-    const extraPixels = state.windowWidth - state.windowHeight
-    const flickerWidth = extraPixels/2
-    const flickerHeight = extraPixels/2
-    context.fillRect(state.windowHeight + extraPixels - flickerWidth, 0,
-        flickerWidth, flickerHeight)
+
     context.restore()
 }
 
@@ -660,6 +692,8 @@ STORE
 const storeInitialState = {
     windowHeight: window.innerHeight,
     windowWidth: window.innerWidth,
+    // the length of the square where we will project the stimulus
+    stimulusLength: Math.min(window.innerHeight,window.innerWidth),
     status: STATUS.STOPPED,
     signalLight: SIGNAL_LIGHT.FRAME_A,
     time: 0,
