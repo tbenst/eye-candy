@@ -177,9 +177,9 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulu
     var stimulus
     switch (stimType.toUpperCase()) {
         case STIMULUS.BAR:
-            stimulus = barSC(calcLifespan(speed, width, windowHeight, windowWidth),
+            stimulus = barSC(calcBarLifespan(speed, width, windowHeight, windowWidth),
                 unprocessed_stimulus.backgroundColor, unprocessed_stimulus.barColor,
-                speed, width, stimulus.angle)
+                speed, width, unprocessed_stimulus.angle)
             break
         case STIMULUS.SOLID:
             stimulus = solidSC(unprocessed_stimulus.time,
@@ -193,7 +193,7 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulu
                 backgroundColor: 'black'}
             break
         case STIMULUS.GRATING:
-            stimulus = gratingSC(calcLifespan(speed, width, windowHeight, windowWidth, unprocessed_stimulus.wavelength,
+            stimulus = gratingSC(calcGratingLifespan(speed, width, windowHeight, windowWidth, unprocessed_stimulus.wavelength,
                 unprocessed_stimulus.numberOfBars),
                 unprocessed_stimulus.backgroundColor, unprocessed_stimulus.barColor,
                 speed, width, unprocessed_stimulus.angle, unprocessed_stimulus.wavelength,

@@ -32,6 +32,7 @@ export function* buildGenerator(formYAML, windowHeight, windowWidth) {
 					// get name/key of stimulus
 					// console.log('buildGenerator', stimulus, n.value, fillInItems(stimulus, n.value))
 					yield stimulusCreator(toYield, windowHeight, windowWidth, stimulusIndex)
+					console.log(stimulusIndex)
 					stimulusIndex++
 				}
 				n = nestedGen.next()

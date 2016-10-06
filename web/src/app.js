@@ -30,7 +30,7 @@ const store = new redisStore({host: 'redis'})
 
 var session = koaSession({
     store: store,
-    secret: '1nkj98sdfa1',
+    secret: '1nkj98sdfa1will',
     resave: true,
     saveUninitialized: true
 });
@@ -122,7 +122,7 @@ io.on('connection', function (ctx) {
 io.on("disconnect", function(ctx) {
     //https://github.com/LearnBoost/socket.io-client/issues/251
     // console.log( 'User disconnected' )
-    socket.socket.reconnect();
+    // io.reconnect();
 
 });
 
