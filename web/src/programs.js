@@ -11,30 +11,38 @@ const STIMULUS = {
     SOLID: 'SOLID',
     WAIT: 'WAIT',
     TARGET: 'TARGET',
-    GRATING: 'GRATING'
+    GRATING: 'GRATING',
+    CHECKERBOARD: "CHECKERBOARD"
 }
 
 const GRAPHIC = {
     BAR: 'BAR',
-    TARGET: 'TARGET'
+    TARGET: 'TARGET',
+    CHECKER: "CHECKER"
 }
 
 function getDiagonalLength(height, width) {
     return sqrt(pow(height, 2) + pow(width, 2));
 }
 
-export function calcLifespan(speed, width, windowHeight, windowWidth, wavelength=0, numberOfBars=0) {
+export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wavelength, numberOfBars, time) {
     // console.log('calcLifespan', session)
     let lifespan
     if (numberOfBars===undefined) {
-        lifespan = (getDiagonalLength(windowHeight, windowWidth)
-                        + width)/speed*120
+        lifespan = time*120
     } else {
         lifespan = (getDiagonalLength(windowHeight, windowWidth)
                         + width + (numberOfBars-1) * wavelength)/speed*120
     }
     return lifespan
 }
+
+export function calcBarLifespan(speed, width, windowHeight, windowWidth) {
+    const lifespan = (getDiagonalLength(windowHeight, windowWidth)
+                    + width)/speed*120
+    return lifespan
+}
+
 
 
 // function* targetGen() {
@@ -147,35 +155,53 @@ function waitSC(time) {
         }
 }
 
+function checkerboardSC(time,size,period,color,alternateColor) {
+    return {stimulusType: STIMULUS.CHECKERBOARD,
+            lifespan: 120 * time,
+            color: color,
+            alternateColor: alternateColor,
+            backgroundColor: alternateColor,
+            size: size,
+            period: period,
+            age: 0,
+            count: 0
+    }
+}
+
 export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulusIndex) {
     // console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
-    const stimulus = jsonValueToNum(stimulusJSON[stimType])
-    const speed = stimulus.speed
-    const width = stimulus.width
+    const unprocessed_stimulus = jsonValueToNum(stimulusJSON[stimType])
+    const speed = unprocessed_stimulus.speed
+    const width = unprocessed_stimulus.width
     var stimulus
     switch (stimType.toUpperCase()) {
         case STIMULUS.BAR:
             stimulus = barSC(calcLifespan(speed, width, windowHeight, windowWidth),
-                stimulus.backgroundColor, stimulus.barColor,
+                unprocessed_stimulus.backgroundColor, unprocessed_stimulus.barColor,
                 speed, width, stimulus.angle)
             break
         case STIMULUS.SOLID:
-            stimulus = solidSC(stimulus.time,
-                          stimulus.backgroundColor)
+            stimulus = solidSC(unprocessed_stimulus.time,
+                          unprocessed_stimulus.backgroundColor)
             break
         case STIMULUS.WAIT:
-            stimulus = waitSC(stimulus.time)
+            stimulus = waitSC(unprocessed_stimulus.time)
             break
         case STIMULUS.TARGET:
-            stimulus = {stimulusType: STIMULUS.TARGET, lifespan: 120 * stimulus.time,
+            stimulus = {stimulusType: STIMULUS.TARGET, lifespan: 120 * unprocessed_stimulus.time,
                 backgroundColor: 'black'}
             break
         case STIMULUS.GRATING:
-            stimulus = gratingSC(calcLifespan(speed, width, windowHeight, windowWidth, stimulus.wavelength, stimulus.numberOfBars),
-                stimulus.backgroundColor, stimulus.barColor,
-                speed, width, stimulus.angle, stimulus.wavelength,
-                stimulus.numberOfBars)
+            stimulus = gratingSC(calcLifespan(speed, width, windowHeight, windowWidth, unprocessed_stimulus.wavelength,
+                unprocessed_stimulus.numberOfBars),
+                unprocessed_stimulus.backgroundColor, unprocessed_stimulus.barColor,
+                speed, width, unprocessed_stimulus.angle, unprocessed_stimulus.wavelength,
+                unprocessed_stimulus.numberOfBars)
+            break
+        case STIMULUS.CHECKERBOARD:
+            stimulus = checkerboardSC(unprocessed_stimulus.time,unprocessed_stimulus.size,unprocessed_stimulus.period,
+                unprocessed_stimulus.color,unprocessed_stimulus.alternateColor)
             break
     }
     stimulus.stimulusIndex = stimulusIndex
