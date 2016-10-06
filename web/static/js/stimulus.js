@@ -22,6 +22,7 @@ const SET_STATUS = 'SET_STATUS'
 const SET_STIMULUS = 'SET_STIMULUS'
 const SET_STIMULUS_QUEUE = 'SET_STIMULUS_QUEUE'
 const ADD_STIMULUS = 'ADD_STIMULUS'
+const INCREMENT_STIMULUS_INDEX = 'INCREMENT_STIMULUS_INDEX'
 const SET_GRAPHICS = 'SET_GRAPHICS'
 const ADD_GRAPHIC = 'ADD_GRAPHIC'
 const REMOVE_GRAPHIC = 'REMOVE_GRAPHIC'
@@ -101,12 +102,15 @@ function removeGraphicAC(index) {
     return { type: REMOVE_GRAPHIC, index: index }
 }
 
-function addStimulus(stimulus, index) {
+function addStimulusAC(stimulus, index) {
     return { type: ADD_STIMULUS, stimulus: stimulus, index: index }
 }
 
 function graphicsTickAC(timeDelta) {
     return  { type: GRAPHICS_TICK, timeDelta: timeDelta}
+
+function incrementStimulusIndexAC() {
+    return  { type: INCREMENT_STIMULUS_INDEX}
 }
 
 function makeAccessorAC(type, ...argNames) {
@@ -337,36 +341,27 @@ function tickDispatcher(timeDelta) {
 }
 
 function newStimulusDispatcher() {
-    queueNewStimulusDispatcher()
-    const newStimulus = getNewStimulusDispatcher()
+    queueStimulusDispatcher()
+    const state = store.getState()
+    const stimulusIndex = state.stimulusIndex
+    const nextStimulus = state.stimulusQueue[stimulusIndex]
 
-    if (newStimulus.done===true) {
+    if (nextStimulus.done===true) {
         store.dispatch(setStatusAC(STATUS.FINISHED)) 
     } else {
-        store.dispatch(setStimulusAC(newStimulus.value))
+        store.dispatch(incrementStimulusIndexAC())
+        // should we check this value exists?
+        store.dispatch(addStimulusAC(nextStimulus.value))
         store.dispatch(setGraphicsAC([]))
     }
 
 }
 
-var stimulusPromiseQueue = []
-
-async function queueNewStimulusDispatcher() {
+async function queueStimulusDispatcher() {
     const stimulus = await nextStimulus()
     const stimulusIndex = stimulus.stimulusIndex
-
-    let newQueue = store.getState().stimulusQueue.slice(0)
-    newQueue.push(queueStimulus)
-    store.dispatch(setStimulusQueueAC(newQueue))
+    store.dispatch(addStimulusAC(stimulus, stimulusIndex))
 }
-
-function getNewStimulusDispatcher() {
-    let newQueue = store.getState().stimulusQueue.slice(0)
-    const newStimulus = newQueue.shift()
-    store.dispatch(setStimulusQueueAC(newQueue))
-    return newStimulus
-}
-
 
 
 /***********************************************
@@ -386,6 +381,10 @@ function eyeCandyApp(state, action) {
         case SET_STIMULUS:
             return Object.assign({}, state, {
                 stimulus: action.stimulus
+            })
+        case INCREMENT_STIMULUS_INDEX:
+            return Object.assign({}, state, {
+                stimulusIndex: action.stimulusIndex + 1
             })
         case ADD_STIMULUS:
             var newStimulusQueue = state.stimulusQueue.slice()
@@ -707,6 +706,7 @@ const storeInitialState = {
     status: STATUS.STOPPED,
     signalLight: SIGNAL_LIGHT.FRAME_A,
     time: 0,
+    stimulusIndex: 0,
     stimulusQueue: [],
     graphics: []
 }
