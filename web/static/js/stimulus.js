@@ -20,12 +20,13 @@ const TIME_TICK = 'TIME_TICK'
 const STIMULUS_TICK = 'STIMULUS_TICK'
 const SET_STATUS = 'SET_STATUS'
 const SET_STIMULUS = 'SET_STIMULUS'
+const SET_STIMULUS_QUEUE = 'SET_STIMULUS_QUEUE'
+const ADD_STIMULUS = 'ADD_STIMULUS'
 const SET_GRAPHICS = 'SET_GRAPHICS'
 const ADD_GRAPHIC = 'ADD_GRAPHIC'
 const REMOVE_GRAPHIC = 'REMOVE_GRAPHIC'
 const GRAPHICS_TICK = 'GRAPHICS_TICK'
 const SET_SIGNAL_LIGHT = 'SET_SIGNAL_LIGHT'
-const SET_STIMULUS_QUEUE = 'SET_STIMULUS_QUEUE'
 const RESET = 'RESET'
 
 // Define states for readability
@@ -93,6 +94,10 @@ function addGraphicAC(graphic) {
 
 function removeGraphicAC(index) {
     return { type: REMOVE_GRAPHIC, index: index }
+}
+
+function addStimulus(stimulus, index) {
+    return { type: ADD_STIMULUS, stimulus: stimulus, index: index }
 }
 
 function graphicsTickAC(timeDelta) {
@@ -282,8 +287,11 @@ function newStimulusDispatcher() {
 
 }
 
+var stimulusPromiseQueue = []
+
 async function queueNewStimulusDispatcher() {
-    const queueStimulus = await nextStimulus()
+    const stimulus = await nextStimulus()
+    const stimulusIndex = stimulus.stimulusIndex
 
     let newQueue = store.getState().stimulusQueue.slice(0)
     newQueue.push(queueStimulus)
@@ -317,6 +325,12 @@ function eyeCandyApp(state, action) {
             return Object.assign({}, state, {
                 stimulus: action.stimulus
             })
+        case ADD_STIMULUS:
+            var newStimulusQueue = state.stimulusQueue.slice()
+            newStimulusQueue[action.stimulusIndex] = action.stimulus
+            return Object.assign({}, state, {
+                stimulusQueue: newStimulusQueue
+            })
         case SET_GRAPHICS:
             return Object.assign({}, state, {
                 graphics: action.graphics
@@ -346,10 +360,6 @@ function eyeCandyApp(state, action) {
         case STIMULUS_TICK:
             return Object.assign({}, state, {
                 stimulus: stimulusTickReducer(state.stimulus, action.timeDelta)
-            })
-        case SET_STIMULUS_QUEUE:
-            return Object.assign({}, state, {
-                stimulusQueue: action.stimulusQueue
             })
         case RESET:
             return Object.assign({}, storeInitialState)
@@ -663,10 +673,15 @@ socket.on('target', () => {
 })
 
 async function nextStimulus() {
-   return await (await fetch('/next-stimulus', {
-        method: 'POST',
-        credentials: 'include'
-   })).json()
+    try {
+        var stimulus = await (await fetch('/next-stimulus', {
+                method: 'POST',
+                credentials: 'include'
+           })).json()
+    } catch (err) {
+        console.error(err);
+    }
+   return 
 }
 
 

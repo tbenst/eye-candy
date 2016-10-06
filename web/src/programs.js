@@ -147,31 +147,39 @@ function waitSC(time) {
         }
 }
 
-export function stimulusCreator(stimulusJSON, windowHeight, windowWidth) {
+export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulusIndex) {
     // console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
     const stimulus = jsonValueToNum(stimulusJSON[stimType])
     const speed = stimulus.speed
     const width = stimulus.width
+    var stimulus
     switch (stimType.toUpperCase()) {
         case STIMULUS.BAR:
-            return barSC(calcLifespan(speed, width, windowHeight, windowWidth),
+            stimulus = barSC(calcLifespan(speed, width, windowHeight, windowWidth),
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle)
+            break
         case STIMULUS.SOLID:
-            return solidSC(stimulus.time,
+            stimulus = solidSC(stimulus.time,
                           stimulus.backgroundColor)
+            break
         case STIMULUS.WAIT:
-            return waitSC(stimulus.time)
+            stimulus = waitSC(stimulus.time)
+            break
         case STIMULUS.TARGET:
-            return {stimulusType: STIMULUS.TARGET, lifespan: 120 * stimulus.time,
+            stimulus = {stimulusType: STIMULUS.TARGET, lifespan: 120 * stimulus.time,
                 backgroundColor: 'black'}
+            break
         case STIMULUS.GRATING:
-            return gratingSC(calcLifespan(speed, width, windowHeight, windowWidth, stimulus.wavelength, stimulus.numberOfBars),
+            stimulus = gratingSC(calcLifespan(speed, width, windowHeight, windowWidth, stimulus.wavelength, stimulus.numberOfBars),
                 stimulus.backgroundColor, stimulus.barColor,
                 speed, width, stimulus.angle, stimulus.wavelength,
                 stimulus.numberOfBars)
+            break
     }
+    stimulus.stimulusIndex = stimulusIndex
+    return stimulus
 }
 
 function jsonValueToNum(myJSON) {
