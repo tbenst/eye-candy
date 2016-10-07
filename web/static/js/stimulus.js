@@ -22,8 +22,8 @@ const SET_STATUS = 'SET_STATUS'
 const SET_STIMULUS = 'SET_STIMULUS'
 
 // for the canvas
-const SET_STIMULUS_HEIGHT = 'SET_STIMULUS_HEIGHT'
-const SET_STIMULUS_WIDTH = 'SET_STIMULUS_WIDTH'
+const SET_DISPLAY_HEIGHT = 'SET_DISPLAY_HEIGHT'
+const SET_DISPLAY_WIDTH = 'SET_DISPLAY_WIDTH'
 
 const SET_GRAPHICS = 'SET_GRAPHICS'
 const ADD_GRAPHIC = 'ADD_GRAPHIC'
@@ -126,8 +126,8 @@ function resetAC() {
 const setStatusAC = makeAccessorAC(SET_STATUS, 'status')
 const setStimulusQueueAC = makeAccessorAC(SET_STIMULUS_QUEUE, 'stimulusQueue')
 const setStimulusAC = makeAccessorAC(SET_STIMULUS, 'stimulus')
-const setStimulusHeightAC = makeAccessorAC(SET_STIMULUS_HEIGHT, 'height')
-const setStimulusWidthAC = makeAccessorAC(SET_STIMULUS_WIDTH, 'width')
+const setDisplayHeightAC = makeAccessorAC(SET_DISPLAY_HEIGHT, 'height')
+const setDisplayWidthAC = makeAccessorAC(SET_DISPLAY_WIDTH, 'width')
 const setGraphicsAC = makeAccessorAC(SET_GRAPHICS, 'graphics')
 const setSignalLightAC = makeAccessorAC(SET_SIGNAL_LIGHT, 'signalLight')
 
@@ -597,12 +597,12 @@ function render() {
 
     context.fillStyle = "black"
     
-    if (state.stimulusWidth>state.stimulusHeight) {
+    if (state.displayWidth>state.displayHeight) {
         // Landscape
 
         // block right edge from screen
-        context.fillRect(state.stimulusHeight, 0,
-            state.stimulusWidth - state.stimulusHeight, state.stimulusHeight)
+        context.fillRect(state.displayHeight, 0,
+            state.displayWidth - state.displayHeight, state.displayHeight)
 
         // draw flicker
 
@@ -618,17 +618,17 @@ function render() {
                 context.fillStyle = 'white'
                 break
         }
-        const extraPixels = state.stimulusWidth - state.stimulusHeight
+        const extraPixels = state.displayWidth - state.displayHeight
         const flickerWidth = extraPixels/2
         const flickerHeight = extraPixels/2
-        context.fillRect(state.stimulusHeight + extraPixels - flickerWidth, 0,
+        context.fillRect(state.displayHeight + extraPixels - flickerWidth, 0,
             flickerWidth, flickerHeight)
     } else {
         // Portrait
 
         // block bottom edge from screen
-        context.fillRect(0, state.stimulusWidth,
-            state.stimulusWidth, state.stimulusHeight - state.stimulusWidth)
+        context.fillRect(0, state.displayWidth,
+            state.displayWidth, state.displayHeight - state.displayWidth)
 
         // draw flicker
 
@@ -644,10 +644,10 @@ function render() {
                 context.fillStyle = 'white'
                 break
         }
-        const extraPixels = state.stimulusHeight - state.stimulusWidth
-        const flickerWidth = state.stimulusWidth
+        const extraPixels = state.displayHeight - state.displayWidth
+        const flickerWidth = state.displayWidth
         const flickerHeight = extraPixels/2
-        context.fillRect(0, state.stimulusWidth + extraPixels - flickerHeight,
+        context.fillRect(0, state.displayWidth + extraPixels - flickerHeight,
             flickerWidth, flickerHeight)
     }
 
@@ -697,8 +697,8 @@ STORE
 ************************************************/
 
 const storeInitialState = {
-    stimulusHeight: Math.min(window.innerHeight,window.innerWidth),
-    stimulusWidth: Math.min(window.innerHeight,window.innerWidth),
+    displayHeight: Math.min(window.innerHeight,window.innerWidth),
+    displayWidth: Math.min(window.innerHeight,window.innerWidth),
     status: STATUS.STOPPED,
     signalLight: SIGNAL_LIGHT.FRAME_A,
     time: 0,
@@ -723,8 +723,8 @@ CANVAS
 
 const canvas=document.getElementById('eyecandy')
 var context = canvas.getContext('2d')
-const WIDTH = store.getState()['stimulusWidth']
-const HEIGHT = store.getState()['stimulusHeight']
+const WIDTH = store.getState()['displayWidth']
+const HEIGHT = store.getState()['displayHeight']
 context.canvas.width  = WIDTH
 context.canvas.height = HEIGHT
 
@@ -763,8 +763,8 @@ var socket = io();
 fetch('/window', {
     method: 'POST',
     headers: {
-        stimulusHeight: store.getState()['stimulusHeight'],
-        stimulusWidth: store.getState()['stimulusWidth']
+        displayHeight: store.getState()['displayHeight'],
+        displayWidth: store.getState()['displayWidth']
     },
     credentials: 'include'
 })

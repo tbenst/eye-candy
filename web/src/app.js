@@ -19,6 +19,7 @@ const koaSocketSession = require('koa-socket-session')
 const redisStore = require('koa-redis')
 var uuid = require('node-uuid');
 import logger from 'koa-logger'
+const yaml = require('js-yaml');
 
 
 import {buildGenerator} from './parser'
@@ -58,8 +59,8 @@ app.context.render = co.wrap(app.context.render);
 router.post('/window', (ctx) => {
     // console.log('got window')
     var session = ctx.session;
-    session.windowHeight = ctx.request.header.windowheight
-    session.windowWidth = ctx.request.header.windowwidth
+    session.displayHeight = ctx.request.header.displayheight
+    session.displayWidth = ctx.request.header.displaywidth
     ctx.body = session;   
 });
 
@@ -83,14 +84,14 @@ let program = {}
 router.post('/start-program', ctx => {
     const sid = cookie.parse(ctx.request.header.cookie)['koa.sid'];
     program[sid] = buildGenerator(ctx.request.body.programYAML,
-        ctx.session.windowHeight, ctx.session.windowWidth)
+        ctx.session.displayHeight, ctx.session.displayWidth)
     let stimulusQueue = []
     for (var i = 0; i < 5; i++) {
         stimulusQueue.push(program[sid].next())
     }
     console.log(ctx)
     io.broadcast('run', stimulusQueue)
-    ctx.body = stimulusQueue
+    ctx.body = yaml.safeDump(ctx.request.body)
     ctx.status = 200
 })
 
@@ -99,7 +100,7 @@ router.post('/analysis/start-program', ctx => {
     const sid = uuid.v4()
     const body = ctx.request.body
     program[sid] = buildGenerator(body.programYAML,
-        body.windowHeight, body.windowWidth)
+        body.displayHeight, body.displayWidth)
     ctx.body = sid
     ctx.status = 200
 })
@@ -128,9 +129,9 @@ io.on("disconnect", function(ctx) {
 
 io.on('window', (ctx, data) => {
     // console.log('in window')
-    // console.log('got windowHeight', data.windowHeight)
-    ctx.session.windowHeight = data.windowHeight
-    ctx.session.windowWidth = data.windowWidth
+    // console.log('got displayHeight', data.displayHeight)
+    ctx.session.displayHeight = data.displayHeight
+    ctx.session.displayWidth = data.displayWidth
 })
 
 io.on('test', (ctx) => {
@@ -138,7 +139,7 @@ io.on('test', (ctx) => {
     session.count = session.count || 0;
     session.count++;
     // console.log('test', ctx.session)
-    // console.log('test get windowHeight', ctx.session.windowHeight)
+    // console.log('test get displayHeight', ctx.session.displayHeight)
 })
 
 io.on('reset', ctx => {
