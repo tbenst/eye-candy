@@ -25,13 +25,29 @@
     - wait:
         time: 2
     - bar:
-       width: items[0]
-       speed: items[1]
-       angle: items[2]
-       barColor: white
-       backgroundColor: black
+        width: items[0]
+        speed: items[1]
+        angle: items[2]
+        barColor: white
+        backgroundColor: black
+    - checkerboard:
+        time: 6
+        size: 100
+        color: white
+        alternateColor: black
+        period: 1
+    - grating:
+        width: items[0]
+        speed: items[1]
+        angle: items[2]
+        barColor: white
+        backgroundColor: black
+        wavelength: 250
+        time: 10
 
 </textarea><br>
+  Stimulus height (px)<br><input type="number" name="stimulusHeight" min="1" max="10000"><br>
+  Stimulus width (px)<br><input type="number" name="stimulusWidth" min="1" max="10000"><br>
   <input type="submit" value="Start program">
 </form>
 <button type="button" onclick="JavaScript: resetButton()">
