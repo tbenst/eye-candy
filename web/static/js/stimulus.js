@@ -191,11 +191,13 @@ function graphicsDispatcher() {
 }
 
 function checkerboardDispatcher(time,size,period,color,alternateColor) {
-    const height = store.getState()["stimulusLength"]
-    const numberOfSquares = Math.ceil(height/size)
+    const height = store.getState()["windowHeight"]
+    const width = store.getState()["windowWidth"]
+    const numberOfRows = Math.ceil(height/size)
+    const numberOfCols = Math.ceil(width/size)
     // we will only create every other square and alternate colors with the background
-    for (var i = 0; i < numberOfSquares; i=i+2) {
-        for (var j = 0; j < numberOfSquares; j=j+2) {
+    for (var i = 0; i < numberOfCols; i=i+2) {
+        for (var j = 0; j < numberOfRows; j=j+2) {
             store.dispatch(addGraphicAC({
                 graphicType: GRAPHIC.CHECKER,
                 startX: i*size,
@@ -211,8 +213,8 @@ function checkerboardDispatcher(time,size,period,color,alternateColor) {
         }
     }
 
-    for (var i = 1; i < numberOfSquares; i=i+2) {
-        for (var j = 1; j < numberOfSquares; j=j+2) {
+    for (var i = 1; i < numberOfCols; i=i+2) {
+        for (var j = 1; j < numberOfRows; j=j+2) {
             store.dispatch(addGraphicAC({
                 graphicType: GRAPHIC.CHECKER,
                 startX: i*size,
@@ -493,9 +495,9 @@ function tickBar(bar, timeDelta) {
         // compensate for bar width & height, translate from polar & translate from center
         // use length on both to make square
         origin: {x: bar.size.width/2*cos(newPosition.theta) +
-                    newPosition.r*cos(newPosition.theta) + state["stimulusLength"]/2,
+                    newPosition.r*cos(newPosition.theta) + state["windowWidth"]/2,
                  y: bar.size.width/2*sin(newPosition.theta) +
-                    newPosition.r*sin(newPosition.theta) + state["stimulusLength"]/2}
+                    newPosition.r*sin(newPosition.theta) + state["windowHeight"]/2}
     })
 }
 
@@ -525,8 +527,8 @@ LOGIC
 
 // ensure bar always spans window regardless of angle
 function getDiagonalLength() {
-    return sqrt(pow(store.getState()["stimulusLength"], 2) +
-        pow(store.getState()["stimulusLength"], 2))
+    return sqrt(pow(store.getState()["windowWidth"], 2) +
+        pow(store.getState()["windowHeight"], 2))
 }
 
 function calcBarLifespan(speed, width, startR) {
@@ -596,65 +598,19 @@ function render() {
         })
     // }
 
-    context.save()
-
-    context.fillStyle = "black"
-    
-    if (state.windowWidth>state.windowHeight) {
-        // Landscape
-
-        // block right edge from screen
-        context.fillRect(state.windowHeight, 0,
-            state.windowWidth - state.windowHeight, state.windowHeight)
-
-        // draw flicker
-
-        switch(state.signalLight) {
-            case SIGNAL_LIGHT.FRAME_A:
-                context.fillStyle = "#949494"
-                break
-            case SIGNAL_LIGHT.FRAME_B:
-                context.fillStyle = "#6C6C6C"
-                break
-            default:
-                // this catches NEW_STIMULUS
-                context.fillStyle = "white"
-                break
-        }
-        const extraPixels = state.windowWidth - state.windowHeight
-        const flickerWidth = extraPixels/2
-        const flickerHeight = extraPixels/2
-        context.fillRect(state.windowHeight + extraPixels - flickerWidth, 0,
-            flickerWidth, flickerHeight)
-    } else {
-        // Portrait
-
-        // // block bottom edge from screen
-        // context.fillRect(0, state.windowWidth,
-        //     state.windowWidth, state.windowHeight - state.windowWidth)
-
-        // // draw flicker
-
-        // switch(state.signalLight) {
-        //     case SIGNAL_LIGHT.FRAME_A:
-        //         context.fillStyle = "#949494"
-        //         break
-        //     case SIGNAL_LIGHT.FRAME_B:
-        //         context.fillStyle = "#6C6C6C"
-        //         break
-        //     default:
-        //         // this catches NEW_STIMULUS
-        //         context.fillStyle = "white"
-        //         break
-        // }
-        // const extraPixels = state.windowHeight - state.windowWidth
-        // const flickerWidth = state.windowWidth
-        // const flickerHeight = extraPixels/2
-        // context.fillRect(0, state.windowWidth + extraPixels - flickerHeight,
-        //     flickerWidth, flickerHeight)
+    // set flicker
+    switch(state.signalLight) {
+        case SIGNAL_LIGHT.FRAME_A:
+            localStorage.setItem('signalLight', "#949494")
+            break
+        case SIGNAL_LIGHT.FRAME_B:
+            localStorage.setItem('signalLight', "#6C6C6C")
+            break
+        default:
+            // this catches NEW_STIMULUS
+            localStorage.setItem('signalLight', "white")
+            break
     }
-
-    context.restore()
 }
 
 
@@ -674,6 +630,7 @@ function renderLoop() {
         case STATUS.FINISHED:
             context.clearRect(0, 0, WIDTH, HEIGHT)
             document.body.style.backgroundColor = "black"
+            localStorage.setItem('signalLight', "#949494")
             break
         case STATUS.STARTED:
 
@@ -703,7 +660,6 @@ const storeInitialState = {
     windowHeight: window.innerHeight,
     windowWidth: window.innerWidth,
     // the length of the square where we will project the stimulus
-    stimulusLength: Math.min(window.innerHeight,window.innerWidth),
     status: STATUS.STOPPED,
     signalLight: SIGNAL_LIGHT.FRAME_A,
     time: 0,
@@ -782,6 +738,7 @@ socket.on("run", (stimulusQueue) => {
 
 socket.on("reset", () => {
     store.dispatch(resetAC())
+    localStorage.setItem('signalLight', "#000000")
 
 })
 
