@@ -28,11 +28,11 @@ function getDiagonalLength(height, width) {
 export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wavelength, numberOfBars, time) {
     // console.log('calcLifespan', session)
     let lifespan
-    if (numberOfBars===undefined) {
-        lifespan = time*120
-    } else {
+    if (numberOfBars>0) {
         lifespan = (getDiagonalLength(windowHeight, windowWidth)
                         + width + (numberOfBars-1) * wavelength)/speed*120
+    } else {
+        lifespan = time*120
     }
     return lifespan
 }
@@ -194,7 +194,7 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulu
             break
         case STIMULUS.GRATING:
             stimulus = gratingSC(calcGratingLifespan(speed, width, windowHeight, windowWidth, unprocessed_stimulus.wavelength,
-                unprocessed_stimulus.numberOfBars),
+                unprocessed_stimulus.numberOfBars, unprocessed_stimulus.time),
                 unprocessed_stimulus.backgroundColor, unprocessed_stimulus.barColor,
                 speed, width, unprocessed_stimulus.angle, unprocessed_stimulus.wavelength,
                 unprocessed_stimulus.numberOfBars)
