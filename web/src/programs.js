@@ -25,14 +25,18 @@ function getDiagonalLength(height, width) {
     return sqrt(pow(height, 2) + pow(width, 2));
 }
 
-export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wavelength, numberOfBars, time) {
+function calcLifespan(time,frames) {
+    return frames ? frames : 120 * time
+}
+
+export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wavelength, numberOfBars, time, frames) {
     // console.log('calcLifespan', session)
     let lifespan
     if (numberOfBars>0) {
         lifespan = (getDiagonalLength(windowHeight, windowWidth)
                         + width + (numberOfBars-1) * wavelength)/speed*120
     } else {
-        lifespan = time*120
+        lifespan = calcLifespan(time,frames)
     }
     return lifespan
 }
@@ -139,25 +143,26 @@ function gratingSC(lifespan, backgroundColor, barColor, speed,
     return ret
 }
 
-function solidSC(time, backgroundColor='white') {
+// should only provide time or frames
+function solidSC(lifespan, backgroundColor='white') {
     return {stimulusType: STIMULUS.SOLID,
-            lifespan: 120 * time,
+            lifespan: lifespan,
             backgroundColor: backgroundColor,
             age: 0
         }
 }
 
-function waitSC(time) {
+function waitSC(lifespan) {
     return {stimulusType: STIMULUS.WAIT,
-            lifespan: 120 * time,
+            lifespan: lifespan,
             backgroundColor: 'black',
             age: 0
         }
 }
 
-function checkerboardSC(time,size,period,color,alternateColor) {
+function checkerboardSC(lifespan,size,period,color,alternateColor) {
     return {stimulusType: STIMULUS.CHECKERBOARD,
-            lifespan: 120 * time,
+            lifespan: lifespan,
             color: color,
             alternateColor: alternateColor,
             backgroundColor: alternateColor,
@@ -174,6 +179,11 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulu
     const unprocessed_stimulus = jsonValueToNum(stimulusJSON[stimType])
     const speed = unprocessed_stimulus.speed
     const width = unprocessed_stimulus.width
+    const time = stimulusJSON.time
+    const frames = stimulusJSON.frames
+    if (time>0 || frames>0) {
+        const lifespan = calcLifespan(time,frames)
+    }
     var stimulus
     switch (stimType.toUpperCase()) {
         case STIMULUS.BAR:
@@ -182,14 +192,14 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulu
                 speed, width, unprocessed_stimulus.angle)
             break
         case STIMULUS.SOLID:
-            stimulus = solidSC(unprocessed_stimulus.time,
+            stimulus = solidSC(lifespan,
                           unprocessed_stimulus.backgroundColor)
             break
         case STIMULUS.WAIT:
-            stimulus = waitSC(unprocessed_stimulus.time)
+            stimulus = waitSC(lifespan)
             break
         case STIMULUS.TARGET:
-            stimulus = {stimulusType: STIMULUS.TARGET, lifespan: 120 * unprocessed_stimulus.time,
+            stimulus = {stimulusType: STIMULUS.TARGET, lifespan: lifespan,
                 backgroundColor: 'black'}
             break
         case STIMULUS.GRATING:
@@ -200,7 +210,7 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulu
                 unprocessed_stimulus.numberOfBars)
             break
         case STIMULUS.CHECKERBOARD:
-            stimulus = checkerboardSC(unprocessed_stimulus.time,unprocessed_stimulus.size,unprocessed_stimulus.period,
+            stimulus = checkerboardSC(lifespan,unprocessed_stimulus.size,unprocessed_stimulus.period,
                 unprocessed_stimulus.color,unprocessed_stimulus.alternateColor)
             break
     }
