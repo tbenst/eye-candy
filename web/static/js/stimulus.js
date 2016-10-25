@@ -295,12 +295,14 @@ function cleanupGraphicsDispatcher() {
     const graphics = store.getState().graphics
     for (var i = 0; i < graphics.length; i++) {
         const graphic = graphics[i]
-        if (graphic.age > graphic.lifespan) {
+        if (graphic.age >= graphic.lifespan) {
             removeGraphicDispatcher(i)
         }
     }
 }
 
+// The mother of all dispatchers: the render loop affects the world
+// by dispatching a time tick
 function tickDispatcher(timeDelta) {
     const state = store.getState()
     

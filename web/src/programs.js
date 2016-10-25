@@ -26,6 +26,7 @@ function getDiagonalLength(height, width) {
 }
 
 function calcLifespan(time,frames) {
+    console.log("lifespan",time,frames)
     return frames ? frames : 120 * time
 }
 
@@ -33,8 +34,8 @@ export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wav
     // console.log('calcLifespan', session)
     let lifespan
     if (numberOfBars>0) {
-        lifespan = (getDiagonalLength(windowHeight, windowWidth)
-                        + width + (numberOfBars-1) * wavelength)/speed*120
+        lifespan = Math.ceil((getDiagonalLength(windowHeight, windowWidth)
+                        + width + (numberOfBars-1) * wavelength)/speed*120)
     } else {
         lifespan = calcLifespan(time,frames)
     }
@@ -42,8 +43,8 @@ export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wav
 }
 
 export function calcBarLifespan(speed, width, windowHeight, windowWidth) {
-    const lifespan = (getDiagonalLength(windowHeight, windowWidth)
-                    + width)/speed*120
+    const lifespan = Math.ceil((getDiagonalLength(windowHeight, windowWidth)
+                    + width)/speed*120)
     return lifespan
 }
 
@@ -103,7 +104,6 @@ export function calcBarLifespan(speed, width, windowHeight, windowWidth) {
 //                         angle: angles[k]}
 //                     // Wait between bars
 //                     yield {stimulusType: STIMULUS.WAIT, lifespan: 120 * 1}
-
 //                 }
 //             }
 //         }
@@ -179,10 +179,12 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulu
     const unprocessed_stimulus = jsonValueToNum(stimulusJSON[stimType])
     const speed = unprocessed_stimulus.speed
     const width = unprocessed_stimulus.width
-    const time = stimulusJSON.time
-    const frames = stimulusJSON.frames
+    const time = unprocessed_stimulus.time
+    const frames = unprocessed_stimulus.frames
+    console.log('stimulusCreator', time, frames)
+    var lifespan
     if (time>0 || frames>0) {
-        const lifespan = calcLifespan(time,frames)
+        lifespan = calcLifespan(time,frames)
     }
     var stimulus
     switch (stimType.toUpperCase()) {
@@ -223,7 +225,7 @@ function jsonValueToNum(myJSON) {
     const keys = Object.keys(myJSON)
     let retJSON = Object.assign({}, myJSON)
     for (var i = 0; i < keys.length; i++) {
-        if (['angle', 'speed', 'width', 'time', 'wavelength'].includes(keys[i])) {
+        if (['angle', 'speed', 'width', 'time', 'wavelength', "frames"].includes(keys[i])) {
             retJSON[keys[i]] = valueToNum(retJSON[keys[i]])
         }
     }
