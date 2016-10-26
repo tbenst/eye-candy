@@ -8,25 +8,29 @@
 const bodyParser = require("koa-bodyparser");
 const koaSession = require("koa-generic-session");
 
-import Koa from "koa";
+const Koa = require("koa");
 const router = require("koa-router")();
-import path from "path"
-import co from "co";
+const path = require("path")
+const co = require("co");
 const cookie = require("cookie")
-import render from "koa-ejs";
+const render = require("koa-ejs");
 const serve = require("koa-static");
 const convert = require("koa-convert");
 const IO = require( "koa-socket" )
 const koaSocketSession = require("koa-socket-session")
 const redisStore = require("koa-redis")
 var uuid = require("node-uuid");
-import logger from "koa-logger"
+const logger = require("koa-logger")
 
 
-import {buildGenerator} from "./parser"
+// import {buildGenerator} from "./parser"
 // import session from "./session"
 
 const app = new Koa();
+app.use(logger())
+app.use(ctx => {
+  ctx.body = 'Hello Koa';
+});
 const io = new IO()
 const store = new redisStore({host: "redis"})
 
@@ -39,22 +43,22 @@ var session = koaSession({
 
 
 app.keys = ["8r92scsdf6", "jnt356gc"];
-app
+// appand
     // .use(convert(session))
-    .use(convert(session))
-    .use(bodyParser({jsonLimit: '50mb', formLimit: "50mb"}));
+    // .use(convert(session))
+    // .use(bodyParser({jsonLimit: '50mb', formLimit: "50mb"}));
 
 io.use(koaSocketSession(app, session))
 
-render(app, {
-    root: path.join(__dirname, "../view"),
-    layout: "template",
-    viewExt: "html",
-    cache: false,
-    debug: true
-});
+// render(app, {
+//     root: path.join(__dirname, "../view"),
+//     layout: "template",
+//     viewExt: "html",
+//     cache: false,
+//     debug: true
+// });
 
-app.context.render = co.wrap(app.context.render);
+// app.context.render = co.wrap(app.context.render);
 
 
 router.post("/window", (ctx) => {
@@ -154,8 +158,7 @@ io.on("target", ctx => {
 io.attach( app )
 
 app
-    .use(logger())
-    .use(serve("static"))
+    // .use(serve("static"))
     .use(router.routes())
     .use(router.allowedMethods());
 
