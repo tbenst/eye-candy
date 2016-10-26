@@ -1,4 +1,4 @@
-FROM node:6
+FROM node:7.0.0
 RUN mkdir -p /www/src
 RUN mkdir /www/view
 RUN mkdir /www/static

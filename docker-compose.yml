@@ -1,7 +1,7 @@
 web:
   restart: always
   build: .
-  command: ./node_modules/babel-cli/bin/babel-node.js src/app.js
+  command: node --harmony src/app.js
   ports:
    - "3000:3000"
   volumes:
