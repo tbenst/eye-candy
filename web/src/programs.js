@@ -25,21 +25,26 @@ function getDiagonalLength(height, width) {
     return sqrt(pow(height, 2) + pow(width, 2));
 }
 
-export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wavelength, numberOfBars, time) {
+function calcLifespan(time,frames) {
+    console.log("lifespan",time,frames)
+    return frames ? frames : 120 * time
+}
+
+export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wavelength, numberOfBars, time, frames) {
     // console.log('calcLifespan', session)
     let lifespan
-    if (numberOfBars===undefined) {
-        lifespan = time*120
+    if (numberOfBars>0) {
+        lifespan = Math.ceil((getDiagonalLength(windowHeight, windowWidth)
+                        + width + (numberOfBars-1) * wavelength)/speed*120)
     } else {
-        lifespan = (getDiagonalLength(windowHeight, windowWidth)
-                        + width + (numberOfBars-1) * wavelength)/speed*120
+        lifespan = calcLifespan(time,frames)
     }
     return lifespan
 }
 
 export function calcBarLifespan(speed, width, windowHeight, windowWidth) {
-    const lifespan = (getDiagonalLength(windowHeight, windowWidth)
-                    + width)/speed*120
+    const lifespan = Math.ceil((getDiagonalLength(windowHeight, windowWidth)
+                    + width)/speed*120)
     return lifespan
 }
 
@@ -99,7 +104,6 @@ export function calcBarLifespan(speed, width, windowHeight, windowWidth) {
 //                         angle: angles[k]}
 //                     // Wait between bars
 //                     yield {stimulusType: STIMULUS.WAIT, lifespan: 120 * 1}
-
 //                 }
 //             }
 //         }
@@ -139,25 +143,26 @@ function gratingSC(lifespan, backgroundColor, barColor, speed,
     return ret
 }
 
-function solidSC(time, backgroundColor='white') {
+// should only provide time or frames
+function solidSC(lifespan, backgroundColor='white') {
     return {stimulusType: STIMULUS.SOLID,
-            lifespan: 120 * time,
+            lifespan: lifespan,
             backgroundColor: backgroundColor,
             age: 0
         }
 }
 
-function waitSC(time) {
+function waitSC(lifespan) {
     return {stimulusType: STIMULUS.WAIT,
-            lifespan: 120 * time,
+            lifespan: lifespan,
             backgroundColor: 'black',
             age: 0
         }
 }
 
-function checkerboardSC(time,size,period,color,alternateColor) {
+function checkerboardSC(lifespan,size,period,color,alternateColor) {
     return {stimulusType: STIMULUS.CHECKERBOARD,
-            lifespan: 120 * time,
+            lifespan: lifespan,
             color: color,
             alternateColor: alternateColor,
             backgroundColor: alternateColor,
@@ -168,34 +173,51 @@ function checkerboardSC(time,size,period,color,alternateColor) {
     }
 }
 
-export function stimulusCreator(stimulusJSON, windowHeight, windowWidth) {
+export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulusIndex) {
     // console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
-    const stimulus = jsonValueToNum(stimulusJSON[stimType])
-    const speed = stimulus.speed
-    const width = stimulus.width
+    const unprocessed_stimulus = jsonValueToNum(stimulusJSON[stimType])
+    const speed = unprocessed_stimulus.speed
+    const width = unprocessed_stimulus.width
+    const time = unprocessed_stimulus.time
+    const frames = unprocessed_stimulus.frames
+    console.log('stimulusCreator', time, frames)
+    var lifespan
+    if (time>0 || frames>0) {
+        lifespan = calcLifespan(time,frames)
+    }
+    var stimulus
     switch (stimType.toUpperCase()) {
         case STIMULUS.BAR:
-            return barSC(calcBarLifespan(speed, width, windowHeight, windowWidth),
-                stimulus.backgroundColor, stimulus.barColor,
-                speed, width, stimulus.angle)
+            stimulus = barSC(calcBarLifespan(speed, width, windowHeight, windowWidth),
+                unprocessed_stimulus.backgroundColor, unprocessed_stimulus.barColor,
+                speed, width, unprocessed_stimulus.angle)
+            break
         case STIMULUS.SOLID:
-            return solidSC(stimulus.time,
-                          stimulus.backgroundColor)
+            stimulus = solidSC(lifespan,
+                          unprocessed_stimulus.backgroundColor)
+            break
         case STIMULUS.WAIT:
-            return waitSC(stimulus.time)
+            stimulus = waitSC(lifespan)
+            break
         case STIMULUS.TARGET:
-            return {stimulusType: STIMULUS.TARGET, lifespan: 120 * stimulus.time,
+            stimulus = {stimulusType: STIMULUS.TARGET, lifespan: lifespan,
                 backgroundColor: 'black'}
+            break
         case STIMULUS.GRATING:
-            return gratingSC(calcGratingLifespan(speed, width, windowHeight, windowWidth, stimulus.wavelength, stimulus.numberOfBars, stimulus.time),
-                stimulus.backgroundColor, stimulus.barColor,
-                speed, width, stimulus.angle, stimulus.wavelength,
-                stimulus.numberOfBars)
+            stimulus = gratingSC(calcGratingLifespan(speed, width, windowHeight, windowWidth, unprocessed_stimulus.wavelength,
+                unprocessed_stimulus.numberOfBars, unprocessed_stimulus.time),
+                unprocessed_stimulus.backgroundColor, unprocessed_stimulus.barColor,
+                speed, width, unprocessed_stimulus.angle, unprocessed_stimulus.wavelength,
+                unprocessed_stimulus.numberOfBars)
+            break
         case STIMULUS.CHECKERBOARD:
-            return checkerboardSC(stimulus.time,stimulus.size,stimulus.period,
-                stimulus.color,stimulus.alternateColor)
+            stimulus = checkerboardSC(lifespan,unprocessed_stimulus.size,unprocessed_stimulus.period,
+                unprocessed_stimulus.color,unprocessed_stimulus.alternateColor)
+            break
     }
+    stimulus.stimulusIndex = stimulusIndex
+    return stimulus
 }
 
 function jsonValueToNum(myJSON) {
@@ -203,7 +225,7 @@ function jsonValueToNum(myJSON) {
     const keys = Object.keys(myJSON)
     let retJSON = Object.assign({}, myJSON)
     for (var i = 0; i < keys.length; i++) {
-        if (['angle', 'speed', 'width', 'time', 'wavelength'].includes(keys[i])) {
+        if (['angle', 'speed', 'width', 'time', 'wavelength', "frames"].includes(keys[i])) {
             retJSON[keys[i]] = valueToNum(retJSON[keys[i]])
         }
     }
