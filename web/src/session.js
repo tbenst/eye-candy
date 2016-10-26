@@ -1,4 +1,4 @@
-import redisStore from 'koa-redis'
+const redisStore = require('koa-redis').redisStore
 
 var session = koaSession({
     store: new RedisStore({...}),
@@ -7,4 +7,4 @@ var session = koaSession({
 	saveUninitialized: true
 });
 
-export default session
+exports.session = session

@@ -22,15 +22,13 @@ const redisStore = require("koa-redis")
 var uuid = require("node-uuid");
 const logger = require("koa-logger")
 
-
+const buildGenerator = require("./parser").buildGenerator
 // import {buildGenerator} from "./parser"
 // import session from "./session"
 
 const app = new Koa();
 app.use(logger())
-app.use(ctx => {
-  ctx.body = 'Hello Koa';
-});
+
 const io = new IO()
 const store = new redisStore({host: "redis"})
 
@@ -43,22 +41,22 @@ var session = koaSession({
 
 
 app.keys = ["8r92scsdf6", "jnt356gc"];
-// appand
-    // .use(convert(session))
-    // .use(convert(session))
-    // .use(bodyParser({jsonLimit: '50mb', formLimit: "50mb"}));
+app
+    .use(convert(session))
+    .use(convert(session))
+    .use(bodyParser({jsonLimit: '50mb', formLimit: "50mb"}));
 
 io.use(koaSocketSession(app, session))
 
-// render(app, {
-//     root: path.join(__dirname, "../view"),
-//     layout: "template",
-//     viewExt: "html",
-//     cache: false,
-//     debug: true
-// });
+render(app, {
+    root: path.join(__dirname, "../view"),
+    layout: "template",
+    viewExt: "html",
+    cache: false,
+    debug: true
+});
 
-// app.context.render = co.wrap(app.context.render);
+app.context.render = co.wrap(app.context.render);
 
 
 router.post("/window", (ctx) => {
@@ -75,6 +73,10 @@ router.post("/next-stimulus",  (ctx) => {
     ctx.body = program[sid].next()
     ctx.status = 200
 });
+
+router.get("/hello", ctx => {
+    ctx.body = 'Hello Koaer3';
+})
 
 router.get("/count", ctx => {
     // console.log("count", ctx.req)
@@ -117,7 +119,15 @@ router.get("/analysis/program/:sid", ctx => {
     ctx.status = 200
 })
 
+
+
+app
+    .use(serve("static"))
+    .use(router.routes())
+    .use(router.allowedMethods());
+
 // IO
+io.attach( app )
 // var clients = [];
 io.on("connection", function (ctx) {
   // console.log( "User connected!!!" )
@@ -132,12 +142,12 @@ io.on("disconnect", function(ctx) {
 
 });
 
-io.on("window", (ctx, data) => {
-    // console.log("in window")
-    // console.log("got windowHeight", data.windowHeight)
-    ctx.session.windowHeight = data.windowHeight
-    ctx.session.windowWidth = data.windowWidth
-})
+// io.on("window", (ctx, data) => {
+//     // console.log("in window")
+//     console.log("got windowHeight", data.windowHeight)
+//     ctx.session.windowHeight = data.windowHeight
+//     ctx.session.windowWidth = data.windowWidth
+// })
 
 io.on("test", (ctx) => {
     var session = ctx.session;
@@ -154,14 +164,6 @@ io.on("reset", ctx => {
 io.on("target", ctx => {
     io.broadcast("target")
 })
-
-io.attach( app )
-
-app
-    // .use(serve("static"))
-    .use(router.routes())
-    .use(router.allowedMethods());
-
 // ctx.session.on("error", function (err) {
 //     console.log("Redis error " + err);
 // });

@@ -26,11 +26,10 @@ function getDiagonalLength(height, width) {
 }
 
 function calcLifespan(time,frames) {
-    console.log("lifespan",time,frames)
     return frames ? frames : 120 * time
 }
 
-export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wavelength, numberOfBars, time, frames) {
+function calcGratingLifespan(speed, width, windowHeight, windowWidth, wavelength, numberOfBars, time, frames) {
     // console.log('calcLifespan', session)
     let lifespan
     if (numberOfBars>0) {
@@ -42,12 +41,15 @@ export function calcGratingLifespan(speed, width, windowHeight, windowWidth, wav
     return lifespan
 }
 
-export function calcBarLifespan(speed, width, windowHeight, windowWidth) {
+exports.calcGratingLifespan = calcGratingLifespan
+
+function calcBarLifespan(speed, width, windowHeight, windowWidth) {
     const lifespan = Math.ceil((getDiagonalLength(windowHeight, windowWidth)
                     + width)/speed*120)
     return lifespan
 }
 
+exports.calcBarLifespan = calcBarLifespan
 
 
 // function* targetGen() {
@@ -173,7 +175,7 @@ function checkerboardSC(lifespan,size,period,color,alternateColor) {
     }
 }
 
-export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulusIndex) {
+function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulusIndex) {
     // console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
     const unprocessed_stimulus = jsonValueToNum(stimulusJSON[stimType])
@@ -181,7 +183,6 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulu
     const width = unprocessed_stimulus.width
     const time = unprocessed_stimulus.time
     const frames = unprocessed_stimulus.frames
-    console.log('stimulusCreator', time, frames)
     var lifespan
     if (time>0 || frames>0) {
         lifespan = calcLifespan(time,frames)
@@ -219,6 +220,8 @@ export function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulu
     stimulus.stimulusIndex = stimulusIndex
     return stimulus
 }
+
+exports.stimulusCreator = stimulusCreator
 
 function jsonValueToNum(myJSON) {
     // console.log('jsonValueToNum', myJSON)
