@@ -24,6 +24,7 @@ const GRAPHIC = {
 function getDiagonalLength(height, width) {
     return sqrt(pow(height, 2) + pow(width, 2));
 }
+exports.getDiagonalLength = getDiagonalLength
 
 function calcLifespan(time,frames) {
     return frames ? frames : 120 * time
@@ -126,6 +127,7 @@ function barSC(lifespan, backgroundColor, barColor, speed, width, angle) {
     // console.log('barSC', ret)
     return ret
 }
+exports.barSC = barSC
 
 function gratingSC(lifespan, backgroundColor, barColor, speed,
     width, angle, wavelength, numberOfBars) {
@@ -144,6 +146,7 @@ function gratingSC(lifespan, backgroundColor, barColor, speed,
     // console.log('gratingSC', ret)
     return ret
 }
+exports.gratingSC = gratingSC
 
 // should only provide time or frames
 function solidSC(lifespan, backgroundColor='white') {
@@ -153,6 +156,7 @@ function solidSC(lifespan, backgroundColor='white') {
             age: 0
         }
 }
+exports.solidSC = solidSC
 
 function waitSC(lifespan) {
     return {stimulusType: STIMULUS.WAIT,
@@ -161,6 +165,7 @@ function waitSC(lifespan) {
             age: 0
         }
 }
+exports.waitSC = waitSC
 
 function checkerboardSC(lifespan,size,period,color,alternateColor) {
     return {stimulusType: STIMULUS.CHECKERBOARD,
@@ -174,6 +179,7 @@ function checkerboardSC(lifespan,size,period,color,alternateColor) {
             count: 0
     }
 }
+exports.checkerboardSC = checkerboardSC
 
 function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulusIndex) {
     // console.log('stimulusCreator', stimulusJSON)
