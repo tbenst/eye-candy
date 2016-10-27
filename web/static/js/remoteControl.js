@@ -8,6 +8,10 @@ function targetButton() {
     socket.emit('target')
 }
 
+function toggleRequired() {
+    
+}
+
 function startButton() {
 	fetch('/start-program', {
 		method: 'post',

@@ -1,5 +1,8 @@
 const yaml = require('js-yaml');
-import {orientationSelectivityGen, stimulusCreator} from './programs'
+const programs = require("./programs")
+const orientationSelectivityGen = programs.orientationSelectivityGen
+const stimulusCreator = programs.stimulusCreator
+
 // import {store} from './store'
 
 const STIMULUS = {
@@ -11,7 +14,7 @@ const STIMULUS = {
     CHECKERBOARD: "CHECKERBOARD"
 }
 
-export function* buildGenerator(formYAML, windowHeight, windowWidth) {
+function* buildGenerator(formYAML, windowHeight, windowWidth) {
 	const userProgram = yaml.safeLoad(formYAML)
 	// we use stimulusIndex to avoid race conditions in presentation order
 	var stimulusIndex = 0
@@ -43,6 +46,8 @@ export function* buildGenerator(formYAML, windowHeight, windowWidth) {
 		}
 	}
 }
+
+exports.buildGenerator = buildGenerator
 
 // replace all 'items[i]' with ith item from arr
 function fillInItems(stimulusJSON, arr) {
@@ -82,6 +87,5 @@ function buildNestedGen(arg) {
     return helper(arg, [], 0);
 }
 
-export function formToLabNotebook(formJSON) {
-	
-}
+// function formToLabNotebook(formJSON) {	
+// }

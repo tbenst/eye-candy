@@ -127,7 +127,6 @@ function resetAC() {
     return {type: RESET}
 }
 
-
 const setStatusAC = makeAccessorAC(SET_STATUS, "status")
 const setStimulusQueueAC = makeAccessorAC(SET_STIMULUS_QUEUE, "stimulusQueue")
 const setStimulusAC = makeAccessorAC(SET_STIMULUS, "stimulus")

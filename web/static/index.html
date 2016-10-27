@@ -11,27 +11,32 @@
 <h1>Eye Candy</h1>
 <a href="/stimulus.html">Open Stimulus in new window first</a>
 <a href="/flicker.html">Open Flicker in new window first</a>
+
+<button type="button" onclick="JavaScript: toggleRequired()">
+Toggle Required
+</button>
+
 <form action="/start-program" method="post" id="stimulus">
   <h2>Study</h2>
     Affiliation:
-    <input type="text" name="affiliation" value="University of Washington Medicine" required><br>
+    <input type="text" name="affiliation" value="University of Washington Medicine" class="required"><br>
     Lab:
-    <input type="text" name="lab" value="Van Gelder Lab" required><br>
+    <input type="text" name="lab" value="Van Gelder Lab" class="required"><br>
     People:
-    <input type="text" name="people" value="Tyler Benster, Darwin Babino" required><br>
+    <input type="text" name="people" value="Tyler Benster, Darwin Babino" class="required"><br>
     Purpose:
     <input type="text" name="purpose"><br>
 
   <h2>Animal</h2>
 
     Animal Number:
-    <input type="number" name="mouseNumber" min="1" value="1" required><br>
+    <input type="number" name="mouseNumber" min="1" value="1" class="required"><br>
 
     Species:
-    <input type="text" name="species" value="mouse" required><br>
+    <input type="text" name="species" value="mouse" class="required"><br>
 
     Type (mel, melrd, black6, black6rd, gnat1gnat2mel):<br>
-    <input type="text" name="mouseType" required><br>
+    <input type="text" name="mouseType" class="required"><br>
 
     Date of birth (YYYY/MM/DD):<br>
     <input type="date" name="birthdate"><br>
@@ -56,15 +61,16 @@
     <input type="number" name="orientation" min="-359" max="359">
 
     Time of dissection:
-    <input type="time" name="dissectionTime" required><br>
+    <input type="time" name="dissectionTime" class="required"><br>
 
-    Pinhole (between 0 and 1, if applicable):
-    <input type="text" name="pinhole"><br>
 
     Solution (comma separated, e.g. "AMES,DAD":
     <input type="text" name="solution" value="AMES"><br>
 
   <h2>Physical Parameters</h2>
+
+    MEA type:
+    <input type="text" name="meaType" value="60MEA200/30iR-ITO"><br>
 
     MEA temperature:
     <input type="text" name="meaTemperature"><br>
@@ -75,30 +81,25 @@
     Perfusion flow rate:
     <input type="text" name="perfusionFlowRate"><br>
 
+    Pinhole (between 0 and 1, if applicable):
+    <input type="text" name="pinhole"><br>
 
   <h2>Digital Parameters</h2>
 
     Display mode:
-    <input type="radio" name="displayMode" value="video" checked required> Video
+    <input type="radio" name="displayMode" value="video" checked class="required"> Video
     <input type="radio" name="displayMode" value="pattern"> Pattern<br>
 
-    Display width (px):
-    <input type="number" name="displayWidth" min="1" value="1140" max="10000" required><br>
-
-    Display height (px):
-    <input type="number" name="displayHeight" min="1" max="10000" value="912" required><br>
-
-    Display flicker (to right of stimulus display):
-    <input type="checkbox" name="flicker" value="true" checked> Yes<br>
-
   <h2>Experiment</h2>
-    Experiment Number: <input type="number" name="experimentNumber" min="1" required><br>
-    Filename: <input type="text" name="filename" required><br>
+    Experiment Number: <input type="number" name="experimentNumber" min="1" class="required"><br>
+    Filename: <input type="text" name="filename" class="required"><br>
 
-    Notes: <textarea name="notes" cols="60" rows="20"></textarea><br>
-
-    Program YAML:<br>
-    <textarea name="programYAML" cols="60" rows="20">- with_nested:
+    Program Type:
+    <input type="radio" name="programType" value="YAML" checked> YAML
+    <input type="radio" name="programType" value="javascript"> Javascript<br>
+    Paul
+    Program:<br>
+    <textarea name="program" cols="60" rows="20">- with_nested:
     - [50, 150]
     - [750, 1250]
     - [0, PI/4, PI/2, 3*PI/4, PI, 5*PI/4, 3*PI/2, 7*PI/4, 5*PI/4, 3*PI/4, 3*PI/2, PI/2, 7*PI/4, PI/4, 0, PI]
@@ -131,16 +132,16 @@
         wavelength: 250
         time: 10
 
-</textarea required><br>
+</textarea class="required"><br>
   <input type="submit" value="Start program">
 </form>
 <button type="button" onclick="JavaScript: resetButton()">
 Reset
 </button>
-<button type="button" onclick="JavaScript: targetButton()">
+<!-- <button type="button" onclick="JavaScript: targetButton()">
 Target
-</button>]
-
+</button>
+ -->
 <h2>Example YAML:</h2>
 <p> Top level argument is one of ['bar', 'solid', 'wait', 'with_nested']
 With nested must be followed by a list ('-' on each new line, indented) and also contain the key 'list' at the same level of indendation as with_nested (but with no '-'). Bar must have [width, speed, angle, barColor, backgroundColor]. Wait must have [time]. Solid must have [time, backgroundColor]. Grating must have [width, speed, angle, barColor, backgroundColor, wavelength] and time OR numberOfBars.

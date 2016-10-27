@@ -1,34 +1,28 @@
-
-
-// const Koa = require("koa");
-// const router = require("koa-router")();
-// const path = require("path")
-
-// require("babel-polyfill");
 const bodyParser = require("koa-bodyparser");
 const koaSession = require("koa-generic-session");
 
-import Koa from "koa";
+const Koa = require("koa");
 const router = require("koa-router")();
-import path from "path"
-import co from "co";
+const path = require("path")
+const co = require("co");
 const cookie = require("cookie")
-import render from "koa-ejs";
+const render = require("koa-ejs");
 const serve = require("koa-static");
 const convert = require("koa-convert");
 const IO = require( "koa-socket" )
 const koaSocketSession = require("koa-socket-session")
 const redisStore = require("koa-redis")
 var uuid = require("node-uuid");
-import logger from "koa-logger"
-const yaml = require('js-yaml');
+const logger = require("koa-logger")
+const yaml = require("js-yaml")
 
-
-import {buildGenerator} from "./parser"
+const buildGenerator = require("./parser").buildGenerator
+// import {buildGenerator} from "./parser"
 // import session from "./session"
 
 const app = new Koa();
 app.use(logger())
+
 const io = new IO()
 const store = new redisStore({host: "redis"})
 
@@ -42,6 +36,7 @@ var session = koaSession({
 
 app.keys = ["8r92scsdf6", "jnt356gc"];
 app
+    .use(convert(session))
     .use(convert(session))
     .use(bodyParser({jsonLimit: '50mb', formLimit: "50mb"}));
 
@@ -73,6 +68,10 @@ router.post("/next-stimulus",  (ctx) => {
     ctx.status = 200
 });
 
+router.get("/hello", ctx => {
+    ctx.body = 'Hello Koaer3';
+})
+
 router.get("/count", ctx => {
     // console.log("count", ctx.req)
     var session = ctx.session;
@@ -84,16 +83,26 @@ router.get("/count", ctx => {
 let program = {}
 
 router.post("/start-program", ctx => {
+    var session = ctx.session
     const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
-    program[sid] = buildGenerator(ctx.request.body.programYAML,
-        ctx.session.windowHeight, ctx.session.windowWidth)
+    const form = ctx.request.body
+    if (form.programType=="YAML") {
+        program[sid] = buildGenerator(form.program,
+            session.windowHeight, session.windowWidth)
+    } else if (form.programType=="javascript") {
+
+    }
+
     let stimulusQueue = []
     for (var i = 0; i < 5; i++) {
         stimulusQueue.push(program[sid].next())
     }
-    console.log(ctx)
+    // console.log(ctx)
     io.broadcast("run", stimulusQueue)
-    ctx.body = yaml.safeDump(ctx.request.body)
+    let labNotebook = ctx.request.body
+    labNotebook.windowHeight = session.windowHeight
+    labNotebook.windowWidth = session.windowWidth
+    ctx.body = "---\n" + yaml.safeDump(labNotebook)
     ctx.status = 200
 })
 
@@ -114,7 +123,15 @@ router.get("/analysis/program/:sid", ctx => {
     ctx.status = 200
 })
 
+
+
+app
+    .use(serve("static"))
+    .use(router.routes())
+    .use(router.allowedMethods());
+
 // IO
+io.attach( app )
 // var clients = [];
 io.on("connection", function (ctx) {
   // console.log( "User connected!!!" )
@@ -129,12 +146,12 @@ io.on("disconnect", function(ctx) {
 
 });
 
-io.on("window", (ctx, data) => {
-    // console.log("in window")
-    // console.log("got windowHeight", data.windowHeight)
-    ctx.session.windowHeight = data.windowHeight
-    ctx.session.windowWidth = data.windowWidth
-})
+// io.on("window", (ctx, data) => {
+//     // console.log("in window")
+//     console.log("got windowHeight", data.windowHeight)
+//     ctx.session.windowHeight = data.windowHeight
+//     ctx.session.windowWidth = data.windowWidth
+// })
 
 io.on("test", (ctx) => {
     var session = ctx.session;
@@ -151,14 +168,6 @@ io.on("reset", ctx => {
 io.on("target", ctx => {
     io.broadcast("target")
 })
-
-io.attach( app )
-
-app
-    .use(serve("static"))
-    .use(router.routes())
-    .use(router.allowedMethods());
-
 // ctx.session.on("error", function (err) {
 //     console.log("Redis error " + err);
 // });
