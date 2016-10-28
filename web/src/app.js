@@ -15,8 +15,10 @@ const redisStore = require("koa-redis")
 var uuid = require("node-uuid");
 const logger = require("koa-logger")
 const yaml = require("js-yaml")
+const {VM} = require('vm2');
 
 const buildGenerator = require("./parser").buildGenerator
+const programs = require("./programs")
 // import {buildGenerator} from "./parser"
 // import session from "./session"
 
@@ -87,17 +89,30 @@ router.post("/start-program", ctx => {
     const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
     const form = ctx.request.body
     if (form.programType=="YAML") {
-        program[sid] = buildGenerator(form.program,
-            session.windowHeight, session.windowWidth)
+        // const p = 
+        // program[sid] = () => {p.next()}
     } else if (form.programType=="javascript") {
-
+        const vm = new VM({
+            sandbox: {checkerboardSC: programs.checkerboardSC,
+                solidSC: programs.solidSC,
+                waitSC: programs.waitSC,
+                barSC: programs.barSC,
+                gratingSC: programs.gratingSC,
+                getDiagonalLength: programs.getDiagonalLength,
+                calcGratingLifespan: programs.calcGratingLifespan,
+                calcBarLifespan: programs.calcBarLifespan,
+            },
+        });
+        vm.run("const p = function* () {" + form.program + "}; let generator = p()");
+        let functionInSandbox = () => {return vm.run('generator.next()')}
+        program[sid] = functionInSandbox
     }
 
     let stimulusQueue = []
     for (var i = 0; i < 5; i++) {
-        stimulusQueue.push(program[sid].next())
+        stimulusQueue.push(program[sid]())
     }
-    // console.log(ctx)
+    console.log(stimulusQueue)
     io.broadcast("run", stimulusQueue)
     let labNotebook = ctx.request.body
     labNotebook.windowHeight = session.windowHeight
