@@ -353,6 +353,7 @@ function newStimulusDispatcher() {
     if (nextStimulus.done===true) {
         store.dispatch(setStatusAC(STATUS.FINISHED)) 
     } else {
+        localStorage.setItem("newStimulus", true)
         store.dispatch(incrementStimulusIndexAC())
         store.dispatch(setStimulusAC(nextStimulus.value))
         store.dispatch(setGraphicsAC([]))
