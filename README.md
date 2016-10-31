@@ -42,3 +42,6 @@ docker-compose stop && docker-compose rm
 
 Deploy:
 docker-compose build && docker-compose up -d
+
+
+

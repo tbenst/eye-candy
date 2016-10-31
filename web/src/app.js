@@ -94,14 +94,11 @@ router.post("/start-program", ctx => {
                 getDiagonalLength: programs.getDiagonalLength,
                 calcGratingLifespan: programs.calcGratingLifespan,
                 calcBarLifespan: programs.calcBarLifespan,
-                seed: random.seed,
-                random: random.random,
-                randi: random.randi,
-                shuffle: random.shuffle,
+                DeterministicRandom: random.DeterministicRandom,
             },
         });
         // we use stimulus index to ensure correct order and avoid race condition
-        vm.run("seed("+form.seed+");"+
+        vm.run("let r = new DeterministicRandom("+form.seed+");"+
             "const p = function* () {" +
             form.program +
             "}; let generator = p(); " +

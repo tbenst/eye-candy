@@ -41,7 +41,8 @@ const SIGNAL_LIGHT = {
     FRAME_B: "FRAME_B",
     NEW_STIM: "NEW_STIM",
     NEW_STIM_A: "NEW_STIM_A",
-    NEW_STIM_B: "NEW_STIM_B"
+    NEW_STIM_B: "NEW_STIM_B",
+    STOPPED: "STOPPED"
 }
 
 const STIMULUS = {
@@ -316,7 +317,6 @@ function tickDispatcher(timeDelta) {
         state.stimulus.age >= state.stimulus.lifespan) {
 
         newStimulusDispatcher()
-        store.dispatch(setSignalLightAC(SIGNAL_LIGHT.NEW_STIM))
     } else {
         switch(state.signalLight) {
             case SIGNAL_LIGHT.FRAME_A:
@@ -325,6 +325,9 @@ function tickDispatcher(timeDelta) {
             case SIGNAL_LIGHT.FRAME_B:
                 store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_A))
                 break
+            // case SIGNAL_LIGHT.NEW_STIM:
+            //     store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_A))
+            //     break
             case SIGNAL_LIGHT.NEW_STIM:
                 store.dispatch(setSignalLightAC(SIGNAL_LIGHT.NEW_STIM_A))
                 break
@@ -351,11 +354,12 @@ function newStimulusDispatcher() {
 
     if (nextStimulus.done===true) {
         store.dispatch(setStatusAC(STATUS.FINISHED)) 
+        store.dispatch(setSignalLightAC(SIGNAL_LIGHT.STOPPED))
     } else {
-        localStorage.setItem("newStimulus", true)
         store.dispatch(incrementStimulusIndexAC())
         store.dispatch(setStimulusAC(nextStimulus.value))
         store.dispatch(setGraphicsAC([]))
+        store.dispatch(setSignalLightAC(SIGNAL_LIGHT.NEW_STIM))
     }
 
 }
@@ -410,6 +414,21 @@ function eyeCandyApp(state, action) {
                 })
             })
         case SET_SIGNAL_LIGHT:
+            switch (action.signalLight) {
+                case SIGNAL_LIGHT.FRAME_A:
+                    localStorage.setItem('signalLight', "#949494")
+                    break
+                case SIGNAL_LIGHT.FRAME_B:
+                    localStorage.setItem('signalLight', "#6C6C6C")
+                    break
+                case SIGNAL_LIGHT.STOPPED:
+                    localStorage.setItem('signalLight', "black")
+                    break
+                default:
+                    localStorage.setItem('signalLight', "white")
+                    localStorage.setItem('newStimulus', true)
+                    break
+            }
             return Object.assign({}, state, {
                 signalLight: action.signalLight
             })
@@ -426,6 +445,7 @@ function eyeCandyApp(state, action) {
                 stimulus: stimulusTickReducer(state.stimulus, action.timeDelta)
             })
         case RESET:
+            localStorage.setItem('signalLight', "black")
             return Object.assign({}, storeInitialState)
         default:
           return state
@@ -599,20 +619,6 @@ function render() {
             context.restore()
         })
     // }
-
-    // set flicker
-    switch(state.signalLight) {
-        case SIGNAL_LIGHT.FRAME_A:
-            localStorage.setItem('signalLight', "#949494")
-            break
-        case SIGNAL_LIGHT.FRAME_B:
-            localStorage.setItem('signalLight', "#6C6C6C")
-            break
-        default:
-            // this catches NEW_STIMULUS
-            localStorage.setItem('signalLight', "white")
-            break
-    }
 }
 
 
@@ -632,7 +638,6 @@ function renderLoop() {
         case STATUS.FINISHED:
             context.clearRect(0, 0, WIDTH, HEIGHT)
             document.body.style.backgroundColor = "black"
-            localStorage.setItem('signalLight', "#949494")
             break
         case STATUS.STARTED:
 
@@ -662,7 +667,7 @@ const storeInitialState = {
     windowHeight: window.innerHeight,
     windowWidth: window.innerWidth,
     status: STATUS.STOPPED,
-    signalLight: SIGNAL_LIGHT.FRAME_A,
+    signalLight: SIGNAL_LIGHT.STOPPED,
     time: 0,
     stimulusIndex: 0,
     stimulusQueue: [],
@@ -739,7 +744,6 @@ socket.on("run", (stimulusQueue) => {
 
 socket.on("reset", () => {
     store.dispatch(resetAC())
-    localStorage.setItem('signalLight', "#000000")
 
 })
 

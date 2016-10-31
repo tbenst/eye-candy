@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<body>
+<xmp>
+let stimuli = []
+
+for (let color of ["red", "green", "blue", "yellow"]) {
+	stimuli.push(solidSC(120,color))
+}
+
+r.shuffle(stimuli)
+for (let stimulus of stimuli) {
+	yield stimulus
+	yield waitSC(120)
+}
+
+
+
+// 
+let solid = []
+
+// .1 second steps through 6 seconds
+for (let i=12; i<=6*120; i=i+12) {
+	solid.push(solidSC(i))
+}
+
+for (var i = 0; i < 5; i++) {
+	r.shuffle(solid)
+	for (let stimulus of solid) {
+		yield stimulus
+		yield waitSC(240)
+	}
+}
+
+
+</xmp>
+
+</body>
+</html>
