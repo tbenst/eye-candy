@@ -16,8 +16,6 @@ const STIMULUS = {
 
 function* buildGenerator(formYAML, windowHeight, windowWidth) {
 	const userProgram = yaml.safeLoad(formYAML)
-	// we use stimulusIndex to avoid race conditions in presentation order
-	var stimulusIndex = 0
 
 	for (var i = 0; i < userProgram.length; i++) {
 		const stimJSON = userProgram[i]
@@ -34,15 +32,12 @@ function* buildGenerator(formYAML, windowHeight, windowWidth) {
 					toYield[innerStimType] = fillInItems(stimulus, n.value)
 					// get name/key of stimulus
 					// console.log('buildGenerator', stimulus, n.value, fillInItems(stimulus, n.value))
-					yield stimulusCreator(toYield, windowHeight, windowWidth, stimulusIndex)
-					console.log(stimulusIndex)
-					stimulusIndex++
+					yield stimulusCreator(toYield, windowHeight, windowWidth)
 				}
 				n = nestedGen.next()
 			}
 		} else {
-			yield stimulusCreator(stimJSON, windowHeight, windowWidth, stimulusIndex)
-			stimulusIndex++
+			yield stimulusCreator(stimJSON, windowHeight, windowWidth)
 		}
 	}
 }

@@ -362,7 +362,7 @@ function newStimulusDispatcher() {
 
 async function queueStimulusDispatcher() {
     const stimulus = await nextStimulus()
-    const stimulusIndex = stimulus.value.stimulusIndex
+    const stimulusIndex = stimulus.stimulusIndex
     store.dispatch(addStimulusAC(stimulus, stimulusIndex))
 }
 
