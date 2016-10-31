@@ -9,7 +9,7 @@
 
 <!-- <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> -->
 <h1>Eye Candy</h1>
-<a href="/stimulus.html">Open Stimulus in new window first</a>
+<a href="/stimulus.html">Open Stimulus in new window first</a><br>
 <a href="/flicker.html">Open Flicker in new window first</a>
 
 <button type="button" onclick="JavaScript: toggleRequired()">
@@ -67,6 +67,9 @@ Toggle Required
     Solution (comma separated, e.g. "AMES,DAD":
     <input type="text" name="solution" value="AMES"><br>
 
+    Retina weight:
+    <input type="text" name="retinaWeight" value="AMES"><br>
+
   <h2>Physical Parameters</h2>
 
     MEA type:
@@ -97,7 +100,10 @@ Toggle Required
     Program Type:
     <input type="radio" name="programType" value="YAML" checked> YAML
     <input type="radio" name="programType" value="javascript"> Javascript<br>
-    Paul
+
+    Seed: <input type="number" name="experimentNumber" min="1" class="required"
+                  value="<%- Math.floor(Math.random() * 2147483647) %>"><br>
+
     Program:<br>
     <textarea name="program" cols="60" rows="20">- with_nested:
     - [50, 150]

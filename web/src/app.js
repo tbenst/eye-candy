@@ -17,6 +17,7 @@ const logger = require("koa-logger")
 const yaml = require("js-yaml")
 const {VM} = require('vm2');
 
+const random = require("./random")
 const buildGenerator = require("./parser").buildGenerator
 const programs = require("./programs")
 // import {buildGenerator} from "./parser"
@@ -39,20 +40,9 @@ var session = koaSession({
 app.keys = ["8r92scsdf6", "jnt356gc"];
 app
     .use(convert(session))
-    .use(convert(session))
     .use(bodyParser({jsonLimit: '50mb', formLimit: "50mb"}));
 
 io.use(koaSocketSession(app, session))
-
-render(app, {
-    root: path.join(__dirname, "../view"),
-    layout: "template",
-    viewExt: "html",
-    cache: false,
-    debug: true
-});
-
-app.context.render = co.wrap(app.context.render);
 
 
 router.post("/window", (ctx) => {
@@ -66,7 +56,9 @@ router.post("/window", (ctx) => {
 router.post("/next-stimulus",  (ctx) => {
     // console.log("next-stimulus", ctx.session)
     const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
-    ctx.body = program[sid].next()
+    const stimulus = program[sid].next()
+    console.log(stimulus)
+    ctx.body = stimulus
     ctx.status = 200
 });
 
@@ -85,6 +77,7 @@ router.get("/count", ctx => {
 let program = {}
 
 router.post("/start-program", ctx => {
+    io.broadcast("reset")
     var session = ctx.session
     const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
     const form = ctx.request.body
@@ -101,22 +94,39 @@ router.post("/start-program", ctx => {
                 getDiagonalLength: programs.getDiagonalLength,
                 calcGratingLifespan: programs.calcGratingLifespan,
                 calcBarLifespan: programs.calcBarLifespan,
+                seed: random.seed,
+                random: random.random,
+                randi: random.randi,
+                shuffle: random.shuffle,
             },
         });
-        vm.run("const p = function* () {" + form.program + "}; let generator = p()");
-        let functionInSandbox = () => {return vm.run('generator.next()')}
-        program[sid] = functionInSandbox
+        // we use stimulus index to ensure correct order and avoid race condition
+        vm.run("seed("+form.seed+");"+
+            "const p = function* () {" +
+            form.program +
+            "}; let generator = p(); " +
+            "let s='uninitialized'; let si = 0;");
+        let functionInSandbox = () => {return vm.run(
+            's = generator.next();'+
+                's.stimulusIndex=si; si++;'+
+                's;')}
+        program[sid] = {vm: vm, next: functionInSandbox}
     }
 
     let stimulusQueue = []
     for (var i = 0; i < 5; i++) {
-        stimulusQueue.push(program[sid]())
+        stimulusQueue.push(program[sid].next())
     }
     console.log(stimulusQueue)
     io.broadcast("run", stimulusQueue)
+
     let labNotebook = ctx.request.body
     labNotebook.windowHeight = session.windowHeight
     labNotebook.windowWidth = session.windowWidth
+    const date = new Date()
+    labNotebook.date = date
+    labNotebook.windowWidth = session.windowWidth
+
     ctx.body = "---\n" + yaml.safeDump(labNotebook)
     ctx.status = 200
 })
@@ -144,6 +154,20 @@ app
     .use(serve("static"))
     .use(router.routes())
     .use(router.allowedMethods());
+
+render(app, {
+    root: path.join(__dirname, "../view"),
+    layout: false,
+    viewExt: "html",
+    cache: false,
+    debug: true
+});
+
+app.context.render = co.wrap(app.context.render);
+
+app.use(async (ctx, next) => {
+    await ctx.render("index");
+});
 
 // IO
 io.attach( app )

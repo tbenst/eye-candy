@@ -181,7 +181,7 @@ function checkerboardSC(lifespan,size,period,color,alternateColor) {
 }
 exports.checkerboardSC = checkerboardSC
 
-function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulusIndex) {
+function stimulusCreator(stimulusJSON, windowHeight, windowWidth) {
     // console.log('stimulusCreator', stimulusJSON)
     const stimType = Object.keys(stimulusJSON)[0]
     const unprocessed_stimulus = jsonValueToNum(stimulusJSON[stimType])
@@ -223,7 +223,6 @@ function stimulusCreator(stimulusJSON, windowHeight, windowWidth, stimulusIndex)
                 unprocessed_stimulus.color,unprocessed_stimulus.alternateColor)
             break
     }
-    stimulus.stimulusIndex = stimulusIndex
     return stimulus
 }
 
