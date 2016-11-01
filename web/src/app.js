@@ -74,7 +74,6 @@ router.get("/count", ctx => {
     ctx.body = session;
 })
 
-let program = {}
 
 router.post("/start-program", ctx => {
     io.broadcast("reset")
@@ -82,32 +81,11 @@ router.post("/start-program", ctx => {
     const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
     const form = ctx.request.body
     if (form.programType=="YAML") {
-        // const p = 
-        // program[sid] = () => {p.next()}
+        createYAMLProgram(sid, form.program, form.seed, session.windowHeight,
+            session.windowHeight)
     } else if (form.programType=="javascript") {
-        const vm = new VM({
-            sandbox: {checkerboardSC: programs.checkerboardSC,
-                solidSC: programs.solidSC,
-                waitSC: programs.waitSC,
-                barSC: programs.barSC,
-                gratingSC: programs.gratingSC,
-                getDiagonalLength: programs.getDiagonalLength,
-                calcGratingLifespan: programs.calcGratingLifespan,
-                calcBarLifespan: programs.calcBarLifespan,
-                DeterministicRandom: random.DeterministicRandom,
-            },
-        });
-        // we use stimulus index to ensure correct order and avoid race condition
-        vm.run("let r = new DeterministicRandom("+form.seed+");"+
-            "const p = function* () {" +
-            form.program +
-            "}; let generator = p(); " +
-            "let s='uninitialized'; let si = 0;");
-        let functionInSandbox = () => {return vm.run(
-            's = generator.next();'+
-                's.stimulusIndex=si; si++;'+
-                's;')}
-        program[sid] = {vm: vm, next: functionInSandbox}
+        createJSProgram(sid, form.program, form.seed, session.windowHeight,
+            session.windowHeight)
     }
 
     let stimulusQueue = []
@@ -123,17 +101,76 @@ router.post("/start-program", ctx => {
     const date = new Date()
     labNotebook.date = date
     labNotebook.windowWidth = session.windowWidth
+    labNotebook.version = 0.4
 
     ctx.body = "---\n" + yaml.safeDump(labNotebook)
     ctx.status = 200
 })
 
+// store all vms here
+let program = {}
+
+function createJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
+    const vm = new VM({
+        sandbox: {checkerboardSC: programs.checkerboardSC,
+            solidSC: programs.solidSC,
+            waitSC: programs.waitSC,
+            barSC: programs.barSC,
+            gratingSC: programs.gratingSC,
+            getDiagonalLength: programs.getDiagonalLength,
+            calcGratingLifespan: programs.calcGratingLifespan,
+            calcBarLifespan: programs.calcBarLifespan,
+            DeterministicRandom: random.DeterministicRandom,
+            windowHeight: windowHeight,
+            windowWidth: windowWidth,
+            seed: seed
+        },
+    });
+    // we use stimulus index to ensure correct order and avoid race condition
+    vm.run("let r = new DeterministicRandom(seed);"+
+        "const p = function* () {" +
+        programJS +
+        "}; let generator = p(); " +
+        "let s='uninitialized'; let si = 0;");
+    let functionInSandbox = () => {return vm.run(
+        's = generator.next();'+
+        's.stimulusIndex=si; si++;'+
+        's;')}
+    program[sid] = {vm: vm, next: functionInSandbox}
+}
+
+function createYAMLProgram(sid,programYAML,seed, windowHeight, windowWidth) {
+        const vm = new VM({
+            sandbox: {buildGenerator: buildGenerator,
+                programYAML: programYAML,
+                windowHeight: windowHeight,
+                windowWidth: windowWidth,
+                seed: seed
+            },
+        });
+        // we use stimulus index to ensure correct order and avoid race condition
+        vm.run("let generator = buildGenerator("+
+            "programYAML,windowHeight,windowWidth);"+
+            "let s='uninitialized'; let si = 0;");
+        let functionInSandbox = () => {return vm.run(
+            's = generator.next();'+
+            's.stimulusIndex=si; si++;'+
+            's;')}
+        program[sid] = {vm: vm, next: functionInSandbox}
+}
+
 // Return the program id
 router.post("/analysis/start-program", ctx => {
     const sid = uuid.v4()
     const body = ctx.request.body
-    program[sid] = buildGenerator(body.programYAML,
-        body.windowHeight, body.windowWidth)
+    if (programType==="YAML") {
+        createYAMLProgram(sid, body.program, body.seed, body.windowHeight,
+            body.windowHeight)
+    } else if (programType==="javascript") {
+        createJSProgram(sid, body.program, body.seed, body.windowHeight,
+            body.windowHeight)
+    }
+
     ctx.body = sid
     ctx.status = 200
 })
@@ -142,6 +179,9 @@ router.post("/analysis/start-program", ctx => {
 router.get("/analysis/program/:sid", ctx => {
     const sid = ctx.params.sid
     ctx.body = program[sid].next()
+    if (ctx.body.done===true) {
+        delete program[sid]
+    }
     ctx.status = 200
 })
 
