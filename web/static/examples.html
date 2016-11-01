@@ -2,6 +2,8 @@
 <html>
 <body>
 <xmp>
+---
+// example of shuffling different colors
 let stimuli = []
 
 for (let color of ["red", "green", "blue", "yellow"]) {
@@ -15,8 +17,8 @@ for (let stimulus of stimuli) {
 }
 
 
-
-// 
+---
+// "light wedge" of different durations
 let solid = []
 
 // .1 second steps through 6 seconds
@@ -24,6 +26,7 @@ for (let i=12; i<=6*120; i=i+12) {
 	solid.push(solidSC(i))
 }
 
+// 5 repetitions
 for (var i = 0; i < 5; i++) {
 	r.shuffle(solid)
 	for (let stimulus of solid) {
@@ -32,6 +35,29 @@ for (var i = 0; i < 5; i++) {
 	}
 }
 
+---
+// acuity to bars of different widths and speeds NOTFINISHED
+let widths = new Set()
+let speeds = [500,250,166,125,100,83,71,62.5]
+let lightDuration = new Set()
+
+let widthStep = 2
+let maxwidth = widthStep * 8
+// this gives thirty widths from 2-512
+// with6equivalency bands of8speeds
+var width
+for (var w = 2; w <= maxwidth; w=i+widthStep) {
+	for (var i = 0; i<6;i++) {
+		width = w*Math.pow(2,i)
+		widths.add(width)
+		for (let s of speeds) {
+			// need to round to frames
+			lightDuration.add(width/s)
+		}
+	}
+}
+
+if
 
 </xmp>
 
