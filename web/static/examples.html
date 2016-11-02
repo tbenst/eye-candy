@@ -27,7 +27,7 @@ for (let i=12; i<=6*120; i=i+12) {
 }
 
 // 5 repetitions
-for (var i = 0; i < 5; i++) {
+for (let i = 0; i < 5; i++) {
 	r.shuffle(solid)
 	for (let stimulus of solid) {
 		yield stimulus
@@ -36,28 +36,73 @@ for (var i = 0; i < 5; i++) {
 }
 
 ---
-// acuity to bars of different widths and speeds NOTFINISHED
+// acuity to bars of different widths and speeds
 let widths = new Set()
-let speeds = [500,250,166,125,100,83,71,62.5]
+let speeds = []
 let lightDuration = new Set()
+let stimuli = []
 
+let steps = 8
+let speedStep = 60
 let widthStep = 2
-let maxwidth = widthStep * 8
+
+
+let maxWidth = widthStep * steps
+let maxSpeed = speedStep * steps
+
+for (let s = speedStep; s < maxSpeed; s=s+speedStep) {
+	speeds.push(s)
+}
+
 // this gives thirty widths from 2-512
-// with6equivalency bands of8speeds
-var width
-for (var w = 2; w <= maxwidth; w=i+widthStep) {
-	for (var i = 0; i<6;i++) {
+// with 6 equivalency bands of 8 speeds
+let width
+let duration
+let lifespan
+for (let w = widthStep; w <= maxWidth; w=w+widthStep) {
+	for (let i = 0; i<6;i++) {
 		width = w*Math.pow(2,i)
 		widths.add(width)
-		for (let s of speeds) {
-			// need to round to frames
-			lightDuration.add(width/s)
-		}
 	}
 }
 
-if
+for (let w of widths) {
+	for (let s of speeds) {
+		// need to round to frames
+		lifespan = calcBarLifespan(s,w,windowHeight,windowWidth)
+		stimuli.push(barSC(lifespan,"black","white",s,w,0))
+		duration = Math.ceil(w/s*120)
+		lightDuration.add(duration)
+	}
+}
+
+for (let d of lightDuration) {
+	stimuli.push(solidSC(d))
+}
+
+r.shuffle(stimuli)
+
+// insert a wait before and after
+for (let s of stimuli) {
+	if (s.stimulusType==="SOLID") {
+		yield waitSC(120)
+		yield s
+		yield waitSC(240)
+	} else {
+		yield s
+	}
+}
+
+---
+// BELOW THIS IS NOT FINISHED
+// color direction selectively
+let angles
+
+const numberOfAngles = 64
+
+for (let i; i<numberOfAngles; i++) {
+	
+}
 
 </xmp>
 

@@ -87,23 +87,43 @@ router.post("/start-program", ctx => {
         createJSProgram(sid, form.program, form.seed, session.windowHeight,
             session.windowHeight)
     }
+    if (form.submitButton==="start") {
 
-    let stimulusQueue = []
-    for (var i = 0; i < 5; i++) {
-        stimulusQueue.push(program[sid].next())
+        let stimulusQueue = []
+        for (var i = 0; i < 5; i++) {
+            stimulusQueue.push(program[sid].next())
+        }
+        console.log(stimulusQueue)
+        io.broadcast("run", stimulusQueue)
+
+        let labNotebook = ctx.request.body
+        labNotebook.windowHeight = session.windowHeight
+        labNotebook.windowWidth = session.windowWidth
+        const date = new Date()
+        labNotebook.date = date
+        labNotebook.windowWidth = session.windowWidth
+        labNotebook.version = 0.4
+
+        ctx.body = "---\n" + yaml.safeDump(labNotebook)
+    } else if (form.submitButton==="preview") {
+        let s = program[sid].next()
+        ctx.body = ""
+        while (s.done===false) {
+            ctx.body=ctx.body+JSON.stringify(s.value)+"\n"
+            s = program[sid].next()
+        }
+    } else if (form.submitButton==="estimate duration") {
+        let s = program[sid].next()
+        let lifespan = 0
+        while (s.done===false) {
+            lifespan=lifespan+s.value.lifespan
+            s = program[sid].next()
+        }
+        let seconds = lifespan/120
+        let minutes = Math.floor(seconds/60)
+        seconds = Math.ceil(seconds%60)
+        ctx.body = minutes+" minutes "+seconds+" seconds"
     }
-    console.log(stimulusQueue)
-    io.broadcast("run", stimulusQueue)
-
-    let labNotebook = ctx.request.body
-    labNotebook.windowHeight = session.windowHeight
-    labNotebook.windowWidth = session.windowWidth
-    const date = new Date()
-    labNotebook.date = date
-    labNotebook.windowWidth = session.windowWidth
-    labNotebook.version = 0.4
-
-    ctx.body = "---\n" + yaml.safeDump(labNotebook)
     ctx.status = 200
 })
 
