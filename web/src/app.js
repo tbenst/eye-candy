@@ -183,10 +183,10 @@ function createYAMLProgram(sid,programYAML,seed, windowHeight, windowWidth) {
 router.post("/analysis/start-program", ctx => {
     const sid = uuid.v4()
     const body = ctx.request.body
-    if (programType==="YAML") {
+    if (body.programType==="YAML") {
         createYAMLProgram(sid, body.program, body.seed, body.windowHeight,
             body.windowHeight)
-    } else if (programType==="javascript") {
+    } else if (body.programType==="javascript") {
         createJSProgram(sid, body.program, body.seed, body.windowHeight,
             body.windowHeight)
     }
