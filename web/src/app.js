@@ -103,6 +103,8 @@ router.post("/start-program", ctx => {
         labNotebook.date = date
         labNotebook.windowWidth = session.windowWidth
         labNotebook.version = 0.4
+        labNotebook.flickerVersion = 0.3
+
 
         ctx.body = "---\n" + yaml.safeDump(labNotebook)
     } else if (form.submitButton==="preview") {

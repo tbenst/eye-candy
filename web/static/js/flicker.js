@@ -1,30 +1,3 @@
-// const canvas=document.getElementById("flicker")
-// var context = canvas.getContext("2d")
-
-// canvas.width  = window.innerWidth
-// canvas.height = window.innerHeight
-
-// function renderLoop() {
-//     if (context.getImageData(1,1,1,1).data[0]===255) {
-//         localStorage.setItem("newStimulus", false)
-//     }
-    
-//     if (localStorage.getItem("newStimulus")==="true") {
-//         context.fillStyle = "white"
-//         context.fillRect(0, 0, canvas.width, canvas.height);
-//         // verify it was drawn
-//     } else {
-//         context.fillStyle = localStorage.getItem("signalLight")
-//         context.fillRect(0, 0, canvas.width, canvas.height);       
-//     }
-//     requestAnimationFrame(renderLoop)
-// }
-
-// renderLoop()
-
-
-
-
 var canvas=document.getElementById("flicker")
 var context = canvas.getContext("2d")
 
@@ -45,25 +18,28 @@ let frame
 // once per second
 function renderLoop() {
     stimulusIndex = localStorage.getItem("stimulusIndex")
-    frame = localStorage.getItem("frame")
+    frame = localStorage.getItem("signalLight")
 
-    if (frame == "FRAME_A") {
-        n = -0.075
-    } else if (frame == "FRAME_B") {
-        n = 0.075
-    }
-    
-    if (stimulusIndex%3===0) {
-        s = 0.8
-    } else if (stimulusIndex%3===1) {
-        s = 0.5
-    } else if (stimulusIndex%3===2) {
-    s = 0.2
+    if (frame === "STOPPED") {
+        context.fillStyle = "black"
+    } else {
+        if (frame == "FRAME_A") {
+            n = -0.075
+        } else if (frame == "FRAME_B") {
+            n = 0.075
+        }
+        
+        if (stimulusIndex%3===0) {
+            s = 0.8
+        } else if (stimulusIndex%3===1) {
+            s = 0.5
+        } else if (stimulusIndex%3===2) {
+            s = 0.2
+        }
+        context.fillStyle = numberToColor(s+n)
     }
 
-    context.fillStyle = numberToColor(s+n)
     context.fillRect(0, 0, canvas.width, canvas.height);       
-    i++
     requestAnimationFrame(renderLoop)
 }
 
