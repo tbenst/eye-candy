@@ -145,6 +145,7 @@ function createJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
             DeterministicRandom: random.DeterministicRandom,
             windowHeight: windowHeight,
             windowWidth: windowWidth,
+            PI: Math.PI,
             seed: seed
         },
     });
@@ -167,6 +168,7 @@ function createYAMLProgram(sid,programYAML,seed, windowHeight, windowWidth) {
                 programYAML: programYAML,
                 windowHeight: windowHeight,
                 windowWidth: windowWidth,
+                PI: Math.PI,
                 seed: seed
             },
         });

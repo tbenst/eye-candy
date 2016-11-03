@@ -94,15 +94,135 @@ for (let s of stimuli) {
 }
 
 ---
-// BELOW THIS IS NOT FINISHED
+// color acuity (2h30m)
+
+
+// acuity to bars of different widths and speeds
+let widths = new Set()
+let speeds = []
+let lightDuration = new Set()
+let stimuli = []
+
+let steps = 8
+let speedStep = 60
+let widthStep = 2
+
+
+let maxWidth = widthStep * steps
+let maxSpeed = speedStep * steps
+
+for (let s = speedStep; s < maxSpeed; s=s+speedStep) {
+	speeds.push(s)
+}
+
+// this gives thirty widths from 2-512
+// with 6 equivalency bands of 8 speeds
+let width
+let duration
+let lifespan
+for (let w = widthStep; w <= maxWidth; w=w+widthStep) {
+	for (let i = 0; i<6;i++) {
+		width = w*Math.pow(2,i)
+		widths.add(width)
+	}
+}
+
+for (let w of widths) {
+	for (let s of speeds) {
+		// need to round to frames
+		lifespan = calcBarLifespan(s,w,windowHeight,windowWidth)
+		stimuli.push(barSC(lifespan,"black","white",s,w,0))
+		stimuli.push(barSC(lifespan,"black","blue",s,w,0))
+		stimuli.push(barSC(lifespan,"black","green",s,w,0))
+		stimuli.push(barSC(lifespan,"black","red",s,w,0))
+		duration = Math.ceil(w/s*120)
+		lightDuration.add(duration)
+	}
+}
+
+for (let d of lightDuration) {
+	stimuli.push(solidSC(d, "white"))
+	stimuli.push(solidSC(d,"blue"))
+	stimuli.push(solidSC(d,"green"))
+	stimuli.push(solidSC(d,"red"))
+}
+
+r.shuffle(stimuli)
+
+// insert a wait before and after
+for (let s of stimuli) {
+	if (s.stimulusType==="SOLID") {
+		yield waitSC(120)
+		yield s
+		yield waitSC(240)
+	} else {
+		yield s
+	}
+}
+
+---
 // color direction selectively
+
 let angles
 
 const numberOfAngles = 64
+const stimuli = []
+let lifespan
 
-for (let i; i<numberOfAngles; i++) {
-	
+let speed = 240
+let width = 15
+for (let i=0; i<numberOfAngles; i++) {
+	lifespan = calcBarLifespan(speed,width,windowHeight,windowWidth)
+	stimuli.push(barSC(lifespan,"black","white",speed,width,i*2/numberOfAngles*PI))
+	stimuli.push(barSC(lifespan,"black","red",speed,width,i*2/numberOfAngles*PI))
+	stimuli.push(barSC(lifespan,"black","blue",speed,width,i*2/numberOfAngles*PI))
+	stimuli.push(barSC(lifespan,"black","green",speed,width,i*2/numberOfAngles*PI))
 }
+
+speed = 240
+width = 30
+for (let i=0; i<numberOfAngles; i++) {
+	lifespan = calcBarLifespan(speed,width,windowHeight,windowWidth)
+	stimuli.push(barSC(lifespan,"black","white",speed,width,i*2/numberOfAngles*PI))
+	stimuli.push(barSC(lifespan,"black","red",speed,width,i*2/numberOfAngles*PI))
+	stimuli.push(barSC(lifespan,"black","blue",speed,width,i*2/numberOfAngles*PI))
+	stimuli.push(barSC(lifespan,"black","green",speed,width,i*2/numberOfAngles*PI))
+}
+
+
+// .1 second steps through 6 seconds
+for (let i=12; i<=6*120; i=i+12) {
+	stimuli.push(solidSC(i))
+	stimuli.push(solidSC(i,"red"))
+	stimuli.push(solidSC(i,"blue"))
+	stimuli.push(solidSC(i,"green"))
+}
+
+r.shuffle(stimuli)
+
+// insert a wait before and after
+for (let s of stimuli) {
+	if (s.stimulusType==="SOLID") {
+		yield waitSC(120)
+		yield s
+		yield waitSC(240)
+	} else {
+		yield s
+	}
+}
+
+---
+// BELOW THIS IS NOT FINISHED
+
+---
+// BELOW THIS IS NOT FINISHED
+
+---
+// BELOW THIS IS NOT FINISHED
+
+---
+// BELOW THIS IS NOT FINISHED
+
 
 </xmp>
 
