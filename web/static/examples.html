@@ -42,23 +42,26 @@ let speeds = []
 let lightDuration = new Set()
 let stimuli = []
 
+let initialSpeed = 60
 let steps = 8
 let speedStep = 60
 let widthStep = 2
 
 
 let maxWidth = widthStep * steps
-let maxSpeed = speedStep * steps
+let maxSpeed = initialSpeed + speedStep * steps
 
-for (let s = speedStep; s < maxSpeed; s=s+speedStep) {
+for (let s = initialSpeed; s <= maxSpeed; s=s+speedStep) {
 	speeds.push(s)
 }
 
-// this gives thirty widths from 2-512
+// this gives thirty-one widths from 1-512
 // with 6 equivalency bands of 8 speeds
 let width
 let duration
 let lifespan
+
+widths.add(1)
 for (let w = widthStep; w <= maxWidth; w=w+widthStep) {
 	for (let i = 0; i<6;i++) {
 		width = w*Math.pow(2,i)
