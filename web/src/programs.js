@@ -47,6 +47,7 @@ exports.calcGratingLifespan = calcGratingLifespan
 function calcBarLifespan(speed, width, windowHeight, windowWidth) {
     const lifespan = Math.ceil((getDiagonalLength(windowHeight, windowWidth)
                     + width)/speed*120)
+    // console.log("calcBarLifespan",speed,width,windowHeight,windowWidth,lifespan)
     return lifespan
 }
 

@@ -78,6 +78,7 @@ router.get("/count", ctx => {
 router.post("/start-program", ctx => {
     io.broadcast("reset")
     var session = ctx.session
+    console.log("height,width",session.windowHeight,session.windowWidth)
     const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
     const form = ctx.request.body
     if (form.programType=="YAML") {
@@ -85,7 +86,7 @@ router.post("/start-program", ctx => {
             session.windowHeight)
     } else if (form.programType=="javascript") {
         createJSProgram(sid, form.program, form.seed, session.windowHeight,
-            session.windowHeight)
+            session.windowWidth)
     }
     if (form.submitButton==="start") {
 
@@ -101,7 +102,6 @@ router.post("/start-program", ctx => {
         labNotebook.windowWidth = session.windowWidth
         const date = new Date()
         labNotebook.date = date
-        labNotebook.windowWidth = session.windowWidth
         labNotebook.version = 0.4
         labNotebook.flickerVersion = 0.3
 
@@ -192,7 +192,7 @@ router.post("/analysis/start-program", ctx => {
             body.windowHeight)
     } else if (body.programType==="javascript") {
         createJSProgram(sid, body.program, body.seed, body.windowHeight,
-            body.windowHeight)
+            body.windowWidth)
     }
 
     ctx.body = sid

@@ -144,7 +144,7 @@ function graphicsDispatcher() {
             if (stimulus.age === 0) {
                 console.log("len is 0")
                 barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
-                    stimulus.speed, stimulus.angle)
+                    stimulus.speed, stimulus.angle, stimulus.lifespan)
             }
             break
         case STIMULUS.TARGET:
@@ -153,6 +153,7 @@ function graphicsDispatcher() {
             }]))
         case STIMULUS.GRATING:
             if (stimulus.age === 0) {
+                const lifespan = calcBarLifespan(speed, width)
                 barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
                     stimulus.speed, stimulus.angle)
                 // increment count by 1 after bar is dispatched
@@ -228,13 +229,13 @@ function checkerboardDispatcher(time,size,period,color,alternateColor) {
     }
 }
 
-function barDispatcher(width, barColor, backgroundColor, speed, angle,
+function barDispatcher(width, barColor, backgroundColor, speed, angle, lifespan,
     startR=getDiagonalLength()/2) {
 
     store.dispatch(addGraphicAC({
         graphicType: GRAPHIC.BAR, age: 0, color: barColor, size: {width: width,
             height: getDiagonalLength()}, speed: speed, angle: angle,
-            lifespan: calcBarLifespan(speed, width, startR), startR: startR
+            lifespan: lifespan, startR: startR
     }))
 }
 
@@ -263,8 +264,9 @@ function gratingDispatcherHelper() {
         if (distanceTraveled  >= nextStartDistance) {
             console.log("XXX will dispatch new bar ", refOrigin+nextStartDistance)
             const startR = refOrigin + nextStartDistance
+            const lifespan = calcBarLifespan(speed, width, startR)
             barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
-                stimulus.speed, stimulus.angle, startR)
+                stimulus.speed, stimulus.angle, lifespan, startR)
             // we use count to keep track of how many bars have been
             // cumulatively dispatched
             count = count + 1
@@ -527,10 +529,10 @@ function getDiagonalLength() {
         pow(store.getState()["windowHeight"], 2))
 }
 
-function calcBarLifespan(speed, width, startR) {
+function calcBarLifespan(speed, width, startR=getDiagonalLength()/2) {
     // in the case of a single bar, startR==getDiagonalLength()/2
     // separating is useful for gratings
-    return (startR + getDiagonalLength()/2 + width ) / speed * 120
+    return Math.ceil((startR + getDiagonalLength()/2 + width ) / speed * 120)
 }
 
 
