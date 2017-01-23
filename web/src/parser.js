@@ -1,7 +1,7 @@
 const yaml = require('js-yaml');
 const programs = require("./programs")
 const orientationSelectivityGen = programs.orientationSelectivityGen
-const stimulusCreator = programs.stimulusCreator
+const YAMLstimulusCreator = programs.YAMLstimulusCreator
 
 // import {store} from './store'
 
@@ -32,12 +32,12 @@ function* buildGenerator(formYAML, windowHeight, windowWidth) {
 					toYield[innerStimType] = fillInItems(stimulus, n.value)
 					// get name/key of stimulus
 					// console.log('buildGenerator', stimulus, n.value, fillInItems(stimulus, n.value))
-					yield stimulusCreator(toYield, windowHeight, windowWidth)
+					yield YAMLstimulusCreator(toYield, windowHeight, windowWidth)
 				}
 				n = nestedGen.next()
 			}
 		} else {
-			yield stimulusCreator(stimJSON, windowHeight, windowWidth)
+			yield YAMLstimulusCreator(stimJSON, windowHeight, windowWidth)
 		}
 	}
 }

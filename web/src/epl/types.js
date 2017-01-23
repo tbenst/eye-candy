@@ -1,0 +1,14 @@
+const STIMULUS = {
+    BAR: 'BAR',
+    SOLID: 'SOLID',
+    WAIT: 'WAIT',
+    TARGET: 'TARGET',
+    GRATING: 'GRATING',
+    CHECKERBOARD: "CHECKERBOARD"
+}
+
+const GRAPHIC = {
+    BAR: 'BAR',
+    TARGET: 'TARGET',
+    CHECKER: "CHECKER"
+}
