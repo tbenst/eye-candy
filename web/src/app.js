@@ -19,7 +19,7 @@ const {VM} = require('vm2');
 
 const random = require("./random")
 const buildGenerator = require("./parser").buildGenerator
-const programs = require("./programs")
+const {compileYAMLProgram, compileJSProgram} = require("./eval")
 // import {buildGenerator} from "./parser"
 // import session from "./session"
 
@@ -82,10 +82,10 @@ router.post("/start-program", ctx => {
     const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
     const form = ctx.request.body
     if (form.programType=="YAML") {
-        program[sid] = createYAMLProgram(sid, form.program, form.seed, session.windowHeight,
+        program[sid] = compileYAMLProgram(sid, form.program, form.seed, session.windowHeight,
             session.windowHeight)
     } else if (form.programType=="javascript") {
-        program[sid] = createJSProgram(sid, form.program, form.seed, session.windowHeight,
+        program[sid] = compileJSProgram(sid, form.program, form.seed, session.windowHeight,
             session.windowWidth)
     }
     if (form.submitButton==="start") {
