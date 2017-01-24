@@ -1,5 +1,5 @@
 // Compile and run EyeCandy Programming Language
-
+const {Bar} = require("./types")
 const pow = Math.pow
 const sqrt = Math.sqrt
 const sin = Math.sin
@@ -11,7 +11,7 @@ function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
         sandbox: {checkerboardSC: programs.checkerboardSC,
             solidSC: programs.solidSC,
             waitSC: programs.waitSC,
-            barSC: programs.barSC,
+            Bar: types.Bar,
             gratingSC: programs.gratingSC,
             getDiagonalLength: programs.getDiagonalLength,
             calcGratingLifespan: programs.calcGratingLifespan,
@@ -33,7 +33,8 @@ function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
         's = generator.next();'+
         's.stimulusIndex=si; si++;'+
         's;')}
-    return {vm: vm, next: functionInSandbox}
+    let metadata = () => {return vm.run('metadata;')}
+    return {vm: vm, next: functionInSandbox, metadata: metadata}
 }
 
 function compileYAMLProgram(sid,programYAML,seed, windowHeight, windowWidth) {

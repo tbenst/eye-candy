@@ -1,7 +1,4 @@
-
-// v2
-
-// acuity to bars of different widths and speeds
+const metadata = {"name": "acuity", "version": 0.3.0}
 
 function linearToHex(f) {
     // gamma compress linear light intensity between zero and one
@@ -64,7 +61,9 @@ for (let i = 0; i < EQspeeds.length; i++) {
 		width = Math.pow(2,w)
 		lifespan = calcBarLifespan(speed,width,windowHeight,windowWidth)
 		// we use an offset to avoid diamond pixel artifacts
-		stimuli.push(barSC(lifespan,"black","white",speed,width,PI/8))
+		stimuli.push(Bar({"lifespan": lifespan,"backgroundColor": "black",
+			"barColor": "white", "speed": speed, "width": width, 
+			"angle": PI/8}))
 		duration = Math.ceil(width/speed*120)
 		whiteFlashLifetime.add(duration)
 	}
@@ -86,7 +85,9 @@ for (let i = 3; i < EQspeeds.length-1; i++) {
 		// Here we do Direction selectively
 		for (var j=1; j<=7;j++) {
 			// 8 angles, offset by 22 degrees to reduce diamond artifact
-			stimuli.push(barSC(lifespan,"black","white",speed,width,(j*2+1)*PI/8))
+			stimuli.push(Bar({"lifespan": lifespan,"backgroundColor": "black",
+			"barColor": "white", "speed": speed, "width": width, 
+			"angle": (j*2+1)*PI/8}))
 		}
 
 		// and now we do contrast

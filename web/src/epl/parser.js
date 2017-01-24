@@ -87,9 +87,12 @@ function YAMLstimulusCreator(stimulusJSON, windowHeight, windowWidth) {
     var stimulus
     switch (stimType.toUpperCase()) {
         case STIMULUS.BAR:
-            stimulus = barSC(calcBarLifespan(speed, width, windowHeight, windowWidth),
-                unprocessed_stimulus.backgroundColor, unprocessed_stimulus.barColor,
-                speed, width, unprocessed_stimulus.angle)
+            stimulus = barSC({"lifespan":
+                calcBarLifespan(speed, width, windowHeight, windowWidth),
+                "backgroundColor": unprocessed_stimulus.backgroundColor,
+                "barColor": unprocessed_stimulus.barColor,
+                "speed": speed, "width": width,
+                "angle": unprocessed_stimulus.angle})
             break
         case STIMULUS.SOLID:
             stimulus = solidSC(lifespan,
