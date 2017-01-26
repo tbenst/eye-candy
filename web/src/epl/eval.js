@@ -9,7 +9,7 @@ const math = require("./math")
 
 
 // this object has all values usable in EPLiniininiiniitininxnoi{inasyouiinheasinyou}
-let EPL = Object.assign({},Types,Render,Random,math,Misc)
+let EPL = Object.assign({log: console.log},Types,Render,Random,math,Misc)
 
 function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
     const vm = new VM({
@@ -17,14 +17,10 @@ function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
             windowHeight: windowHeight,
             windowWidth: windowWidth,
             seed: seed
-        }, EPL)
+        }, EPL),
+        console: 'inherit'
     });
 
-    console.log(Object.assign({
-            windowHeight: windowHeight,
-            windowWidth: windowWidth,
-            seed: seed
-        }, EPL))
     // we use stimulus index to ensure correct order and avoid race condition
     vm.run("let r = new DeterministicRandom(seed);"+
         "const p = function* () {" +

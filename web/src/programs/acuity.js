@@ -9,12 +9,13 @@ function linearToHex(f) {
 
 function* measureIntegrity(stimuli,every=5*60) {
 	// every N seconds, do a flash
+	let integrityMeta = {group: r.uuid(), label: "integrity"}
 	let elapsedTime = every
 	for (let s of stimuli) {
 		if (elapsedTime>=every && !s.metadata.block) {
-			yield new Wait(120)
-			yield new Solid(60)
-			yield new Wait(240)
+			yield new Wait(120, integrityMeta)
+			yield new Solid(60, integrityMeta)
+			yield new Wait(240, integrityMeta)
 			elapsedTime = 0
 			yield s
 		} else {
@@ -24,10 +25,10 @@ function* measureIntegrity(stimuli,every=5*60) {
 	}
 }
 
-let widths = [...Array(16).keys()].map(x => (x+1)*10)
-let speeds = [...Array(16).keys()].map(x => (1+x)*60)
-// 16 angles, offset by 22 degrees to reduce diamond artifact
-let angles = [...Array(16).keys()].map(x => (x*2+1)*PI/16)
+let widths = [...Array(12).keys()].map(x => (x+1)*10)
+let speeds = [...Array(8).keys()].map(x => (1+x)*100)
+// 12 angles, offset by 22 degrees to reduce diamond artifact
+let angles = [...Array(12).keys()].map(x => (x*2+1)*PI/12)
 let stimuli = []
 
 let width
@@ -36,6 +37,8 @@ let lifespan
 let group = Array(3)
 let id
 let before
+let after
+let solid
 
 for (let speed of speeds) {
 	for (let width of widths) {
@@ -48,13 +51,14 @@ for (let speed of speeds) {
 		}
 		
 		// block means "do not insert a integrity check after me"
-		lit = new Solid(ceil(width/speed*120), "white", {group: id, block: true})
+		lit = ceil(width/speed*120)
+		solid = new Solid(lit, "white", {group: id, block: true})
 		before = new Wait(floor((lifespan-lit)/2), {group: id, block: true})
 		after = new Wait(ceil((lifespan-lit)/2), {group: id})
 
 		// before + lit + after = lifespan
 		// this pads the white flash
-		stimuli.push([before, lit, after])
+		stimuli.push([before, solid, after])
 	}
 }
 
