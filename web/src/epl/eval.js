@@ -3,12 +3,13 @@ const {VM} = require('vm2');
 const Types = require("./types")
 const Render = require("./render")
 const Random = require("./random")
+const Misc = require("./misc")
 
 const math = require("./math")
 
 
 // this object has all values usable in EPLiniininiiniitininxnoi{inasyouiinheasinyou}
-let EPL = Object.assign({},Types,Render,Random,math)
+let EPL = Object.assign({},Types,Render,Random,math,Misc)
 
 function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
     const vm = new VM({

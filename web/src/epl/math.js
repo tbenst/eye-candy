@@ -6,5 +6,6 @@ module.exports = {
 	sin: Math.sin,
 	cos: Math.cos,
 	PI: Math.PI,
-	uuid: uuid.v4
+	floor: Math.floor,
+	ceil: Math.ceil
 }

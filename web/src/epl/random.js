@@ -35,7 +35,17 @@ class DeterministicRandom {
         }
 
         return r%range + start
+    }
 
+    int() {return this.mt.int()}
+
+    // courtesy http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+    uuid() {
+        let r = this.random()
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = r*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+            return v.toString(16);
+        });
     }
 }
 
