@@ -1,4 +1,8 @@
-
+const PI = Math.PI
+const pow = Math.pow
+const sqrt = Math.sqrt
+const sin = Math.sin
+const cos = Math.cos
 
 function getDiagonalLength(height, width) {
     return sqrt(pow(height, 2) + pow(width, 2));

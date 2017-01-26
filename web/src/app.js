@@ -12,14 +12,13 @@ const convert = require("koa-convert");
 const IO = require( "koa-socket" )
 const koaSocketSession = require("koa-socket-session")
 const redisStore = require("koa-redis")
-var uuid = require("node-uuid");
+var uuid = require("uuid");
 const logger = require("koa-logger")
 const yaml = require("js-yaml")
-const {VM} = require('vm2');
 
-const random = require("./random")
-const buildGenerator = require("./parser").buildGenerator
-const {compileYAMLProgram, compileJSProgram} = require("./eval")
+const random = require("./epl/random")
+const buildGenerator = require("./epl/parser").buildGenerator
+const {compileYAMLProgram, compileJSProgram} = require("./epl/eval")
 // import {buildGenerator} from "./parser"
 // import session from "./session"
 

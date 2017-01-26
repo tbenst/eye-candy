@@ -1,7 +1,7 @@
+// YAML is deprecated right now, needs to use new Stimulus prototypes
+
 const yaml = require('js-yaml');
-const {calcLifespan} = require("./epl")
-const orientationSelectivityGen = programs.orientationSelectivityGen
-const YAMLstimulusCreator = programs.YAMLstimulusCreator
+const {calcLifespan} = require("./render")
 
 
 function* buildGenerator(formYAML, windowHeight, windowWidth) {

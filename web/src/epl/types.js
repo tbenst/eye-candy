@@ -16,7 +16,7 @@ const GRAPHIC = {
 class Stimulus {
     // parameters are used for program execution
     // analysis is metadata used after the fact
-    constructor({lifespan, backgroundColor}, analysis) {
+    constructor(lifespan, backgroundColor, analysis) {
         this.lifespan = lifespan
         this.backgroundColor = backgroundColor
         this.analysis = analysis
@@ -25,8 +25,8 @@ class Stimulus {
 }
 
 class Bar extends Stimulus {
-    constructor({speed, width, angle, barColor, ...parameters}, analysis) {
-        super(parameters, analysis)
+    constructor(lifespan, backgroundColor, speed, width, angle, barColor, analysis) {
+        super(lifespan, backgroundColor, analysis)
         this.stimulusType = STIMULUS.BAR
         this.speed = speed
         this.width = width
@@ -37,8 +37,8 @@ class Bar extends Stimulus {
 exports.Bar = Bar
 
 class Grating extends Bar {
-    constructor({wavelength, numberOfBars, ...parameters}, analysis) {
-        super(parameters, analysis)
+    constructor(lifespan, backgroundColor, wavelength, numberOfBars, analysis) {
+        super(lifespan, backgroundColor, analysis)
         this.stimulusType = STIMULUS.GRATING
         this.wavelength = wavelength
         this.numberOfBars = numberOfBars
@@ -48,29 +48,28 @@ class Grating extends Bar {
 exports.Grating = Grating
 
 class Solid extends Stimulus {
-    constructor({backgroundColor = "white"} = {}, analysis) {
-        super(parameters, analysis)
+    constructor(lifespan, backgroundColor = "white", analysis) {
+        super(lifespan, backgroundColor, analysis)
         this.stimulusType = STIMULUS.SOLID
     }
 }
 exports.Solid = Solid
 
 class Wait extends Stimulus {
-    constructor(parameters, analysis) {
-        super(parameters, analysis)
+    constructor(lifespan, analysis) {
+        super(lifespan, "black", analysis)
         this.stimulusType = STIMULUS.WAIT
-        this.backgroundColor = "black"
     }
 }
 exports.Wait = Wait
 
 class Checkerboard extends Stimulus {
-    constructor({color, alternateColor, size, period, ...parameters}, analysis) {
-        super(parameters, analysis)
+    constructor(lifespan, color, alternateColor, size, period, analysis) {
+    	// not positive alternateColor is correct here, test with slow period
+        super(lifespan, alternateColor, analysis)
         this.stimulusType = STIMULUS.CHECKERBOARD
         this.color = color
         this.alternateColor = alternateColor
-        this.backgroundColor = backgroundColor
         this.size = size
         this.period = period
         this.count = 0

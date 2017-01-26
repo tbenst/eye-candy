@@ -1,28 +1,29 @@
 // Compile and run EyeCandy Programming Language
-const {Bar} = require("./types")
-const pow = Math.pow
-const sqrt = Math.sqrt
-const sin = Math.sin
-const cos = Math.cos
+const {VM} = require('vm2');
+const Types = require("./types")
+const Render = require("./render")
+const Random = require("./random")
 
+const math = require("./math")
+
+
+// this object has all values usable in EPLiniininiiniitininxnoi{inasyouiinheasinyou}
+let EPL = Object.assign({},Types,Render,Random,math)
 
 function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
     const vm = new VM({
-        sandbox: {checkerboardSC: programs.checkerboardSC,
-            solidSC: programs.solidSC,
-            waitSC: programs.waitSC,
-            Bar: types.Bar,
-            gratingSC: programs.gratingSC,
-            getDiagonalLength: programs.getDiagonalLength,
-            calcGratingLifespan: programs.calcGratingLifespan,
-            calcBarLifespan: programs.calcBarLifespan,
-            DeterministicRandom: random.DeterministicRandom,
+        sandbox: Object.assign({
             windowHeight: windowHeight,
             windowWidth: windowWidth,
-            PI: Math.PI,
             seed: seed
-        },
+        }, EPL)
     });
+
+    console.log(Object.assign({
+            windowHeight: windowHeight,
+            windowWidth: windowWidth,
+            seed: seed
+        }, EPL))
     // we use stimulus index to ensure correct order and avoid race condition
     vm.run("let r = new DeterministicRandom(seed);"+
         "const p = function* () {" +
@@ -36,6 +37,7 @@ function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
     let metadata = () => {return vm.run('metadata;')}
     return {vm: vm, next: functionInSandbox, metadata: metadata}
 }
+exports.compileJSProgram = compileJSProgram
 
 function compileYAMLProgram(sid,programYAML,seed, windowHeight, windowWidth) {
         const vm = new VM({
@@ -57,3 +59,4 @@ function compileYAMLProgram(sid,programYAML,seed, windowHeight, windowWidth) {
             's;')}
         return {vm: vm, next: functionInSandbox}
 }
+exports.compileYAMLProgram = compileYAMLProgram

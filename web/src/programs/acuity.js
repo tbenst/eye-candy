@@ -1,4 +1,4 @@
-const metadata = {"name": "acuity", "version": 0.3.0}
+const metadata = {"name": "acuity", "version": "0.3.0"}
 
 function linearToHex(f) {
     // gamma compress linear light intensity between zero and one
@@ -11,9 +11,9 @@ function* wrapSolid(stimuli) {
 	// insert a wait before and after
 	for (let s of stimuli) {
 		if (s.stimulusType==="SOLID") {
-			yield waitSC(120)
+			yield new Wait(120)
 			yield s
-			yield waitSC(240)
+			yield new Wait(240)
 		} else {
 			yield s
 		}
@@ -25,9 +25,9 @@ function* measureIntegrity(stimuli,every=5*60) {
 	let elapsedTime = every
 	for (let s of stimuli) {
 		if (elapsedTime>=every) {
-			yield waitSC(120)
-			yield solidSC(60)
-			yield waitSC(240)
+			yield new Wait(120)
+			yield new Solid(60)
+			yield new Wait(240)
 			elapsedTime = 0
 			yield s
 		} else {
@@ -37,35 +37,25 @@ function* measureIntegrity(stimuli,every=5*60) {
 	}
 }
 
-let widths = new Set()
-let EQspeeds = [15,30,60,120,240,480,960,1920]
-let whiteFlashLifetime = new Set()
-let colorFlashLifetime = new Set()
+let widths = [...Array(16).keys()].map(x => (x+1)*10)
+let speeds = [...Array(16).keys()].map(x => (1+x)*60)
 let stimuli = []
-
-let steps = 8
-let widthStep = 2
-let maxWidth = widthStep * steps
 
 let width
 let duration
 let lifespan
-let speed
-let exponent
+let group = Array(3)
+let id
 
-for (let i = 0; i < EQspeeds.length; i++) {
-	speed = EQspeeds[i]
-	exponent = 7+i<10 ? 7+i : 10
-
-	for (let w = 0; w <= exponent; w++) {
-		width = Math.pow(2,w)
+for (let speed of speeds) {
+	for (let width of widths) {
 		lifespan = calcBarLifespan(speed,width,windowHeight,windowWidth)
 		// we use an offset to avoid diamond pixel artifacts
-		stimuli.push(Bar({"lifespan": lifespan,"backgroundColor": "black",
-			"barColor": "white", "speed": speed, "width": width, 
-			"angle": PI/8}))
+		id = uuid()
+		stimuli.push(new Bar(lifespan,"black",
+			speed, width, PI/8, "white", {group: id}))
 		duration = Math.ceil(width/speed*120)
-		whiteFlashLifetime.add(duration)
+		group = whiteFlashLifetime.add(duration)
 	}
 }
 
@@ -85,28 +75,16 @@ for (let i = 3; i < EQspeeds.length-1; i++) {
 		// Here we do Direction selectively
 		for (var j=1; j<=7;j++) {
 			// 8 angles, offset by 22 degrees to reduce diamond artifact
-			stimuli.push(Bar({"lifespan": lifespan,"backgroundColor": "black",
-			"barColor": "white", "speed": speed, "width": width, 
-			"angle": (j*2+1)*PI/8}))
-		}
-
-		// and now we do contrast
-		for (let c of colors) {
-			stimuli.push(barSC(lifespan,"black",c,speed,width,PI/8))
-			colorFlashLifetime.add(duration,c)
+			stimuli.push(new Bar(lifespan,"black", speed, width, (j*2+1)*PI/8,
+				"white"))
 		}
 	}
 }
 
 for (let s of whiteFlashLifetime) {
-	stimuli.push(solidSC(s))
+	stimuli.push(new Solid(s))
 }
 
-for (let s of colorFlashLifetime) {
-	for (let c of colors) {
-		stimuli.push(solidSC(s,c))
-	}
-}
 
 r.shuffle(stimuli)
 
