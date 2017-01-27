@@ -146,13 +146,13 @@ router.post("/analysis/start-program", ctx => {
         ctx.status = 501
     } else if (body.programType==="javascript") {
         // legacy
-        createJSProgram(sid, body.program, body.seed, body.windowHeight,
+        program[sid] = compileJSProgram(sid, body.program, body.seed, body.windowHeight,
             body.windowWidth)
 
         ctx.body = sid
         ctx.status = 200
     } else {
-        createJSProgram(sid, body.program, body.seed, body.windowHeight,
+        program[sid] = compileJSProgram(sid, body.epl, body.seed, body.windowHeight,
             body.windowWidth)
 
         ctx.body = sid
