@@ -142,15 +142,23 @@ router.post("/analysis/start-program", ctx => {
     const sid = uuid.v4()
     const body = ctx.request.body
     if (body.programType==="YAML") {
-        createYAMLProgram(sid, body.program, body.seed, body.windowHeight,
-            body.windowHeight)
+        ctx.body = "YAML deprecated"
+        ctx.status = 501
     } else if (body.programType==="javascript") {
+        // legacy
         createJSProgram(sid, body.program, body.seed, body.windowHeight,
             body.windowWidth)
+
+        ctx.body = sid
+        ctx.status = 200
+    } else {
+        createJSProgram(sid, body.program, body.seed, body.windowHeight,
+            body.windowWidth)
+
+        ctx.body = sid
+        ctx.status = 200
     }
 
-    ctx.body = sid
-    ctx.status = 200
 })
 
 // give the next value for a given program (id)
