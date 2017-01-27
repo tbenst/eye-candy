@@ -1,4 +1,22 @@
-const metadata = {name: "acuity", version: "0.3.0"}
+const metadata = {name: "wedge", version: "0.1.1"}
+
+
+// "light wedge" of different durations
+let solid = []
+
+// .1 second steps through 6 seconds
+for (let i=12; i<=6*120; i=i+12) {
+	solid.push(new Solid(i))
+}
+
+// 5 repetitions
+for (let i = 0; i < 5; i++) {
+	r.shuffle(solid)
+	for (let stimulus of solid) {
+		yield stimulus
+		yield new Wait(240)
+	}
+}
 
 function* measureIntegrity(stimuli,every=5*60) {
 	// every N seconds, do a flash

@@ -96,49 +96,21 @@ Toggle Required
   <h2>Experiment</h2>
     Experiment Number: <input type="number" name="experimentNumber" min="1" class="required"><br>
     Filename: <input type="text" name="filename" class="required"><br>
-
-    Program Type:
-    <input type="radio" name="programType" value="YAML" checked> YAML
-    <input type="radio" name="programType" value="javascript"> Javascript<br>
+    <!-- <input type="radio" name="programType" value="select" checked> Select -->
+    <!-- <input type="radio" name="programType" value="javascript"> Javascript<br> -->
 
     Seed: <input type="number" name="seed" min="0" class="required"
                   value="<%- Math.floor(Math.random() * 2147483647) %>"><br>
 
-    Program:<br>
-    <textarea name="program" cols="60" rows="20">- with_nested:
-    - [50, 150]
-    - [750, 1250]
-    - [0, PI/4, PI/2, 3*PI/4, PI, 5*PI/4, 3*PI/2, 7*PI/4, 5*PI/4, 3*PI/4, 3*PI/2, PI/2, 7*PI/4, PI/4, 0, PI]
-  list:
-    - wait:
-        time: 1
-    - solid:
-        time: 1
-        backgroundColor: white
-    - wait:
-        time: 2
-    - bar:
-        width: items[0]
-        speed: items[1]
-        angle: items[2]
-        barColor: white
-        backgroundColor: black
-    - checkerboard:
-        time: 6
-        size: 100
-        color: white
-        alternateColor: black
-        period: 1
-    - grating:
-        width: items[0]
-        speed: items[1]
-        angle: items[2]
-        barColor: white
-        backgroundColor: black
-        wavelength: 250
-        time: 10
+    Program:
+    <select name="program">
+      <option value="acuity">Acuity</option>
+      <option value="wedge">Wedge</option>
+      <option value="custom">Custom</option>
+    </select><br>
 
-</textarea class="required"><br>
+    Custom Eyecandy Programming Language program:<br>
+    <textarea name="epl" cols="60" rows="20"></textarea><br>
   <input type="submit" name="submitButton" value="start">
   <input type="submit" name="submitButton" value="preview">
   <input type="submit" name="submitButton" value="estimate duration">

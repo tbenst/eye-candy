@@ -15,6 +15,7 @@ const redisStore = require("koa-redis")
 var uuid = require("uuid");
 const logger = require("koa-logger")
 const yaml = require("js-yaml")
+const fs = require('fs')
 
 const random = require("./epl/random")
 const buildGenerator = require("./epl/parser").buildGenerator
@@ -79,15 +80,22 @@ router.post("/start-program", ctx => {
     var session = ctx.session
     console.log("height,width",session.windowHeight,session.windowWidth)
     const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
-    const form = ctx.request.body
-    if (form.programType=="YAML") {
-        program[sid] = compileYAMLProgram(sid, form.program, form.seed, session.windowHeight,
-            session.windowHeight)
-    } else if (form.programType=="javascript") {
-        program[sid] = compileJSProgram(sid, form.program, form.seed, session.windowHeight,
+    let labNotebook = Object.assign({},ctx.request.body)
+    let {submitButton} = labNotebook
+    delete labNotebook.submitButton
+    if (labNotebook.program==="custom") {
+        program[sid] = compileJSProgram(sid, labNotebook.epl, labNotebook.seed, session.windowHeight,
+            session.windowWidth)
+
+    } else if (labNotebook.program==="acuity") {
+        // console.log(fs.readdirSync('/src/pro'))
+        labNotebook.epl = fs.readFileSync('./src/programs/acuity.js', "utf-8")
+        console.log('*', labNotebook.epl)
+        program[sid] = compileJSProgram(sid, labNotebook.epl, labNotebook.seed, session.windowHeight,
             session.windowWidth)
     }
-    if (form.submitButton==="start") {
+
+    if (submitButton==="start") {
 
         let stimulusQueue = []
         for (var i = 0; i < 5; i++) {
@@ -96,7 +104,6 @@ router.post("/start-program", ctx => {
         console.log(stimulusQueue)
         io.broadcast("run", stimulusQueue)
 
-        let labNotebook = ctx.request.body
         labNotebook.windowHeight = session.windowHeight
         labNotebook.windowWidth = session.windowWidth
         const date = new Date()
@@ -106,14 +113,14 @@ router.post("/start-program", ctx => {
 
 
         ctx.body = "---\n" + yaml.safeDump(labNotebook)
-    } else if (form.submitButton==="preview") {
+    } else if (submitButton==="preview") {
         let s = program[sid].next()
         ctx.body = ""
         while (s.done===false) {
             ctx.body=ctx.body+JSON.stringify(s.value)+"\n"
             s = program[sid].next()
         }
-    } else if (form.submitButton==="estimate duration") {
+    } else if (submitButton==="estimate duration") {
         let s = program[sid].next()
         let lifespan = 0
         while (s.done===false) {
