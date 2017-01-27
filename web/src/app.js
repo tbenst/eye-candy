@@ -84,16 +84,14 @@ router.post("/start-program", ctx => {
     let {submitButton} = labNotebook
     delete labNotebook.submitButton
     if (labNotebook.program==="custom") {
-        program[sid] = compileJSProgram(sid, labNotebook.epl, labNotebook.seed, session.windowHeight,
-            session.windowWidth)
-
+        // program already loaded in labNotebook.epl
     } else if (labNotebook.program==="acuity") {
-        // console.log(fs.readdirSync('/src/pro'))
         labNotebook.epl = fs.readFileSync('./src/programs/acuity.js', "utf-8")
-        console.log('*', labNotebook.epl)
-        program[sid] = compileJSProgram(sid, labNotebook.epl, labNotebook.seed, session.windowHeight,
-            session.windowWidth)
+    } else if (labNotebook.program==="wedge") {
+        labNotebook.epl = fs.readFileSync('./src/programs/wedge.js', "utf-8")
     }
+    program[sid] = compileJSProgram(sid, labNotebook.epl, labNotebook.seed, session.windowHeight,
+        session.windowWidth)
 
     if (submitButton==="start") {
 
