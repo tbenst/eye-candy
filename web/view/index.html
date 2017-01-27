@@ -10,7 +10,6 @@
 <h1>Eye Candy</h1>
 <a href="/stimulus.html">Open Stimulus in new window first</a><br>
 <a href="/flicker.html">Open Flicker in new window first</a><br>
-<a href="/examples.html">Examples</a><br>
 
 <button type="button" onclick="JavaScript: toggleRequired()">
 Toggle Required
@@ -109,7 +108,7 @@ Toggle Required
       <option value="custom">Custom</option>
     </select><br>
 
-    Custom Eyecandy Programming Language program:<br>
+    Custom program:<br>
     <textarea name="epl" cols="60" rows="20"></textarea><br>
   <input type="submit" name="submitButton" value="start">
   <input type="submit" name="submitButton" value="preview">
@@ -118,15 +117,12 @@ Toggle Required
 <button type="button" onclick="JavaScript: resetButton()">
 Reset
 </button>
+
+<a href="/examples.html">Examples</a><br>
 <!-- <button type="button" onclick="JavaScript: targetButton()">
 Target
 </button>
  -->
-<h2>Example YAML:</h2>
-<p> Top level argument is one of ['bar', 'solid', 'wait', 'with_nested']
-With nested must be followed by a list ('-' on each new line, indented) and also contain the key 'list' at the same level of indendation as with_nested (but with no '-'). Bar must have [width, speed, angle, barColor, backgroundColor]. Wait must have [time]. Solid must have [time, backgroundColor]. Grating must have [width, speed, angle, barColor, backgroundColor, wavelength] and time OR numberOfBars.
-</p>
-
     <script src="js/remoteControl.js"></script>
 </body>
 </html>
