@@ -43,11 +43,11 @@ for (let speed of speeds) {
 				speed, width, angle, "white", {group: id}))
 		}
 		
-		// block means "do not insert a integrity check after me"
+		// block means "do not insert a integrity check before me"
 		lit = ceil(width/speed*120)
 		solid = new Solid(lit, "white", {group: id, block: true})
-		before = new Wait(floor((lifespan-lit)/2), {group: id, block: true})
-		after = new Wait(ceil((lifespan-lit)/2), {group: id})
+		before = new Wait(floor((lifespan-lit)/2), {group: id})
+		after = new Wait(ceil((lifespan-lit)/2), {group: id, block: true})
 
 		// before + lit + after = lifespan
 		// this pads the white flash
