@@ -11,3 +11,12 @@ html, body {
 canvas {
     display: block;
 }
+
+@font-face {
+    font-family: 'Sloan';
+    src: url('Sloan.ttf');
+}
+@font-face {
+    font-family: 'Snellen';
+    src: url('Snellen.ttf');
+}
