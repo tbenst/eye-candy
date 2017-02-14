@@ -35,3 +35,10 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+# Purescript
+web/bower_components
+web/.pulp-cache
+web/output/
+web/.psc*
+web/.psa*

@@ -1,0 +1,17 @@
+FROM node:7.0.0
+RUN mkdir -p /www/src
+RUN mkdir /www/view
+RUN mkdir /www/static
+COPY web/package.json /www
+WORKDIR /www
+# RUN npm install --quiet --production
+RUN npm install --quiet
+RUN npm install -g pulp bower purescript
+COPY web/bower.json /www
+RUN bower install --allow-root
+
+COPY web/static /www/static
+COPY web/view /www/view
+
+COPY web/src /www/src
+RUN pulp build --to static/js/purescript.js

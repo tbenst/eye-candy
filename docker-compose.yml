@@ -1,11 +1,15 @@
 web:
   restart: always
   build: .
-  command: node --harmony src/app.js
+  # command: 
+  # command: npm run webpack:server
+  # command: node --harmony src/app.js
   ports:
    - "3000:3000"
-  # volumes:
-  #  - .:/web
+  volumes:
+   - ./web/src/client:/www/src/client
+   - ./web/static:/www/static
+   - ./web/view:/www/view
   links:
    - redis
 redis:

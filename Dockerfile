@@ -1,11 +1,21 @@
-FROM node:7.0.0
-RUN mkdir -p /www/src
-RUN mkdir /www/view
-RUN mkdir /www/static
+FROM node:7.5.0
+
+RUN npm set progress=false && \
+    npm install -g --progress=false yarn \
+    	bower
+
+RUN mkdir /www
 COPY web/package.json /www
 WORKDIR /www
-# RUN npm install --quiet --production
-RUN npm install --quiet
-COPY web/src /www/src
-COPY web/static /www/static
-COPY web/view /www/view
+# RUN npm install --quiet
+# RUN npm install -g bower
+COPY web/bower.json /www
+
+RUN yarn install
+RUN bower install --allow-root
+COPY web/webpack.config.js /www
+
+COPY web/src/*.js /www/src/
+COPY web/src/epl /www/src/epl
+
+CMD sh -c "npm run webpack:watch & node --harmony src/app.js"

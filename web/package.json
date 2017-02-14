@@ -4,7 +4,9 @@
   "description": "stimulus generator ",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack:watch": "./node_modules/.bin/webpack --progress --watch",
+    "webpack:server": "./node_modules/.bin/webpack-dev-server --progress --inline --hot"
   },
   "repository": {
     "type": "git",
@@ -17,7 +19,8 @@
   },
   "homepage": "https://github.com/tbenst/eye-candy#readme",
   "devDependencies": {
-    "koa-logger": "^2.0.0"
+    "koa-logger": "^2.0.0",
+    "webpack-dev-server": "^2.3.0"
   },
   "dependencies": {
     "co": "4.6.0",
@@ -36,8 +39,12 @@
     "koa-socket-session": "1.1.0",
     "koa-static": "3.0.0",
     "mersennetwister": "0.2.3",
-    "uuid": "3.0.1",
+    "purescript": "^0.10.7",
+    "purescript-psa": "^0.4.0",
+    "purs-loader": "^2.3.0",
     "redux": "3.6.0",
-    "vm2": "3.1.0"
+    "uuid": "3.0.1",
+    "vm2": "3.1.0",
+    "webpack": "^2.2.1"
   }
 }
