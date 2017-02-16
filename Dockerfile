@@ -13,6 +13,7 @@ COPY web/bower.json /www
 
 RUN yarn install
 RUN bower install --allow-root
+RUN npm install purs-loader
 COPY web/webpack.config.js /www
 
 COPY web/src/*.js /www/src/

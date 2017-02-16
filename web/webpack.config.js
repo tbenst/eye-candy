@@ -38,20 +38,15 @@ module.exports = {
   },
   module: {
     rules: [
-      // {
-      //   test: /\.js$/,
-      //   exclude: /(node_modules|bower_components)/,
-      //   loader: 'babel-loader'
-      // },
       {
         test: /\.purs$/,
         loader: 'purs-loader',
         exclude: /node_modules/,
-
         query: {
           psc: 'psa',
           src: ['bower_components/purescript-*/src/**/*.purs', 'src/**/*.purs'],
           ffi: ['bower_components/purescript-*/src/**/*.js', 'src/**/*.js'],
+          noErrors: true
         }
       },
       // { test: /\.css$/, exclude: /\.useable\.css$/, loader: "style!css" },

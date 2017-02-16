@@ -20,7 +20,8 @@
   "homepage": "https://github.com/tbenst/eye-candy#readme",
   "devDependencies": {
     "koa-logger": "^2.0.0",
-    "webpack-dev-server": "^2.3.0"
+    "webpack-dev-server": "^2.3.0",
+    "purs-loader": "2.3.0"
   },
   "dependencies": {
     "co": "4.6.0",
@@ -41,7 +42,6 @@
     "mersennetwister": "0.2.3",
     "purescript": "^0.10.7",
     "purescript-psa": "^0.4.0",
-    "purs-loader": "^2.3.0",
     "redux": "3.6.0",
     "uuid": "3.0.1",
     "vm2": "3.1.0",
