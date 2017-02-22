@@ -21,7 +21,7 @@
   "devDependencies": {
     "koa-logger": "^2.0.0",
     "webpack-dev-server": "^2.3.0",
-    "purs-loader": "2.3.0"
+    "purs-loader": "2.4.0-beta.1"
   },
   "dependencies": {
     "co": "4.6.0",
