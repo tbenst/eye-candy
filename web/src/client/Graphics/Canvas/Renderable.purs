@@ -1,6 +1,7 @@
 module Graphics.Canvas.Renderable where
 
 import Prelude
+import Data.Generic
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Data.Maybe (Maybe(..))
@@ -25,7 +26,7 @@ newtype Rectangle = Rectangle { x :: Number, y :: Number, w :: Number
                               , h :: Number, c :: Color
                               }
 
-
+derive instance genericRectangle :: Generic Rectangle
 
 instance renderableRectangle :: Renderable Rectangle where
     render ctx (Rectangle {x,y,w,h,c}) = void do

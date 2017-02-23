@@ -1,9 +1,11 @@
 "use strict";
+// var Main = require("Mfain")
 
-// https://github.com/CapillarySoftware/purescript-requestAnimationFrame
-// module DOM.RequestAnimationFrame 
+// // https://github.com/CapillarySoftware/purescript-requestAnimationFrame
+// // module DOM.RequestAnimationFrame 
 
 var requestAnimationFrame = null;
+var wrapper = null;
 
 // http://www.paulirish.com/2011/requestanimationframe-for-smart-animating/
 exports.requestAnimationFrame = function(window_) {
@@ -18,9 +20,11 @@ exports.requestAnimationFrame = function(window_) {
         })();
     }
     return function(action) {
-        console.log(action.toString())
+        wrapper = function(t) {
+            return action(t)()
+        }
         return function() {
-            return requestAnimationFrame(action);
+            return requestAnimationFrame(wrapper);
         };
     }
 };

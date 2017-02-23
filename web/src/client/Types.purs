@@ -1,4 +1,5 @@
 module Types where
+import Prelude
 
 type Time = Number
 

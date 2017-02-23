@@ -42,3 +42,4 @@ web/.pulp-cache
 web/output/
 web/.psc*
 web/.psa*
+web/static/js/main.js

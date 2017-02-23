@@ -742,7 +742,6 @@ async function nextStimulus() {
     }
    return stimulus
 }
-console.log(double(24))
 
 /************************************************
 RUN
