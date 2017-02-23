@@ -35,3 +35,8 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+
+web/.psci_modules/
+web/bower_components/
+web/output/

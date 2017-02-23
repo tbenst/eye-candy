@@ -83,6 +83,8 @@ router.post("/start-program", ctx => {
     let labNotebook = Object.assign({},ctx.request.body)
     let {submitButton} = labNotebook
     delete labNotebook.submitButton
+
+    // this is bad design--what if version changes?? should
     if (labNotebook.program==="custom") {
         // program already loaded in labNotebook.epl
     } else if (labNotebook.program==="acuity") {
