@@ -13,7 +13,7 @@ import DOM.HTML (window)
 import DOM.HTML.Types (Window())
 import Types
 import Graphics.Canvas.Renderable
-import Debug.Trace (traceAny)
+-- import Debug.Trace (traceAny)
 
 foreign import requestAnimationFrame :: forall a eff.
     Window -> (Time -> Eff (dom :: DOM | eff) a) -> Eff (dom :: DOM | eff) Unit
