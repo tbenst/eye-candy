@@ -8,7 +8,7 @@ const Misc = require("./misc")
 const math = require("./math")
 
 
-// this object has all values usable in EPLiniininiiniitininxnoi{inasyouiinheasinyou}
+// this object has all values usable in EPL
 let EPL = Object.assign({log: console.log},Types,Render,Random,math,Misc)
 
 function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {

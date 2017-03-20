@@ -41,15 +41,15 @@ const STIMULUS = {
 }
 
 const LETTER = {
-     C: "C"
-     D: "D"
-     H: "H"
-     K: "K"
-     N: "N"
-     O: "O"
-     R: "R"
-     S: "S"
-     V: "V"
+     C: "C",
+     D: "D",
+     H: "H",
+     K: "K",
+     N: "N",
+     O: "O",
+     R: "R",
+     S: "S",
+     V: "V",
      Z: "Z"
 }
 

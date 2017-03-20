@@ -109,8 +109,8 @@ function render() {
                                      graphic.size, graphic.size)
                     break
                 case GRAPHIC.LETTER:
-                    // context.fillStyle = graphic.color
-                    ctx.font = '48px serif';
+                    context.fillStyle = graphic.color
+                    context.font = graphic.size+'px Sloan'
                     context.fillText(graphic.letter, graphic.x, graphic.y)
                     break
             }

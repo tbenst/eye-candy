@@ -21,6 +21,7 @@ function graphicsDispatcher() {
                 age: 0,
                 lifespan: 6000
             }]))
+            break
         case STIMULUS.LETTER:
             store.dispatch(setGraphicsAC([{
                 graphicType: GRAPHIC.LETTER,
@@ -33,6 +34,7 @@ function graphicsDispatcher() {
                 y: stimulus.y,
                 age: 0
             }]))
+            break
         case STIMULUS.GRATING:
             if (stimulus.age === 0) {
                 const lifespan = calcBarLifespan(speed, width)

@@ -89,6 +89,8 @@ router.post("/start-program", ctx => {
         // program already loaded in labNotebook.epl
     } else if (labNotebook.program==="acuity") {
         labNotebook.epl = fs.readFileSync('/www/src/programs/acuity.js', "utf-8")
+    } else if (labNotebook.program==="letters") {
+        labNotebook.epl = fs.readFileSync('/www/src/programs/letters.js', "utf-8")
     } else if (labNotebook.program==="wedge") {
         labNotebook.epl = fs.readFileSync('/www/src/programs/wedge.js', "utf-8")
     }
