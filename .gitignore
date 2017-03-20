@@ -40,3 +40,4 @@ jspm_packages
 web/.psci_modules/
 web/bower_components/
 web/output/
+web/static/js/main.js

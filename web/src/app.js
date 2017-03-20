@@ -88,9 +88,9 @@ router.post("/start-program", ctx => {
     if (labNotebook.program==="custom") {
         // program already loaded in labNotebook.epl
     } else if (labNotebook.program==="acuity") {
-        labNotebook.epl = fs.readFileSync('./src/programs/acuity.js', "utf-8")
+        labNotebook.epl = fs.readFileSync('/www/src/programs/acuity.js', "utf-8")
     } else if (labNotebook.program==="wedge") {
-        labNotebook.epl = fs.readFileSync('./src/programs/wedge.js', "utf-8")
+        labNotebook.epl = fs.readFileSync('/www/src/programs/wedge.js', "utf-8")
     }
     program[sid] = compileJSProgram(sid, labNotebook.epl, labNotebook.seed, session.windowHeight,
         session.windowWidth)
