@@ -2,10 +2,11 @@ const metadata = {name: "acuity", version: "0.3.0"}
 
 function* measureIntegrity(stimuli,every=5*60) {
 	// every N seconds, do a flash
-	let integrityMeta = {group: r.uuid(), label: "integrity"}
+	let integrityMeta
 	let elapsedTime = every
 	for (let s of stimuli) {
 		if (elapsedTime>=every && !s.metadata.block) {
+			integrityMeta = {group: r.uuid(), label: "integrity"}
 			yield new Wait(120, integrityMeta)
 			yield new Solid(60, "white", integrityMeta)
 			yield new Wait(240, integrityMeta)
