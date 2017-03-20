@@ -1,4 +1,4 @@
-const metadata = {name: "acuity", version: "0.3.0"}
+const metadata = {name: "acuity", version: "0.3.1"}
 
 function* measureIntegrity(stimuli,every=5*60) {
 	// every N seconds, do a flash
