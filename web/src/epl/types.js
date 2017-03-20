@@ -4,7 +4,8 @@ const STIMULUS = {
     WAIT: 'WAIT',
     TARGET: 'TARGET',
     GRATING: 'GRATING',
-    CHECKERBOARD: "CHECKERBOARD"
+    CHECKERBOARD: "CHECKERBOARD",
+    LETTER: "LETTER"
 }
 
 const GRAPHIC = {
@@ -35,6 +36,19 @@ class Bar extends Stimulus {
     }
 }
 exports.Bar = Bar
+
+class Letter extends Stimulus {
+    constructor(lifespan, backgroundColor, letter, x, y, size, color, metadata) {
+        super(lifespan, backgroundColor, metadata)
+        this.stimulusType = STIMULUS.LETTER
+        this.letter = letter
+        this.x = x
+        this.y = y
+        this.size = size
+        this.color = color
+    }
+}
+exports.Letter = Letter
 
 class Grating extends Bar {
     constructor(lifespan, backgroundColor, wavelength, numberOfBars, metadata) {

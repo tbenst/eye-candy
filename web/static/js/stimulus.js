@@ -1,503 +1,9 @@
-const PI = Math.PI
-const pow = Math.pow
-const sqrt = Math.sqrt
-const sin = Math.sin
-const cos = Math.cos
-
 /************************************************
 REDUX (GLOBAL STATE)
 ************************************************/
 
 const createStore = Redux.createStore
 const applyMiddleware = Redux.applyMiddleware
-
-
-/***********************************************
-ACTIONS
-************************************************/
-const TIME_TICK = "TIME_TICK"
-const STIMULUS_TICK = "STIMULUS_TICK"
-const SET_STATUS = "SET_STATUS"
-const SET_STIMULUS = "SET_STIMULUS"
-const SET_STIMULUS_QUEUE = "SET_STIMULUS_QUEUE"
-const ADD_STIMULUS = "ADD_STIMULUS"
-const INCREMENT_STIMULUS_INDEX = "INCREMENT_STIMULUS_INDEX"
-const SET_GRAPHICS = "SET_GRAPHICS"
-const ADD_GRAPHIC = "ADD_GRAPHIC"
-const REMOVE_GRAPHIC = "REMOVE_GRAPHIC"
-const GRAPHICS_TICK = "GRAPHICS_TICK"
-const SET_SIGNAL_LIGHT = "SET_SIGNAL_LIGHT"
-const RESET = "RESET"
-
-// Define states for readability
-const STATUS = {
-    STARTED: "STARTED",
-    STOPPED: "STOPPED",
-    FINISHED: "FINISHED"
-}
-
-const SIGNAL_LIGHT = {
-    FRAME_A: "FRAME_A",
-    FRAME_B: "FRAME_B",
-    STOPPED: "STOPPED"
-}
-
-const STIMULUS = {
-    BAR: "BAR",
-    SOLID: "SOLID",
-    WAIT: "WAIT",
-    TARGET: "TARGET",
-    GRATING: "GRATING",
-    CHECKERBOARD: "CHECKERBOARD"
-}
-
-const GRAPHIC = {
-    BAR: "BAR",
-    CHECKER: "CHECKER",
-    TARGET: "TARGET"
-}
-
-/***********************************************
-EXAMPLE STIMULUS
-************************************************/
-
-const exampleBar = {stimulusType: STIMULUS.BAR, lifespan: 300,
-        backgroundColor: "black", width: 50, barColor: "white",
-        speed: 15, angle: PI, age: 0}
-const exampleCheckerboard = {stimulusType: STIMULUS.CHECKERBOARD, lifespan: 300,
-        backgroundColor: "black", width: 50, barColor: "white",
-        speed: 15, angle: PI, age: 0}
-const exampleSolid = {stimulusType: STIMULUS.SOLID,
-            lifespan: 120 * 5,
-            backgroundColor: "black"
-        }
-const exampleWait = {stimulusType: STIMULUS.WAIT,
-            lifespan: 120 * 5,
-            backgroundColor: "black"
-        }
-const exampleGrating = {stimulusType: STIMULUS.GRATING, lifespan: 300,
-        backgroundColor: "black", width: 50, barColor: "white",
-        speed: 15, angle: PI, wavelength: 500, age: 0, count: 0}
-
-/***********************************************
-ACTION CREATORS
-************************************************/
-
-function stimulusTickAC(timeDelta) {
-    return {type: STIMULUS_TICK, timeDelta: timeDelta}
-}
-
-function timetickAC(timeDelta) {
-    return { type: TIME_TICK, timeDelta: timeDelta}
-}
-
-function addGraphicAC(graphic) {
-    return { type: ADD_GRAPHIC, graphic: graphic }
-}
-
-function removeGraphicAC(index) {
-    return { type: REMOVE_GRAPHIC, index: index }
-}
-
-function addStimulusAC(stimulus, index) {
-    return { type: ADD_STIMULUS, stimulus: stimulus, index: index }
-}
-
-function graphicsTickAC(timeDelta) {
-    return  { type: GRAPHICS_TICK, timeDelta: timeDelta}
-}
-
-function incrementStimulusIndexAC() {
-    return  { type: INCREMENT_STIMULUS_INDEX}
-}
-
-function makeAccessorAC(type, ...argNames) {
-    return function(...args) {
-        let action = { type }
-        argNames.forEach((arg, index) => {
-            action[argNames[index]] = args[index]
-        })
-        return action
-    }
-}
-
-function resetAC() {
-    return {type: RESET}
-}
-
-const setStatusAC = makeAccessorAC(SET_STATUS, "status")
-const setStimulusQueueAC = makeAccessorAC(SET_STIMULUS_QUEUE, "stimulusQueue")
-const setStimulusAC = makeAccessorAC(SET_STIMULUS, "stimulus")
-const setGraphicsAC = makeAccessorAC(SET_GRAPHICS, "graphics")
-const setSignalLightAC = makeAccessorAC(SET_SIGNAL_LIGHT, "signalLight")
-
-/***********************************************
-DISPATCHERS
-************************************************/
-
-function graphicsDispatcher() {
-    const state = store.getState()
-    const stimulus = state.stimulus
-    console.log("in graphicsDispatcher", stimulus)
-    switch (stimulus.stimulusType) {
-        case STIMULUS.BAR:
-            if (stimulus.age === 0) {
-                console.log("len is 0")
-                barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
-                    stimulus.speed, stimulus.angle, stimulus.lifespan)
-            }
-            break
-        case STIMULUS.TARGET:
-            store.dispatch(setGraphicsAC([{
-                graphicType: GRAPHIC.TARGET
-            }]))
-        case STIMULUS.GRATING:
-            if (stimulus.age === 0) {
-                const lifespan = calcBarLifespan(speed, width)
-                barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
-                    stimulus.speed, stimulus.angle)
-                // increment count by 1 after bar is dispatched
-                store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
-                    count: stimulus.count + 1
-                })))
-            }
-            
-            // console.log("XXX grating comparison", stimulus.speed / 120 * stimulus.age)
-            // console.log(">= XXX grating comparison", stimulus.wavelength * stimulus.count)
-
-            gratingDispatcherHelper()
-            break
-        case STIMULUS.CHECKERBOARD:
-            if (stimulus.age === 0) {
-                checkerboardDispatcher(stimulus.time,stimulus.size,stimulus.period,stimulus.color,stimulus.alternateColor)
-            } else {
-                 if (stimulus.age > stimulus.period * stimulus.count / 2 * 120) {
-                    if (stimulus.count % 2 == 0) {
-                        store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
-                            count: stimulus.count+1,
-                            backgroundColor: stimulus.alternateColor,
-                        })))
-                    } else {
-                        store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
-                            count: stimulus.count+1,
-                            backgroundColor: stimulus.color,
-                        })))
-                    }
-                 }
-            }
-    }
-}
-
-function checkerboardDispatcher(time,size,period,color,alternateColor) {
-    const height = store.getState()["windowHeight"]
-    const width = store.getState()["windowWidth"]
-    const numberOfRows = Math.ceil(height/size)
-    const numberOfCols = Math.ceil(width/size)
-    // we will only create every other square and alternate colors with the background
-    for (var i = 0; i < numberOfCols; i=i+2) {
-        for (var j = 0; j < numberOfRows; j=j+2) {
-            store.dispatch(addGraphicAC({
-                graphicType: GRAPHIC.CHECKER,
-                startX: i*size,
-                startY: j*size,
-                size: size,
-                period: period, 
-                color: color,
-                alternateColor: alternateColor,
-                count: 1,
-                lifespan: time*120,
-                age: 0
-            }))
-        }
-    }
-
-    for (var i = 1; i < numberOfCols; i=i+2) {
-        for (var j = 1; j < numberOfRows; j=j+2) {
-            store.dispatch(addGraphicAC({
-                graphicType: GRAPHIC.CHECKER,
-                startX: i*size,
-                startY: j*size,
-                size: size,
-                period: period, 
-                color: color,
-                alternateColor: alternateColor,
-                count: 1,
-                lifespan: time*120,
-                age: 0
-            }))
-        }
-    }
-}
-
-function barDispatcher(width, barColor, backgroundColor, speed, angle, lifespan,
-    startR=getDiagonalLength()/2) {
-
-    store.dispatch(addGraphicAC({
-        graphicType: GRAPHIC.BAR, age: 0, color: barColor, size: {width: width,
-            height: getDiagonalLength()}, speed: speed, angle: angle,
-            lifespan: lifespan, startR: startR
-    }))
-}
-
-function gratingDispatcherHelper() {
-
-    const state = store.getState()
-    const stimulus = state.stimulus
-
-    // first bar is reference origin
-    const originR = getDiagonalLength()/2
-    const distanceTraveled = stimulus.speed / 120 * stimulus.age
-    const refOrigin = originR - distanceTraveled
-
-
-    // adjust for > 0 or else wavelength will be off
-    // due to frame timing
-    // refOrigin must have move by at least this much to dispatch new bar
-    let count = stimulus.count
-    let nextStartDistance = stimulus.wavelength * count
-
-    // user can give numberOfBars or time. 
-    if (stimulus.numberOfBars===undefined || count<stimulus.numberOfBars) {
-        // aggregate position (distance traveled) spawns new bars
-        // once equal to wavelength
-        // 500 / 120 * 290 >= 300 * 0
-        if (distanceTraveled  >= nextStartDistance) {
-            console.log("XXX will dispatch new bar ", refOrigin+nextStartDistance)
-            const startR = refOrigin + nextStartDistance
-            const lifespan = calcBarLifespan(speed, width, startR)
-            barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
-                stimulus.speed, stimulus.angle, lifespan, startR)
-            // we use count to keep track of how many bars have been
-            // cumulatively dispatched
-            count = count + 1
-            store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
-                count: count
-            })))
-        }
-
-        // need to have bars at least speed / 120 * 3 pixels past originR (3 frames)
-        // const bufferDistance = stimulus.speed / 120 * 3
-        nextStartDistance = stimulus.wavelength * count
-
-        // This likely creates stack problems with large numbers of bars (eg <10 width and <10 wavelength)
-        if (distanceTraveled  >= nextStartDistance) {
-            gratingDispatcherHelper()
-        }
-    }
-}
-
-function removeGraphicDispatcher(index) {
-    store.dispatch(removeGraphicAC(index))
-}
-
-function cleanupGraphicsDispatcher() {
-    const graphics = store.getState().graphics
-    for (var i = 0; i < graphics.length; i++) {
-        const graphic = graphics[i]
-        if (graphic.age >= graphic.lifespan) {
-            removeGraphicDispatcher(i)
-        }
-    }
-}
-
-// The mother of all dispatchers: the render loop affects the world
-// by dispatching a time tick
-function tickDispatcher(timeDelta) {
-    const state = store.getState()
-    
-    // initialize for time=0
-    if (state.stimulus!=undefined ) {
-        store.dispatch(timetickAC(timeDelta))
-        store.dispatch(stimulusTickAC(timeDelta))
-    }
-
-    // check if stimulus expired then update signal light
-    if (state.stimulus===undefined ||
-        state.stimulus.age >= state.stimulus.lifespan) {
-
-        newStimulusDispatcher()
-    }
-    switch(state.signalLight) {
-        case SIGNAL_LIGHT.STOPPED:
-            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_A))
-            break
-        case SIGNAL_LIGHT.FRAME_A:
-            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_B))
-            break
-        case SIGNAL_LIGHT.FRAME_B:
-            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_A))
-            break
-    }
-    // graphicsDispatcher will initialize graphics
-    graphicsDispatcher()
-    // graphicsTickAC will initialize correct position
-    store.dispatch(graphicsTickAC(timeDelta))
-    cleanupGraphicsDispatcher()
-}
-
-function newStimulusDispatcher() {
-    queueStimulusDispatcher()
-    const state = store.getState()
-    const stimulusIndex = state.stimulusIndex
-    const nextStimulus = state.stimulusQueue[stimulusIndex]
-
-    if (nextStimulus.done===true) {
-        store.dispatch(setStatusAC(STATUS.FINISHED)) 
-        store.dispatch(setSignalLightAC(SIGNAL_LIGHT.STOPPED))
-    } else {
-        store.dispatch(incrementStimulusIndexAC())
-        store.dispatch(setStimulusAC(nextStimulus.value))
-        store.dispatch(setGraphicsAC([]))
-    }
-
-}
-
-async function queueStimulusDispatcher() {
-    const stimulus = await nextStimulus()
-    const stimulusIndex = stimulus.stimulusIndex
-    store.dispatch(addStimulusAC(stimulus, stimulusIndex))
-}
-
-
-/***********************************************
-REDUCERS
-************************************************/
-
-function eyeCandyApp(state, action) {
-    switch (action.type) {
-        case SET_STATUS:
-            return Object.assign({}, state, {
-                status: action.status
-            })
-        case SET_STIMULUS_QUEUE:
-            return Object.assign({}, state, {
-                stimulusQueue: action.stimulusQueue
-            })
-        case SET_STIMULUS:
-            return Object.assign({}, state, {
-                stimulus: action.stimulus
-            })
-        case INCREMENT_STIMULUS_INDEX:
-            let index = state.stimulusIndex + 1
-            localStorage.setItem("stimulusIndex", index)
-            return Object.assign({}, state, {
-                stimulusIndex: index
-            })
-        case ADD_STIMULUS:
-            var newStimulusQueue = state.stimulusQueue.slice()
-            newStimulusQueue[action.index] = action.stimulus
-            return Object.assign({}, state, {
-                stimulusQueue: newStimulusQueue
-            })
-        case SET_GRAPHICS:
-            return Object.assign({}, state, {
-                graphics: action.graphics
-            })
-        case ADD_GRAPHIC:
-            return Object.assign({}, state, {
-                graphics: [...state.graphics, action.graphic]
-            })
-        case REMOVE_GRAPHIC:
-            return Object.assign({}, state, {
-                graphics: state.graphics.filter((v,i) => {
-                    if (i===action.index) {return false} return true
-                })
-            })
-        case SET_SIGNAL_LIGHT:
-            localStorage.setItem('signalLight', action.signalLight)
-            return Object.assign({}, state, {
-                signalLight: action.signalLight
-            })
-        case TIME_TICK:
-            return Object.assign({}, state, {
-                time: state.time + action.timeDelta
-            })
-        case GRAPHICS_TICK:
-            return Object.assign({}, state, {
-                graphics: graphicsReducer(state.graphics, action.timeDelta)
-            })
-        case STIMULUS_TICK:
-            return Object.assign({}, state, {
-                stimulus: stimulusTickReducer(state.stimulus, action.timeDelta)
-            })
-        case RESET:
-            localStorage.setItem('signalLight', SIGNAL_LIGHT.STOPPED)
-            return Object.assign({}, storeInitialState)
-        default:
-          return state
-    }
-}
-
-function stimulusTickReducer(stimulus, timeDelta) {
-    return Object.assign({}, stimulus, {
-        age: stimulus.age + timeDelta
-    })
-}
-
-function graphicsReducer(graphics, timeDelta) {
-    // if (graphics === undefined) {
-        // return graphics
-    // } else {
-        return graphics.map(graphic => {
-            return tickGraphic(graphic, timeDelta)
-       })/*.filter((x) => {return x}) // TODO add code to expire graphics*/
-    // }
-}
-
-
-/***********************************************
-GRAPHICS TICK
-************************************************/
-
-function tickGraphic(graphic, timeDelta) {
-    switch (graphic.graphicType) {
-        case GRAPHIC.BAR:
-            return tickBar(graphic, timeDelta)
-        case GRAPHIC.CHECKER:
-            return tickChecker(graphic,timeDelta)
-        default:
-            return graphic
-    }
-}
-
-function tickChecker(checker, timeDelta) {
-    if (checker.age+timeDelta >= checker.period/2*120) {
-        return Object.assign({}, checker, {
-            age: checker.age + timeDelta - checker.period/2*120,
-            color: checker.alternateColor,
-            alternateColor: checker.color
-
-        })
-    } else {
-        return Object.assign({}, checker, {
-            age: checker.age + timeDelta,
-        })
-
-    }
-}
-
-function tickBar(bar, timeDelta) {
-    let newPosition = undefined
-    if (bar.position === undefined) {
-        newPosition = {r: bar.startR, theta: -bar.angle}
-    } else {
-        newPosition = {r: bar.position.r - bar.speed/120*timeDelta, 
-            theta: bar.position.theta}
-    }
-
-    const state = store.getState()
-
-    return Object.assign({}, bar, {
-        position: newPosition,
-        age: bar.age + timeDelta,
-        // compensate for bar width & height, translate from polar & translate from center
-        // use length on both to make square
-        origin: {x: bar.size.width/2*cos(newPosition.theta) +
-                    newPosition.r*cos(newPosition.theta) + state["windowWidth"]/2,
-                 y: bar.size.width/2*sin(newPosition.theta) +
-                    newPosition.r*sin(newPosition.theta) + state["windowHeight"]/2}
-    })
-}
 
 
 /***********************************************
@@ -519,21 +25,32 @@ function logger({ getState }) {
     }
 }
 
+
 /************************************************
-LOGIC
+STORE
 ************************************************/
 
-// ensure bar always spans window regardless of angle
-function getDiagonalLength() {
-    return sqrt(pow(store.getState()["windowWidth"], 2) +
-        pow(store.getState()["windowHeight"], 2))
+const storeInitialState = {
+    windowHeight: window.innerHeight,
+    windowWidth: window.innerWidth,
+    status: STATUS.STOPPED,
+    signalLight: SIGNAL_LIGHT.STOPPED,
+    time: 0,
+    stimulusIndex: 0,
+    stimulusQueue: [],
+    graphics: []
 }
 
-function calcBarLifespan(speed, width, startR=getDiagonalLength()/2) {
-    // in the case of a single bar, startR==getDiagonalLength()/2
-    // separating is useful for gratings
-    return Math.ceil((startR + getDiagonalLength()/2 + width ) / speed * 120)
-}
+
+// USE THIS FOR NO LOGGER
+// let store = createStore(eyeCandyApp, storeInitialState)
+
+// USE THIS FOR LOGGER
+let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
+
+// GET FROM SERVER (NOT OPERATIONAL)
+// let store = createStore(todoApp, window.STATE_FROM_SERVER)
+
 
 
 /************************************************
@@ -591,6 +108,11 @@ function render() {
                     context.fillRect(graphic.startX, graphic.startY,
                                      graphic.size, graphic.size)
                     break
+                case GRAPHIC.LETTER:
+                    // context.fillStyle = graphic.color
+                    ctx.font = '48px serif';
+                    context.fillText(graphic.letter, graphic.x, graphic.y)
+                    break
             }
             context.restore()
         })
@@ -633,32 +155,6 @@ function renderLoop() {
     }
     requestAnimationFrame(renderLoop)
 }
-
-
-/************************************************
-STORE
-************************************************/
-
-const storeInitialState = {
-    windowHeight: window.innerHeight,
-    windowWidth: window.innerWidth,
-    status: STATUS.STOPPED,
-    signalLight: SIGNAL_LIGHT.STOPPED,
-    time: 0,
-    stimulusIndex: 0,
-    stimulusQueue: [],
-    graphics: []
-}
-
-
-// USE THIS FOR NO LOGGER
-// let store = createStore(eyeCandyApp, storeInitialState)
-
-// USE THIS FOR LOGGER
-let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
-
-// GET FROM SERVER (NOT OPERATIONAL)
-// let store = createStore(todoApp, window.STATE_FROM_SERVER)
 
 
 /************************************************
