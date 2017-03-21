@@ -91,6 +91,8 @@ router.post("/start-program", ctx => {
         labNotebook.epl = fs.readFileSync('/www/src/programs/acuity.js', "utf-8")
     } else if (labNotebook.program==="letters") {
         labNotebook.epl = fs.readFileSync('/www/src/programs/letters.js', "utf-8")
+    } else if (labNotebook.program==="letters-inverted") {
+        labNotebook.epl = fs.readFileSync('/www/src/programs/letters-inverted.js', "utf-8")
     } else if (labNotebook.program==="wedge") {
         labNotebook.epl = fs.readFileSync('/www/src/programs/wedge.js', "utf-8")
     }
