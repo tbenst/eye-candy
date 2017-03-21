@@ -9,25 +9,25 @@ let repetitions = 12
 let sizes = [200,400,600]
 let durations = [60,120,180]
 
-
 function* measureIntegrity(stimuli,every=5*60) {
-    // every N seconds, do a flash
-    let integrityMeta
-    let elapsedTime = every
-    for (let s of stimuli) {
-        if (elapsedTime>=every && !s.metadata.block) {
-            integrityMeta = {group: r.uuid(), label: "integrity"}
-            yield new Wait(120, integrityMeta)
-            yield new Solid(60, "white", integrityMeta)
-            yield new Wait(240, integrityMeta)
-            elapsedTime = 0
-            yield s
-        } else {
-            yield s
-            elapsedTime=elapsedTime+s["lifespan"]/120
-        }
-    }
+	// every N seconds, do a flash
+	let integrityMeta
+	let elapsedTime = every
+	for (let s of stimuli) {
+		if (elapsedTime>=every && s.metadata.block===undefined) {
+			integrityMeta = {group: r.uuid(), label: "integrity"}
+			yield new Wait(120, integrityMeta)
+			yield new Solid(60, "white", integrityMeta)
+			yield new Wait(240, integrityMeta)
+			elapsedTime = 0
+			yield s
+		} else {
+			yield s
+		}
+		elapsedTime=elapsedTime+s["lifespan"]/120
+	}
 }
+
 
 let letters = ["C", "D", "H", "K", "N", "O", "R", "S", "V", "Z"]
 let x
