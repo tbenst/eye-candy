@@ -46,8 +46,8 @@ for (let i = 0; i < repetitions; i++) {
                 y = windowHeight/2 + size/2
                 l = new Letter(duration, "white", letter,x,y,size, 
                     "black", {group: id, cohort: cohort, block: true})
-                before = new Solid(r.randi(60,120), "white" {group: id})
-                after = new Solid(r.randi(60,120), "white" {group: id, block: true})
+                before = new Solid(r.randi(60,120), "white", {group: id})
+                after = new Solid(r.randi(60,120), "white", {group: id, block: true})
 
                 // before + lit + after = lifespan
                 // this pads the white flash
