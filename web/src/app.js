@@ -132,6 +132,8 @@ router.post("/start-program", ctx => {
         let minutes = Math.floor(seconds/60)
         seconds = Math.ceil(seconds%60)
         ctx.body = minutes+" minutes "+seconds+" seconds"
+    } else if (submitButton==="view source code") {
+        ctx.body = labNotebook.epl
     }
     ctx.status = 200
 })
