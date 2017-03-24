@@ -20,9 +20,9 @@ for (let speed of speeds) {
 			stimuli.push([
 				new Wait(120, integrityMeta),
 				new Solid(120, "white", integrityMeta),
-				new Wait(120, integrityMeta)
+				new Wait(120, integrityMeta),
 				new Bar(lifespan,"black", speed, width, angle, "white",
-					{group: id}),
+					{group: id})
 			])
 		}
 	}
