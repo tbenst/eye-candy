@@ -84,17 +84,14 @@ router.post("/start-program", ctx => {
     let {submitButton} = labNotebook
     delete labNotebook.submitButton
 
-    // this is bad design--what if version changes?? should
     if (labNotebook.program==="custom") {
         // program already loaded in labNotebook.epl
-    } else if (labNotebook.program==="acuity") {
-        labNotebook.epl = fs.readFileSync('/www/src/programs/acuity.js', "utf-8")
-    } else if (labNotebook.program==="letters") {
-        labNotebook.epl = fs.readFileSync('/www/src/programs/letters.js', "utf-8")
-    } else if (labNotebook.program==="letters-inverted") {
-        labNotebook.epl = fs.readFileSync('/www/src/programs/letters-inverted.js', "utf-8")
-    } else if (labNotebook.program==="wedge") {
-        labNotebook.epl = fs.readFileSync('/www/src/programs/wedge.js', "utf-8")
+    } else {
+        // this is likely a security vulnerability but sure is convenient
+        // convention over customization
+        labNotebook.epl = fs.readFileSync(
+            '/www/src/programs/'+labNotebook.program+'.js',
+            "utf-8")
     }
     program[sid] = compileJSProgram(sid, labNotebook.epl, labNotebook.seed, session.windowHeight,
         session.windowWidth)
