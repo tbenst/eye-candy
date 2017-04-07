@@ -1,8 +1,8 @@
-const metadata = {name: "letters", version: "0.1.0", inverted: false}
+const metadata = {name: "letters", version: "0.2.0", inverted: false}
 
-let repetitions = 12
-let sizes = [200,400,600]
-let durations = [60,120,180]
+let repetitions = 200
+let sizes = [300]
+let durations = [60]
 
 
 function* measureIntegrity(stimuli,every=5*60) {
@@ -46,7 +46,7 @@ for (let i = 0; i < repetitions; i++) {
                 y = windowHeight/2 + size/2
                 l = new Letter(duration, "black", letter,x,y,size, 
                     "white", {group: id, cohort: cohort, block: true})
-                before = new Wait(r.randi(60,120), {group: id})
+                before = new Wait(120, {group: id})
                 after = new Wait(r.randi(60,120), {group: id, block: true})
 
                 // before + lit + after = lifespan
