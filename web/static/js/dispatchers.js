@@ -29,11 +29,17 @@ function graphicsDispatcher() {
                 lifespan: stimulus.lifespan,
                 size: stimulus.size,
                 color: stimulus.color,
-                backgroundColor: stimulus.backgroundColor,
+                // backgroundColor: stimulus.backgroundColor,
                 x:  stimulus.x,
                 y: stimulus.y,
                 age: 0
             }]))
+            break
+        case STIMULUS.EYECHART:
+        if (stimulus.age === 0) {
+            eyeChartDispatcher(stimulus.lifespan, stimulus.letterMatrix, stimulus.size,
+                stimulus.padding, stimulus.color)
+        }
             break
         case STIMULUS.GRATING:
             if (stimulus.age === 0) {
@@ -53,7 +59,7 @@ function graphicsDispatcher() {
             break
         case STIMULUS.CHECKERBOARD:
             if (stimulus.age === 0) {
-                checkerboardDispatcher(stimulus.time,stimulus.size,stimulus.period,stimulus.color,stimulus.alternateColor)
+                checkerboardDispatcher(stimulus.size,stimulus.period,stimulus.color,stimulus.alternateColor)
             } else {
                  if (stimulus.age > stimulus.period * stimulus.count / 2 * 120) {
                     if (stimulus.count % 2 == 0) {
@@ -72,7 +78,31 @@ function graphicsDispatcher() {
     }
 }
 
-function checkerboardDispatcher(time,size,period,color,alternateColor) {
+
+function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
+    const height = store.getState()["windowHeight"]
+    const width = store.getState()["windowWidth"]
+    const fullSize  = size + padding
+    const numberOfRows = Math.ceil(height/fullSize)
+    const numberOfCols = Math.ceil(width/fullSize)
+
+    for (var i = 0; i < numberOfRows; i++) {
+        for (var j = 0; j < numberOfCols; j++) {
+            store.dispatch(addGraphicAC({
+                graphicType: GRAPHIC.LETTER,
+                x: j*fullSize+padding/2,
+                y: i*fullSize+size+padding/2,
+                letter: letterMatrix[i][j],
+                size: size,
+                color: color,
+                lifespan: lifespan,
+                age: 0
+            }))
+        }
+    }
+}
+
+function checkerboardDispatcher(size,period,color,alternateColor) {
     const height = store.getState()["windowHeight"]
     const width = store.getState()["windowWidth"]
     const numberOfRows = Math.ceil(height/size)
@@ -89,7 +119,7 @@ function checkerboardDispatcher(time,size,period,color,alternateColor) {
                 color: color,
                 alternateColor: alternateColor,
                 count: 1,
-                lifespan: time*120,
+                lifespan: period*120,
                 age: 0
             }))
         }
@@ -106,7 +136,7 @@ function checkerboardDispatcher(time,size,period,color,alternateColor) {
                 color: color,
                 alternateColor: alternateColor,
                 count: 1,
-                lifespan: time*120,
+                lifespan: period*120,
                 age: 0
             }))
         }
