@@ -1,4 +1,4 @@
-const metadata = {name: "checkerboard", version: "0.1.0", inverted: false}
+const metadata = {name: "checkerboard", version: "0.1.1", inverted: false}
 
 let repetitions = 40
 let durations = [120]
@@ -36,8 +36,8 @@ let cohort
 
 for (let size of sizes) {
     for (let duration of durations) {
+        cohort = r.uuid()
         for (let i = 0; i < repetitions; i++) {
-            cohort = r.uuid()
             id = r.uuid()
             a = new Checkerboard(duration, "white", "black", size,
                 duration, {group: id, cohort: cohort, block: true, class: 'A'})
