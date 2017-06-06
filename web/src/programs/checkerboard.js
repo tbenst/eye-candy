@@ -1,9 +1,9 @@
-const metadata = {name: "checkerboard", version: "0.1.1", inverted: false}
+const metadata = {name: "checkerboard", version: "0.2.0", inverted: false}
 
-let repetitions = 40
-let durations = [120]
+let repetitions = 50
+let durations = [60]
 
-let sizes = [1000,500,250,125,75,50,25]
+let sizes = [13,20,31,50,79,125,198,314,498]
 
 
 function* measureIntegrity(stimuli,every=5*60) {
@@ -25,6 +25,39 @@ function* measureIntegrity(stimuli,every=5*60) {
     }
 }
 
+function checkerboard_group(class1, class2, duration, size, cohort) {
+    const id = r.uuid()
+    let target
+    let color1
+    let color2
+    if (class1=='A') {
+        color1 = ["white","black"]
+    } else {
+        color1 = ["black", "white"]
+    }
+
+    if (class2=='A') {
+        color2 = ["white","black"]
+    } else {
+        color2 = ["black", "white"]
+    }
+
+    if (class1===class2) {
+        target = 'SAME'
+    } else {
+        target = 'DIFFERENT'
+    }
+    const before = new Wait(120, {group: id})
+    const first = new Checkerboard(duration, color1[0], color1[1], size,
+        duration, {group: id, cohort: cohort, block: true, class: class1,
+                   target: target})
+    const second = new Checkerboard(duration, color2[0], color2[1], size,
+        duration, {group: id, cohort: cohort, block: true, class: class2,
+                   target: target})
+    const after = new Wait(r.randi(120,180), {group: id, block: true})
+    return [before, first, second, after]
+}
+
 let x
 let y
 let stimuli = []
@@ -36,21 +69,13 @@ let cohort
 
 for (let size of sizes) {
     for (let duration of durations) {
-        cohort = r.uuid()
         for (let i = 0; i < repetitions; i++) {
-            id = r.uuid()
-            a = new Checkerboard(duration, "white", "black", size,
-                duration, {group: id, cohort: cohort, block: true, class: 'A'})
-            before = new Wait(120, {group: id})
-            after = new Wait(r.randi(60,120), {group: id, block: true})
-            stimuli.push([before, a, after])
-
-            id = r.uuid()
-            b = new Checkerboard(duration, "black", "white", size,
-                duration, {group: id, cohort: cohort, block: true, class: 'B'})
-            before = new Wait(120, {group: id})
-            after = new Wait(r.randi(60,120), {group: id, block: true})
-            stimuli.push([before, b, after])
+            // use cohort to maintain balance in analysis
+            cohort = r.uuid()
+            stimuli.push(checkerboard_group('A','B', duration,size, cohort))
+            stimuli.push(checkerboard_group('A','A', duration,size, cohort))
+            stimuli.push(checkerboard_group('B','B', duration,size, cohort))
+            stimuli.push(checkerboard_group('B','A', duration,size, cohort))
         }
     }
 }
