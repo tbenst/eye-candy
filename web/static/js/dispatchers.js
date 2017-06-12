@@ -59,21 +59,8 @@ function graphicsDispatcher() {
             break
         case STIMULUS.CHECKERBOARD:
             if (stimulus.age === 0) {
-                checkerboardDispatcher(stimulus.size,stimulus.period,stimulus.color,stimulus.alternateColor)
-            } else {
-                 if (stimulus.age > stimulus.period * stimulus.count / 2 * 120) {
-                    if (stimulus.count % 2 == 0) {
-                        store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
-                            count: stimulus.count+1,
-                            backgroundColor: stimulus.alternateColor,
-                        })))
-                    } else {
-                        store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
-                            count: stimulus.count+1,
-                            backgroundColor: stimulus.color,
-                        })))
-                    }
-                 }
+                checkerboardDispatcher(stimulus.lifespan, stimulus.size,
+                    stimulus.color,stimulus.alternateColor)
             }
     }
 }
@@ -102,45 +89,28 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
     }
 }
 
-function checkerboardDispatcher(size,period,color,alternateColor) {
-    const height = store.getState()["windowHeight"]
-    const width = store.getState()["windowWidth"]
-    const numberOfRows = Math.ceil(height/size)
-    const numberOfCols = Math.ceil(width/size)
-    // we will only create every other square and alternate colors with the background
-    for (var i = 0; i < numberOfCols; i=i+2) {
-        for (var j = 0; j < numberOfRows; j=j+2) {
-            store.dispatch(addGraphicAC({
-                graphicType: GRAPHIC.CHECKER,
-                startX: i*size,
-                startY: j*size,
-                size: size,
-                period: period, 
-                color: color,
-                alternateColor: alternateColor,
-                count: 1,
-                lifespan: period*120,
-                age: 0
-            }))
-        }
-    }
+function checkerboardDispatcher(lifespan, size,color,alternateColor) {
 
-    for (var i = 1; i < numberOfCols; i=i+2) {
-        for (var j = 1; j < numberOfRows; j=j+2) {
-            store.dispatch(addGraphicAC({
-                graphicType: GRAPHIC.CHECKER,
-                startX: i*size,
-                startY: j*size,
-                size: size,
-                period: period, 
-                color: color,
-                alternateColor: alternateColor,
-                count: 1,
-                lifespan: period*120,
-                age: 0
-            }))
-        }
-    }
+    var canvasPattern = document.createElement("canvas");
+    canvasPattern.width = size*2;
+    canvasPattern.height = size*2;
+    var contextPattern = canvasPattern.getContext("2d");
+
+    contextPattern.fillStyle = alternateColor
+    contextPattern.fillRect(0, 0, canvasPattern.width, canvasPattern.height);
+
+    contextPattern.fillStyle = color
+    contextPattern.fillRect(0, 0, size, size)
+    contextPattern.fillRect(size, size, size, size)
+
+    var pattern = context.createPattern(canvasPattern,"repeat");
+
+    store.dispatch(addGraphicAC({
+        graphicType: GRAPHIC.PATTERN,
+        pattern: pattern,
+        lifespan: lifespan,
+        age: 0
+    }))
 }
 
 function barDispatcher(width, barColor, backgroundColor, speed, angle, lifespan,

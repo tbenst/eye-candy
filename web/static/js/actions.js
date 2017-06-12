@@ -56,7 +56,7 @@ const LETTER = {
 
 const GRAPHIC = {
     BAR: "BAR",
-    CHECKER: "CHECKER",
+    PATTERN: "PATTERN",
     TARGET: "TARGET",
     LETTER: "LETTER"
 }
@@ -69,8 +69,7 @@ const exampleBar = {stimulusType: STIMULUS.BAR, lifespan: 300,
         backgroundColor: "black", width: 50, barColor: "white",
         speed: 15, angle: PI, age: 0}
 const exampleCheckerboard = {stimulusType: STIMULUS.CHECKERBOARD, lifespan: 300,
-        backgroundColor: "black", width: 50, barColor: "white",
-        speed: 15, angle: PI, age: 0}
+        alternateColor: "black", size: 50, color: "white", age: 0}
 const exampleSolid = {stimulusType: STIMULUS.SOLID,
             lifespan: 120 * 5,
             backgroundColor: "black"

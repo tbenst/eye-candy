@@ -92,14 +92,12 @@ class Wait extends Stimulus {
 exports.Wait = Wait
 
 class Checkerboard extends Stimulus {
-    constructor(lifespan, color, alternateColor, size, period, metadata) {
-    	// not positive alternateColor is correct here, test with slow period
+    constructor(lifespan, color, alternateColor, size, metadata) {
         super(lifespan, alternateColor, metadata)
         this.stimulusType = STIMULUS.CHECKERBOARD
         this.color = color
         this.alternateColor = alternateColor
         this.size = size
-        this.period = period
         this.count = 0
     }
 }

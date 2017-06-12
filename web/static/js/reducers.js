@@ -93,26 +93,8 @@ function tickGraphic(graphic, timeDelta) {
     switch (graphic.graphicType) {
         case GRAPHIC.BAR:
             return tickBar(graphic, timeDelta)
-        case GRAPHIC.CHECKER:
-            return tickChecker(graphic,timeDelta)
         default:
             return graphic
-    }
-}
-
-function tickChecker(checker, timeDelta) {
-    if (checker.age+timeDelta >= checker.period/2*120) {
-        return Object.assign({}, checker, {
-            age: checker.age + timeDelta - checker.period/2*120,
-            color: checker.alternateColor,
-            alternateColor: checker.color
-
-        })
-    } else {
-        return Object.assign({}, checker, {
-            age: checker.age + timeDelta,
-        })
-
     }
 }
 

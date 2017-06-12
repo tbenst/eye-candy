@@ -57,6 +57,53 @@ let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger 
 ANIMATE
 ************************************************/
 
+function renderBar(context, graphic) {
+    // might need to translate first if rotation
+    context.translate(graphic.origin.x,
+        graphic.origin.y)
+    context.fillStyle = graphic.color
+    // Rotate rectangle to be perpendicular with Center of Canvas
+    context.rotate(graphic.position.theta)
+    // Draw a rectangle, adjusting for Bar width
+    context.fillRect(-graphic.size.width/2, -graphic.size.height/2,
+        graphic.size.width, graphic.size.height)
+}
+
+function renderTarget(context, graphic) {
+    context.strokeStyle = "#ff0000"
+
+    context.beginPath()
+    context.arc(HEIGHT/2,HEIGHT/2,HEIGHT/2,0,2*PI)
+    context.stroke()
+
+    context.beginPath()
+    context.arc(HEIGHT/2,HEIGHT/2,HEIGHT/3,0,2*PI)
+    context.stroke()
+
+    context.beginPath()
+    context.arc(HEIGHT/2,HEIGHT/2,HEIGHT/5,0,2*PI)
+    context.stroke()
+
+    context.beginPath()
+    context.arc(HEIGHT/2,HEIGHT/2,HEIGHT/10,0,2*PI)
+    context.stroke()
+
+    context.beginPath()
+    context.arc(HEIGHT/2,HEIGHT/2,HEIGHT/100,0,2*PI)
+    context.stroke()
+
+    context.rect(0,0,HEIGHT,HEIGHT)
+    context.stroke()
+}
+
+function renderPattern(context, pattern) {
+    context.fillStyle = pattern;
+    context.fillRect(0,0, WIDTH, HEIGHT);
+
+}
+
+
+
 function render() {
     context.clearRect(0, 0, WIDTH, HEIGHT)
     const state = store.getState()
@@ -67,46 +114,13 @@ function render() {
             context.save()
             switch (graphic.graphicType) {
                 case GRAPHIC.BAR:
-                    // might need to translate first if rotation
-                    context.translate(graphic.origin.x,
-                        graphic.origin.y)
-                    context.fillStyle = graphic.color
-                    // Rotate rectangle to be perpendicular with Center of Canvas
-                    context.rotate(graphic.position.theta)
-                    // Draw a rectangle, adjusting for Bar width
-                    context.fillRect(-graphic.size.width/2, -graphic.size.height/2,
-                        graphic.size.width, graphic.size.height)
+                    renderBar(context, graphic)
                     break
                 case GRAPHIC.TARGET:
-                    context.strokeStyle = "#ff0000"
-
-                    context.beginPath()
-                    context.arc(HEIGHT/2,HEIGHT/2,HEIGHT/2,0,2*PI)
-                    context.stroke()
-
-                    context.beginPath()
-                    context.arc(HEIGHT/2,HEIGHT/2,HEIGHT/3,0,2*PI)
-                    context.stroke()
-
-                    context.beginPath()
-                    context.arc(HEIGHT/2,HEIGHT/2,HEIGHT/5,0,2*PI)
-                    context.stroke()
-
-                    context.beginPath()
-                    context.arc(HEIGHT/2,HEIGHT/2,HEIGHT/10,0,2*PI)
-                    context.stroke()
-
-                    context.beginPath()
-                    context.arc(HEIGHT/2,HEIGHT/2,HEIGHT/100,0,2*PI)
-                    context.stroke()
-
-                    context.rect(0,0,HEIGHT,HEIGHT)
-                    context.stroke()
+                    renderTarget(context, graphic)
                     break
-                case GRAPHIC.CHECKER:
-                    context.fillStyle = graphic.color
-                    context.fillRect(graphic.startX, graphic.startY,
-                                     graphic.size, graphic.size)
+                case GRAPHIC.PATTERN:
+                    renderPattern(context, graphic.pattern)
                     break
                 case GRAPHIC.LETTER:
                     context.fillStyle = graphic.color

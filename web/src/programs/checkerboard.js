@@ -3,7 +3,7 @@ const metadata = {name: "checkerboard", version: "0.2.0", inverted: false}
 let repetitions = 50
 let durations = [60]
 
-let sizes = [13,20,31,50,79,125,198,314,498]
+let sizes = [5,8,13,20,31,50,79,125,198]
 
 
 function* measureIntegrity(stimuli,every=5*60) {
@@ -49,10 +49,10 @@ function checkerboard_group(class1, class2, duration, size, cohort) {
     }
     const before = new Wait(120, {group: id})
     const first = new Checkerboard(duration, color1[0], color1[1], size,
-        duration, {group: id, cohort: cohort, block: true, class: class1,
+        {group: id, cohort: cohort, block: true, class: class1,
                    target: target})
     const second = new Checkerboard(duration, color2[0], color2[1], size,
-        duration, {group: id, cohort: cohort, block: true, class: class2,
+        {group: id, cohort: cohort, block: true, class: class2,
                    target: target})
     const after = new Wait(r.randi(120,180), {group: id, block: true})
     return [before, first, second, after]
