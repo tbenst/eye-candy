@@ -134,7 +134,7 @@ function gratingDispatcherHelper() {
 
     // first bar is reference origin
     const originR = getDiagonalLength()/2
-    const distanceTraveled = stimulus.speed / 120 * stimulus.age
+    const distanceTraveled = stimulus.speed * stimulus.age
     const refOrigin = originR - distanceTraveled
 
 
@@ -148,7 +148,7 @@ function gratingDispatcherHelper() {
     if (stimulus.numberOfBars===undefined || count<stimulus.numberOfBars) {
         // aggregate position (distance traveled) spawns new bars
         // once equal to wavelength
-        // 500 / 120 * 290 >= 300 * 0
+        // 500 * 290 >= 300 * 0
         if (distanceTraveled  >= nextStartDistance) {
             console.log("XXX will dispatch new bar ", refOrigin+nextStartDistance)
             const startR = refOrigin + nextStartDistance
@@ -163,7 +163,7 @@ function gratingDispatcherHelper() {
             })))
         }
 
-        // need to have bars at least speed / 120 * 3 pixels past originR (3 frames)
+        // need to have bars at least speed * 3 pixels past originR (3 frames)
         // const bufferDistance = stimulus.speed / 120 * 3
         nextStartDistance = stimulus.wavelength * count
 

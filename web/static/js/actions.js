@@ -72,11 +72,11 @@ const exampleBar = {stimulusType: STIMULUS.BAR, lifespan: 300,
 const exampleCheckerboard = {stimulusType: STIMULUS.CHECKERBOARD, lifespan: 300,
         alternateColor: "black", size: 50, color: "white", age: 0}
 const exampleSolid = {stimulusType: STIMULUS.SOLID,
-            lifespan: 120 * 5,
+            lifespan: 5,
             backgroundColor: "black"
         }
 const exampleWait = {stimulusType: STIMULUS.WAIT,
-            lifespan: 120 * 5,
+            lifespan: 5,
             backgroundColor: "black"
         }
 const exampleGrating = {stimulusType: STIMULUS.GRATING, lifespan: 300,

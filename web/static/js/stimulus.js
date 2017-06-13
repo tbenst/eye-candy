@@ -65,7 +65,7 @@ function renderBar(context, graphic) {
     // Rotate rectangle to be perpendicular with Center of Canvas
     context.rotate(graphic.position.theta)
     // Draw a rectangle, adjusting for Bar width
-    context.fillRect(-graphic.size.width/2, -graphic.size.height/2,
+    context.fillRect(Math.round(-graphic.size.width/2), Math.round(-graphic.size.height/2),
         graphic.size.width, graphic.size.height)
 }
 
@@ -134,12 +134,13 @@ function render() {
 }
 
 
-var lastTime = window.performance.now()
-function renderLoop() {
-    var curTime = window.performance.now()
+var lastTime
+function renderLoop(time) {
+    if (!lastTime) lastTime = time;
 
-    const frameTime = curTime - lastTime
-    lastTime = curTime
+    // seconds
+    const timeDelta = (time - lastTime)/1000
+    lastTime = time
 
 
     switch (store.getState().status) {
@@ -152,18 +153,7 @@ function renderLoop() {
             document.body.style.backgroundColor = "black"
             break
         case STATUS.STARTED:
-
-            // adjust for dropped frames
-            if (frameTime < 10) {
-                // 120 Hz
-                tickDispatcher(1)
-            } else if (frameTime < 20) {
-                // 60 Hz
-                tickDispatcher(2)
-            } else {
-                const toTick = Math.round(frameTime/(1000/120))
-                tickDispatcher(toTick)
-            }
+            tickDispatcher(timeDelta)
             render()
             break
     }

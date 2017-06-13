@@ -12,6 +12,7 @@ const math = require("./math")
 let EPL = Object.assign({log: console.log},Types,Render,Random,math,Misc)
 
 function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
+    console.log('compiling EPL.')
     const vm = new VM({
         sandbox: Object.assign({
             windowHeight: windowHeight,
@@ -35,25 +36,3 @@ function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
     return {vm: vm, next: functionInSandbox, metadata: metadata}
 }
 exports.compileJSProgram = compileJSProgram
-
-function compileYAMLProgram(sid,programYAML,seed, windowHeight, windowWidth) {
-        const vm = new VM({
-            sandbox: {buildGenerator: buildGenerator,
-                programYAML: programYAML,
-                windowHeight: windowHeight,
-                windowWidth: windowWidth,
-                PI: Math.PI,
-                seed: seed
-            },
-        });
-        // we use stimulus index to ensure correct order and avoid race condition
-        vm.run("let generator = buildGenerator("+
-            "programYAML,windowHeight,windowWidth);"+
-            "let s='uninitialized'; let si = 0;");
-        let functionInSandbox = () => {return vm.run(
-            's = generator.next();'+
-            's.stimulusIndex=si; si++;'+
-            's;')}
-        return {vm: vm, next: functionInSandbox}
-}
-exports.compileYAMLProgram = compileYAMLProgram

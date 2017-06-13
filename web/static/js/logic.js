@@ -13,6 +13,6 @@ function getDiagonalLength() {
 function calcBarLifespan(speed, width, startR=getDiagonalLength()/2) {
     // in the case of a single bar, startR==getDiagonalLength()/2
     // separating is useful for gratings
-    return Math.ceil((startR + getDiagonalLength()/2 + width ) / speed * 120)
+    return (startR + getDiagonalLength()/2 + width ) / speed
 }
 

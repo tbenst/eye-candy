@@ -7,15 +7,15 @@ function* measureIntegrity(stimuli,every=5*60) {
 	for (let s of stimuli) {
 		if (elapsedTime>=every && s.metadata.block===undefined) {
 			integrityMeta = {group: r.uuid(), label: "integrity"}
-			yield new Wait(120, integrityMeta)
-			yield new Solid(60, "white", integrityMeta)
-			yield new Wait(240, integrityMeta)
+			yield new Wait(1, integrityMeta)
+			yield new Solid(0.5, "white", integrityMeta)
+			yield new Wait(2, integrityMeta)
 			elapsedTime = 0
 			yield s
 		} else {
 			yield s
 		}
-		elapsedTime=elapsedTime+s["lifespan"]/120
+		elapsedTime=elapsedTime+s["lifespan"]
 	}
 }
 
@@ -45,7 +45,7 @@ for (let speed of speeds) {
 		}
 		
 		// block means "do not insert a integrity check before me"
-		lit = ceil(width/speed*120)
+		lit = width/speed
 		solid = new Solid(lit, "white", {group: id, block: true})
 		before = new Wait(floor((lifespan-lit)/2), {group: id})
 		after = new Wait(ceil((lifespan-lit)/2), {group: id, block: true})

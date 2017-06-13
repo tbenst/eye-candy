@@ -103,7 +103,7 @@ function tickBar(bar, timeDelta) {
     if (bar.position === undefined) {
         newPosition = {r: bar.startR, theta: -bar.angle}
     } else {
-        newPosition = {r: bar.position.r - bar.speed/120*timeDelta, 
+        newPosition = {r: bar.position.r - bar.speed*timeDelta, 
             theta: bar.position.theta}
     }
 

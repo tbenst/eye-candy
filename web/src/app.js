@@ -18,7 +18,6 @@ const yaml = require("js-yaml")
 const fs = require('fs')
 
 const random = require("./epl/random")
-const buildGenerator = require("./epl/parser").buildGenerator
 const {compileYAMLProgram, compileJSProgram} = require("./epl/eval")
 // import {buildGenerator} from "./parser"
 // import session from "./session"
@@ -128,7 +127,7 @@ router.post("/start-program", ctx => {
             lifespan=lifespan+s.value.lifespan
             s = program[sid].next()
         }
-        let seconds = lifespan/120
+        let seconds = lifespan
         let minutes = Math.floor(seconds/60)
         seconds = Math.ceil(seconds%60)
         ctx.body = minutes+" minutes "+seconds+" seconds"
