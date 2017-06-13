@@ -15,6 +15,7 @@
     "purescript-dom": "^3.5.1",
     "purescript-refs": "^2.0.0",
     "purescript-lists": "^3.4.0",
+    "purescript-math": "^2.0.0",
     "purescript-signal": "^8.0.1"
   },
   "devDependencies": {

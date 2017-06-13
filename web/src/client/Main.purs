@@ -17,6 +17,7 @@ import Types (Time, Behavior(..), Color, at)
 import Graphics.Canvas.Animate (animationLoop)
 import Graphics.Canvas.Renderable (Rectangle(..))
 
+import Math (sin)
 
 
 -- main :: forall e. Eff (console :: CONSOLE | e) Unit
@@ -39,7 +40,7 @@ main = void $ unsafePartial do
     ctx <- getContext2D canvas
     width <- getCanvasWidth canvas
     height <- getCanvasHeight canvas
-    let sample t = Rectangle { x: 0.01*t
+    let sample t = Rectangle { x: 100.0*sin(t/1000.0)+150.0
                               , y: 250.0
                               , w: 10.0
                               , h: 300.0
