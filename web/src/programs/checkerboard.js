@@ -1,4 +1,4 @@
-const metadata = {name: "checkerboard", version: "0.2.0", inverted: false}
+const metadata = {name: "checkerboard", version: "0.2.1", inverted: false}
 
 let repetitions = 50
 let durations = [60]
