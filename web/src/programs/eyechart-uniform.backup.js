@@ -43,17 +43,28 @@ let ncols
 let pad
 let totalSize
 
+function uniformLetterMatrix(nrows,ncols, letter) {
+    const col = [...Array(ncols).keys()].map(x => letter)
+    let toReturn = [...Array(nrows).keys()].map(x => col)
+    return toReturn
+}
+
 for (let duration of durations) {
-    for (let size of sizes) {
-        pad = size
+    for (let s = 0; s < sizes.length; s++) {
+        size = sizes[s]
+        pad = padding[s]
+        totalSize = size + pad
+        ncols = ceil(windowWidth/totalSize)
+        nrows = ceil(windowHeight/totalSize)        
 
         for (let i = 0; i < repetitions; i++) {
             cohort = r.uuid(i)
             for (let letter of letters) {
+                letterMatrix = uniformLetterMatrix(nrows, ncols, letter)
                 id = r.uuid(i)
                 // block means "do not insert a integrity check before me"
                 // backgroundColor, letter, x, y, size, color
-                l = new UniformLetter(duration, "black", letter, size, pad,
+                l = new EyeChart(duration, "black", letterMatrix,size, pad,
                     "white", {group: id, cohort: cohort, block: true})
                 before = new Wait(120, {group: id})
                 after = new Wait(r.randi(60,120), {group: id, block: true})

@@ -2,8 +2,20 @@ const metadata = {name: "checkerboard", version: "0.2.0", inverted: false}
 
 let repetitions = 50
 let durations = [60]
+let nsizes = 10
+let startLogMAR = 1.6
+let logMarStep = 0.2
 
-let sizes = [5,8,13,20,31,50,79,125,198]
+
+function logMARtoPx(logMAR, pxPerDegree=7.5) {
+    let degrees = pow(10,logMAR)/60
+    return round(degrees*pxPerDegree)
+}
+
+
+let sizes = [...Array(nsizes).keys()].map(
+    x => x*logMarStep+startLogMAR).map(
+    x => logMARtoPx(x))
 
 
 function* measureIntegrity(stimuli,every=5*60) {

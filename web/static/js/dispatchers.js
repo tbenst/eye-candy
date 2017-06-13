@@ -89,6 +89,10 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
     }
 }
 
+function uniformLetterDispatcher(lifespan, letter, size, padding, color) {
+    // body...
+}
+
 function checkerboardDispatcher(lifespan, size,color,alternateColor) {
 
     var canvasPattern = document.createElement("canvas");

@@ -52,6 +52,18 @@ class Letter extends Stimulus {
 }
 exports.Letter = Letter
 
+class UniformLetter extends Stimulus {
+    constructor(lifespan, backgroundColor, letter, size, padding, color, metadata) {
+        super(lifespan, backgroundColor, metadata)
+        this.stimulusType = STIMULUS.LETTER
+        this.letter = letter
+        this.size = size
+        this.padding = padding
+        this.color = color
+    }
+}
+exports.Letter = Letter
+
 class EyeChart extends Stimulus {
     constructor(lifespan, backgroundColor, letterMatrix, size, padding, color, metadata) {
         super(lifespan, backgroundColor, metadata)

@@ -6,6 +6,7 @@ module.exports = {
 	sin: Math.sin,
 	cos: Math.cos,
 	PI: Math.PI,
-	floor: Math.floor,
+	round: Math.round,
+    floor: Math.floor,
 	ceil: Math.ceil
 }
