@@ -44,12 +44,9 @@ function graphicsDispatcher() {
         case STIMULUS.GRATING:
             if (stimulus.age === 0) {
                 const lifespan = calcBarLifespan(speed, width)
-                barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
+                gratingDispatcher(stimulus.lifespan, stimulus.width, stimulus.barColor, stimulus.backgroundColor,
                     stimulus.speed, stimulus.angle)
                 // increment count by 1 after bar is dispatched
-                store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
-                    count: stimulus.count + 1
-                })))
             }
             
             // console.log("XXX grating comparison", stimulus.speed / 120 * stimulus.age)
