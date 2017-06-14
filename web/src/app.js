@@ -108,7 +108,7 @@ router.post("/start-program", ctx => {
         labNotebook.windowWidth = session.windowWidth
         const date = new Date()
         labNotebook.date = date
-        labNotebook.version = 0.4
+        labNotebook.version = 0.5
         labNotebook.flickerVersion = 0.3
 
 

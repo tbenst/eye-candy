@@ -1,8 +1,8 @@
 const metadata = {name: "letters", version: "0.2.0", inverted: false}
-
+// TODO pre-render letters
 let repetitions = 200
 let sizes = [300]
-let durations = [60]
+let durations = [0.5]
 
 
 function* measureIntegrity(stimuli,every=5*60) {
@@ -12,15 +12,15 @@ function* measureIntegrity(stimuli,every=5*60) {
     for (let s of stimuli) {
         if (elapsedTime>=every && s.metadata.block===undefined) {
             integrityMeta = {group: r.uuid(), label: "integrity"}
-            yield new Wait(120, integrityMeta)
-            yield new Solid(60, "white", integrityMeta)
-            yield new Wait(240, integrityMeta)
+            yield new Wait(1, integrityMeta)
+            yield new Solid(0.5, "white", integrityMeta)
+            yield new Wait(2, integrityMeta)
             elapsedTime = 0
             yield s
         } else {
             yield s
         }
-        elapsedTime=elapsedTime+s["lifespan"]/120
+        elapsedTime=elapsedTime+s["lifespan"]
     }
 }
 
@@ -46,8 +46,8 @@ for (let i = 0; i < repetitions; i++) {
                 y = windowHeight/2 + size/2
                 l = new Letter(duration, "black", letter,x,y,size, 
                     "white", {group: id, cohort: cohort, block: true})
-                before = new Wait(120, {group: id})
-                after = new Wait(r.randi(60,120), {group: id, block: true})
+                before = new Wait(1, {group: id})
+                after = new Wait(r.randi(0.5,1), {group: id, block: true})
 
                 // before + lit + after = lifespan
                 // this pads the white flash

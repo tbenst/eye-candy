@@ -102,11 +102,23 @@ function renderPattern(context, pattern) {
 
 }
 
+function renderGrating(context, pattern, width, angle, position) {
+    context.fillStyle = pattern;
+    // move to the center of the canvas
+    context.translate(WIDTH/2,HEIGHT/2)
+    context.rotate(-angle)
+    const diag = getDiagonalLength()
+    context.translate(-diag/2,-diag/2)
+    const x = width*2 - position
+    context.translate(x,0)
+    context.fillRect(-width*2,0, diag+width*2, diag);
+
+}
 
 
-function render() {
+
+function render(state) {
     context.clearRect(0, 0, WIDTH, HEIGHT)
-    const state = store.getState()
     document.body.style.backgroundColor = state.stimulus.backgroundColor
 
     // if (state.graphics != undefined) {
@@ -121,6 +133,9 @@ function render() {
                     break
                 case GRAPHIC.PATTERN:
                     renderPattern(context, graphic.pattern)
+                    break
+                case GRAPHIC.GRATING:
+                    renderGrating(context, graphic.pattern, graphic.width, graphic.angle, graphic.position)
                     break
                 case GRAPHIC.LETTER:
                     context.fillStyle = graphic.color
@@ -154,7 +169,7 @@ function renderLoop(time) {
             break
         case STATUS.STARTED:
             tickDispatcher(timeDelta)
-            render()
+            render(store.getState())
             break
     }
     requestAnimationFrame(renderLoop)

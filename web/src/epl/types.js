@@ -9,13 +9,6 @@ const STIMULUS = {
     EYECHART: "EYECHART"
 }
 
-const GRAPHIC = {
-    BAR: 'BAR',
-    TARGET: 'TARGET',
-    CHECKER: "CHECKER",
-    LETTER: "LETTER"
-}
-
 class Stimulus {
     // parameters are used for program execution
     // metadata is used for stimulus generation & analysis
@@ -38,6 +31,18 @@ class Bar extends Stimulus {
     }
 }
 exports.Bar = Bar
+
+class Grating extends Stimulus {
+    constructor(lifespan, backgroundColor, speed, width, angle, barColor, metadata) {
+        super(lifespan, backgroundColor, metadata)
+        this.stimulusType = STIMULUS.GRATING
+        this.speed = speed
+        this.width = width
+        this.angle = angle
+        this.barColor = barColor
+    }
+}
+exports.Grating = Grating
 
 class Letter extends Stimulus {
     constructor(lifespan, backgroundColor, letter, x, y, size, color, metadata) {
@@ -75,17 +80,6 @@ class EyeChart extends Stimulus {
     }
 }
 exports.EyeChart = EyeChart
-
-class Grating extends Bar {
-    constructor(lifespan, backgroundColor, wavelength, numberOfBars, metadata) {
-        super(lifespan, backgroundColor, metadata)
-        this.stimulusType = STIMULUS.GRATING
-        this.wavelength = wavelength
-        this.numberOfBars = numberOfBars
-        this.count = 0
-    }
-}
-exports.Grating = Grating
 
 class Solid extends Stimulus {
     constructor(lifespan, backgroundColor = "white", metadata) {

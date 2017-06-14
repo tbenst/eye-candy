@@ -1,8 +1,8 @@
-const metadata = {name: "letters", version: "0.1.0", inverted: true}
+const metadata = {name: "letters", version: "0.2.0", inverted: true}
 
 let repetitions = 12
 let sizes = [200,400,600]
-let durations = [60,120,180]
+let durations = [0.5,1,1.5]
 
 
 function* measureIntegrity(stimuli,every=5*60) {
@@ -12,15 +12,15 @@ function* measureIntegrity(stimuli,every=5*60) {
     for (let s of stimuli) {
         if (elapsedTime>=every && s.metadata.block===undefined) {
             integrityMeta = {group: r.uuid(), label: "integrity"}
-            yield new Solid(120, "white",integrityMeta)
-            yield new Solid(60, "black", integrityMeta)
-            yield new Solid(240, "white",integrityMeta)
+            yield new Solid(1, "white",integrityMeta)
+            yield new Solid(0.5, "black", integrityMeta)
+            yield new Solid(2, "white",integrityMeta)
             elapsedTime = 0
             yield s
         } else {
             yield s
         }
-        elapsedTime=elapsedTime+s["lifespan"]/120
+        elapsedTime=elapsedTime+s["lifespan"]
     }
 }
 
@@ -46,8 +46,8 @@ for (let i = 0; i < repetitions; i++) {
                 y = windowHeight/2 + size/2
                 l = new Letter(duration, "white", letter,x,y,size, 
                     "black", {group: id, cohort: cohort, block: true})
-                before = new Solid(r.randi(60,120), "white", {group: id})
-                after = new Solid(r.randi(60,120), "white", {group: id, block: true})
+                before = new Solid(1, "white", {group: id})
+                after = new Solid(r.randi(0.5,1), "white", {group: id, block: true})
 
                 // before + lit + after = lifespan
                 // this pads the white flash

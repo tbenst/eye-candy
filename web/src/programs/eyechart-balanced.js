@@ -1,4 +1,4 @@
-const metadata = {name: "eyechart-balanced", version: "0.1.0", inverted: false}
+const metadata = {name: "eyechart-balanced", version: "0.2.0", inverted: false}
 
 let repetitions = 100
 
@@ -7,7 +7,7 @@ let repetitions = 100
 let sizes = [250,200,160,125]
 let padding = [250,200,160,125]
 
-let durations = [60]
+let durations = [0.5]
 
 
 function* measureIntegrity(stimuli,every=5*60) {
@@ -17,15 +17,15 @@ function* measureIntegrity(stimuli,every=5*60) {
     for (let s of stimuli) {
         if (elapsedTime>=every && s.metadata.block===undefined) {
             integrityMeta = {group: r.uuid(), label: "integrity"}
-            yield new Wait(120, integrityMeta)
-            yield new Solid(60, "white", integrityMeta)
-            yield new Wait(240, integrityMeta)
+            yield new Wait(1, integrityMeta)
+            yield new Solid(0.5, "white", integrityMeta)
+            yield new Wait(2, integrityMeta)
             elapsedTime = 0
             yield s
         } else {
             yield s
         }
-        elapsedTime=elapsedTime+s["lifespan"]/120
+        elapsedTime=elapsedTime+s["lifespan"]:
     }
 }
 
@@ -93,8 +93,8 @@ for (let duration of durations) {
                 // backgroundColor, letter, x, y, size, color
                 l = new EyeChart(duration, "black", letterMatrix,size, pad,
                     "white", {group: id, cohort: cohort, block: true})
-                before = new Wait(120, {group: id})
-                after = new Wait(r.randi(60,120), {group: id, block: true})
+                before = new Wait(1, {group: id})
+                after = new Wait(r.randi(0.5,1), {group: id, block: true})
 
                 // before + lit + after = lifespan
                 // this pads the white flash

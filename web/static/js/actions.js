@@ -58,6 +58,7 @@ const LETTER = {
 const GRAPHIC = {
     BAR: "BAR",
     PATTERN: "PATTERN",
+    GRATING: "GRATING",
     TARGET: "TARGET",
     LETTER: "LETTER"
 }

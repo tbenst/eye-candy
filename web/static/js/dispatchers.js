@@ -11,8 +11,8 @@ function graphicsDispatcher() {
         case STIMULUS.BAR:
             if (stimulus.age === 0) {
                 console.log("len is 0")
-                barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
-                    stimulus.speed, stimulus.angle, stimulus.lifespan)
+                barDispatcher(stimulus.lifespan, stimulus.width, stimulus.barColor, stimulus.backgroundColor,
+                    stimulus.speed, stimulus.angle)
             }
             break
         case STIMULUS.TARGET:
@@ -36,23 +36,17 @@ function graphicsDispatcher() {
             }]))
             break
         case STIMULUS.EYECHART:
-        if (stimulus.age === 0) {
-            eyeChartDispatcher(stimulus.lifespan, stimulus.letterMatrix, stimulus.size,
-                stimulus.padding, stimulus.color)
-        }
+            if (stimulus.age === 0) {
+                eyeChartDispatcher(stimulus.lifespan, stimulus.letterMatrix, stimulus.size,
+                    stimulus.padding, stimulus.color)
+            }
             break
         case STIMULUS.GRATING:
             if (stimulus.age === 0) {
-                const lifespan = calcBarLifespan(speed, width)
                 gratingDispatcher(stimulus.lifespan, stimulus.width, stimulus.barColor, stimulus.backgroundColor,
                     stimulus.speed, stimulus.angle)
                 // increment count by 1 after bar is dispatched
             }
-            
-            // console.log("XXX grating comparison", stimulus.speed / 120 * stimulus.age)
-            // console.log(">= XXX grating comparison", stimulus.wavelength * stimulus.count)
-
-            gratingDispatcherHelper()
             break
         case STIMULUS.CHECKERBOARD:
             if (stimulus.age === 0) {
@@ -114,7 +108,7 @@ function checkerboardDispatcher(lifespan, size,color,alternateColor) {
     }))
 }
 
-function barDispatcher(width, barColor, backgroundColor, speed, angle, lifespan,
+function barDispatcher(lifespan, width, barColor, backgroundColor, speed, angle,
     startR=getDiagonalLength()/2) {
 
     store.dispatch(addGraphicAC({
@@ -124,51 +118,30 @@ function barDispatcher(width, barColor, backgroundColor, speed, angle, lifespan,
     }))
 }
 
-function gratingDispatcherHelper() {
+function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, angle) {
 
-    const state = store.getState()
-    const stimulus = state.stimulus
+    var canvasPattern = document.createElement("canvas");
+    canvasPattern.width = width*2;
+    canvasPattern.height = width;
+    var contextPattern = canvasPattern.getContext("2d");
 
-    // first bar is reference origin
-    const originR = getDiagonalLength()/2
-    const distanceTraveled = stimulus.speed * stimulus.age
-    const refOrigin = originR - distanceTraveled
+    contextPattern.fillStyle =  backgroundColor
+    contextPattern.fillRect(0, 0, canvasPattern.width, canvasPattern.height);
 
+    contextPattern.fillStyle = barColor
+    contextPattern.fillRect(0, 0, width, width)
 
-    // adjust for > 0 or else wavelength will be off
-    // due to frame timing
-    // refOrigin must have move by at least this much to dispatch new bar
-    let count = stimulus.count
-    let nextStartDistance = stimulus.wavelength * count
+    var pattern = context.createPattern(canvasPattern,"repeat");
 
-    // user can give numberOfBars or time. 
-    if (stimulus.numberOfBars===undefined || count<stimulus.numberOfBars) {
-        // aggregate position (distance traveled) spawns new bars
-        // once equal to wavelength
-        // 500 * 290 >= 300 * 0
-        if (distanceTraveled  >= nextStartDistance) {
-            console.log("XXX will dispatch new bar ", refOrigin+nextStartDistance)
-            const startR = refOrigin + nextStartDistance
-            const lifespan = calcBarLifespan(speed, width, startR)
-            barDispatcher(stimulus.width, stimulus.barColor, stimulus.backgroundColor,
-                stimulus.speed, stimulus.angle, lifespan, startR)
-            // we use count to keep track of how many bars have been
-            // cumulatively dispatched
-            count = count + 1
-            store.dispatch(setStimulusAC(Object.assign({}, stimulus, {
-                count: count
-            })))
-        }
-
-        // need to have bars at least speed * 3 pixels past originR (3 frames)
-        // const bufferDistance = stimulus.speed / 120 * 3
-        nextStartDistance = stimulus.wavelength * count
-
-        // This likely creates stack problems with large numbers of bars (eg <10 width and <10 wavelength)
-        if (distanceTraveled  >= nextStartDistance) {
-            gratingDispatcherHelper()
-        }
-    }
+    store.dispatch(addGraphicAC({
+        graphicType: GRAPHIC.GRATING,
+        width: width,
+        speed: speed,
+        angle: angle,
+        pattern: pattern,
+        lifespan: lifespan,
+        age: 0
+    }))
 }
 
 function removeGraphicDispatcher(index) {

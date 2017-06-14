@@ -93,6 +93,8 @@ function tickGraphic(graphic, timeDelta) {
     switch (graphic.graphicType) {
         case GRAPHIC.BAR:
             return tickBar(graphic, timeDelta)
+        case GRAPHIC.GRATING:
+            return tickGrating(graphic, timeDelta)
         default:
             return graphic
     }
@@ -118,6 +120,23 @@ function tickBar(bar, timeDelta) {
                     newPosition.r*cos(newPosition.theta) + state["windowWidth"]/2,
                  y: bar.size.width/2*sin(newPosition.theta) +
                     newPosition.r*sin(newPosition.theta) + state["windowHeight"]/2}
+    })
+}
+
+
+function tickGrating(grating, timeDelta) {
+    let newPosition = undefined
+    if (grating.position === undefined) {
+        newPosition = 0
+    } else {
+        newPosition = (grating.position + grating.speed*timeDelta) % (2*grating.width)
+    }
+
+    const state = store.getState()
+
+    return Object.assign({}, grating, {
+        position: newPosition,
+        age: grating.age + timeDelta,
     })
 }
 

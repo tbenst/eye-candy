@@ -1,4 +1,4 @@
-const metadata = {name: "acuity-with-flashes", version: "0.3.2"}
+const metadata = {name: "acuity-with-flashes", version: "0.4.2"}
 
 let widths = [...Array(12).keys()].map(x => (x+1)*10)
 let speeds = [...Array(8).keys()].map(x => (1+x)*100)
@@ -18,9 +18,9 @@ for (let speed of speeds) {
 		for (let angle of angles) {
 			integrityMeta = {group: r.uuid(), label: "integrity"}
 			stimuli.push([
-				new Wait(120, integrityMeta),
-				new Solid(120, "white", integrityMeta),
-				new Wait(120, integrityMeta),
+				new Wait(1, integrityMeta),
+				new Solid(1, "white", integrityMeta),
+				new Wait(1, integrityMeta),
 				new Bar(lifespan,"black", speed, width, angle, "white",
 					{group: id})
 			])

@@ -1,7 +1,7 @@
-const metadata = {name: "checkerboard", version: "0.2.1", inverted: false}
+const metadata = {name: "checkerboard", version: "0.2.2", inverted: false}
 
 let repetitions = 50
-let durations = [60]
+let durations = [0.5]
 let nsizes = 10
 let startLogMAR = 1.6
 let logMarStep = 0.2
@@ -25,15 +25,15 @@ function* measureIntegrity(stimuli,every=5*60) {
     for (let s of stimuli) {
         if (elapsedTime>=every && s.metadata.block===undefined) {
             integrityMeta = {group: r.uuid(), label: "integrity"}
-            yield new Wait(120, integrityMeta)
-            yield new Solid(60, "white", integrityMeta)
-            yield new Wait(240, integrityMeta)
+            yield new Wait(1, integrityMeta)
+            yield new Solid(0.5, "white", integrityMeta)
+            yield new Wait(2, integrityMeta)
             elapsedTime = 0
             yield s
         } else {
             yield s
         }
-        elapsedTime=elapsedTime+s["lifespan"]/120
+        elapsedTime=elapsedTime+s["lifespan"]
     }
 }
 
@@ -59,14 +59,14 @@ function checkerboard_group(class1, class2, duration, size, cohort) {
     } else {
         target = 'DIFFERENT'
     }
-    const before = new Wait(120, {group: id})
+    const before = new Wait(1, {group: id})
     const first = new Checkerboard(duration, color1[0], color1[1], size,
         {group: id, cohort: cohort, block: true, class: class1,
                    target: target})
     const second = new Checkerboard(duration, color2[0], color2[1], size,
         {group: id, cohort: cohort, block: true, class: class2,
                    target: target})
-    const after = new Wait(r.randi(120,180), {group: id, block: true})
+    const after = new Wait(r.randi(1,1.5), {group: id, block: true})
     return [before, first, second, after]
 }
 
