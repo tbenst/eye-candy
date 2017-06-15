@@ -1,4 +1,4 @@
-const metadata = {name: "grating", version: "0.1.0"}
+const metadata = {name: "grating", version: "0.1.1"}
 
 
 let repetitions = 75
@@ -6,8 +6,8 @@ let durations = [2]
 let angles = [0]
 let speeds = [200]
 let nsizes = 10
-let startLogMAR = 1.6
-let logMarStep = 0.2
+let startLogMAR = 2.0
+let logMarStep = 0.1
 
 
 function logMARtoPx(logMAR, pxPerDegree=7.5) {

@@ -1,10 +1,10 @@
-const metadata = {name: "checkerboard", version: "0.2.2", inverted: false}
+const metadata = {name: "checkerboard", version: "0.2.3", inverted: false}
 
 let repetitions = 50
 let durations = [0.5]
 let nsizes = 10
-let startLogMAR = 1.6
-let logMarStep = 0.2
+let startLogMAR = 2.0
+let logMarStep = 0.1
 
 
 function logMARtoPx(logMAR, pxPerDegree=7.5) {
