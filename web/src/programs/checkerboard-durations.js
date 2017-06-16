@@ -1,7 +1,8 @@
-const metadata = {name: "checkerboard-durations", version: "0.2.3", inverted: false}
+const metadata = {name: "checkerboard-durations", version: "0.2.4", inverted: false}
 
 let repetitions = 25
 let durations = [0.1,0.25,0.5]
+let angle = PI/4
 let nsizes = 8
 let startLogMAR = 2.1
 let logMarStep = 0.1
@@ -60,10 +61,10 @@ function checkerboard_group(class1, class2, duration, size, cohort) {
         target = 'DIFFERENT'
     }
     const before = new Wait(1, {group: id})
-    const first = new Checkerboard(duration, color1[0], color1[1], size,
+    const first = new Checkerboard(duration, color1[0], color1[1], size, angle,
         {group: id, cohort: cohort, block: true, class: class1,
                    target: target})
-    const second = new Checkerboard(duration, color2[0], color2[1], size,
+    const second = new Checkerboard(duration, color2[0], color2[1], size, angle,
         {group: id, cohort: cohort, block: true, class: class2,
                    target: target})
     const after = new Wait(r.randi(1,1.5), {group: id, block: true})

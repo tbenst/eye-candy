@@ -1,4 +1,4 @@
-const metadata = {name: "grating-speeds", version: "0.1.1"}
+const metadata = {name: "grating-speeds", version: "0.1.2"}
 
 
 let repetitions = 50

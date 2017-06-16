@@ -98,12 +98,13 @@ class Wait extends Stimulus {
 exports.Wait = Wait
 
 class Checkerboard extends Stimulus {
-    constructor(lifespan, color, alternateColor, size, metadata) {
+    constructor(lifespan, color, alternateColor, size, angle, metadata) {
         super(lifespan, alternateColor, metadata)
         this.stimulusType = STIMULUS.CHECKERBOARD
         this.color = color
         this.alternateColor = alternateColor
         this.size = size
+        this.angle = angle
         this.count = 0
     }
 }

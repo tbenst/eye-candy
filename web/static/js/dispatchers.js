@@ -51,7 +51,7 @@ function graphicsDispatcher() {
         case STIMULUS.CHECKERBOARD:
             if (stimulus.age === 0) {
                 checkerboardDispatcher(stimulus.lifespan, stimulus.size,
-                    stimulus.color,stimulus.alternateColor)
+                    stimulus.color,stimulus.alternateColor, stimulus.angle)
             }
     }
 }
@@ -84,7 +84,7 @@ function uniformLetterDispatcher(lifespan, letter, size, padding, color) {
     // body...
 }
 
-function checkerboardDispatcher(lifespan, size,color,alternateColor) {
+function checkerboardDispatcher(lifespan, size,color,alternateColor, angle) {
 
     var canvasPattern = document.createElement("canvas");
     canvasPattern.width = size*2;
@@ -103,6 +103,7 @@ function checkerboardDispatcher(lifespan, size,color,alternateColor) {
     store.dispatch(addGraphicAC({
         graphicType: GRAPHIC.PATTERN,
         pattern: pattern,
+        angle: angle,
         lifespan: lifespan,
         age: 0
     }))
