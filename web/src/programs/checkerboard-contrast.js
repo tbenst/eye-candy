@@ -1,7 +1,8 @@
 const metadata = {name: "checkerboard", version: "0.2.3", inverted: false}
 
-let repetitions = 40
+let repetitions = 25
 let durations = [0.5]
+let contrasts = [50,100,176,254]
 let nsizes = 8
 let startLogMAR = 2.1
 let logMarStep = 0.1

@@ -1,8 +1,8 @@
-const metadata = {name: "grating", version: "0.1.1"}
+const metadata = {name: "grating-durations", version: "0.1.1"}
 
 
-let repetitions = 75
-let durations = [2]
+let repetitions = 50
+let durations = [0.5,1,1.5]
 let angles = [0]
 let speeds = [200]
 let nsizes = 8

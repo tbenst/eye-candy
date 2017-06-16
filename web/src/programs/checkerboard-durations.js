@@ -1,7 +1,7 @@
-const metadata = {name: "checkerboard", version: "0.2.3", inverted: false}
+const metadata = {name: "checkerboard-durations", version: "0.2.3", inverted: false}
 
-let repetitions = 40
-let durations = [0.5]
+let repetitions = 25
+let durations = [0.1,0.25,0.5]
 let nsizes = 8
 let startLogMAR = 2.1
 let logMarStep = 0.1
