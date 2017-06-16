@@ -1,12 +1,19 @@
-const metadata = {name: "checkerboard", version: "0.2.3", inverted: false}
+const metadata = {name: "checkerboard-contrast", version: "0.2.3", inverted: false}
 
 let repetitions = 25
 let durations = [0.5]
-let contrasts = [50,100,176,254]
+let contrasts = [0.25,0.5,1]
 let nsizes = 8
 let startLogMAR = 2.1
 let logMarStep = 0.1
 
+
+function linearToHex(f) {
+    // gamma compress linear light intensity between zero and one
+    let n = Math.ceil((1.055*Math.pow(f,1/2.4)-0.055)*255)
+    let hex = n.toString(16)
+    return "#"+hex+hex+hex
+}
 
 function logMARtoPx(logMAR, pxPerDegree=7.5) {
     let degrees = pow(10,logMAR)/60
@@ -17,6 +24,9 @@ function logMARtoPx(logMAR, pxPerDegree=7.5) {
 let sizes = [...Array(nsizes).keys()].map(
     x => x*logMarStep+startLogMAR).map(
     x => logMARtoPx(x))
+
+let colors = contrasts.map(
+    x => linearToHex(x))
 
 
 function* measureIntegrity(stimuli,every=5*60) {
@@ -38,21 +48,21 @@ function* measureIntegrity(stimuli,every=5*60) {
     }
 }
 
-function checkerboard_group(class1, class2, duration, size, cohort) {
+function checkerboard_group(class1, class2, duration, size, cohort, color) {
     const id = r.uuid()
     let target
     let color1
     let color2
     if (class1=='A') {
-        color1 = ["white","black"]
+        color1 = [color,"black"]
     } else {
-        color1 = ["black", "white"]
+        color1 = ["black", color]
     }
 
     if (class2=='A') {
-        color2 = ["white","black"]
+        color2 = [color,"black"]
     } else {
-        color2 = ["black", "white"]
+        color2 = ["black", color]
     }
 
     if (class1===class2) {
@@ -81,14 +91,20 @@ let id
 let cohort
 
 for (let size of sizes) {
-    for (let duration of durations) {
-        for (let i = 0; i < repetitions; i++) {
-            // use cohort to maintain balance in analysis
-            cohort = r.uuid()
-            stimuli.push(checkerboard_group('A','B', duration,size, cohort))
-            stimuli.push(checkerboard_group('A','A', duration,size, cohort))
-            stimuli.push(checkerboard_group('B','B', duration,size, cohort))
-            stimuli.push(checkerboard_group('B','A', duration,size, cohort))
+    for (let color of colors) {
+        for (let duration of durations) {
+            for (let i = 0; i < repetitions; i++) {
+                // use cohort to maintain balance in analysis
+                cohort = r.uuid()
+                stimuli.push(checkerboard_group('A','B', duration,size,
+                    cohort, color))
+                stimuli.push(checkerboard_group('A','A', duration,size,
+                    cohort, color))
+                stimuli.push(checkerboard_group('B','B', duration,size,
+                    cohort, color))
+                stimuli.push(checkerboard_group('B','A', duration,size,
+                    cohort, color))
+            }
         }
     }
 }
