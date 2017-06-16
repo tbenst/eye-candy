@@ -3,7 +3,7 @@ const metadata = {name: "grating-speeds", version: "0.1.1"}
 
 let repetitions = 50
 let durations = [1]
-let angles = [0]
+let angles = [PI/4]
 let speeds = [200,400,600]
 let nsizes = 8
 let startLogMAR = 2.1
