@@ -2,7 +2,7 @@ const metadata = {name: "checkerboard-contrast", version: "0.2.4", inverted: fal
 
 let repetitions = 25
 let durations = [0.5]
-let contrasts = [0.25,0.5,1]
+let contrasts = [0,0.1,1]
 let angle = PI/4
 let nsizes = 8
 let startLogMAR = 2.1
