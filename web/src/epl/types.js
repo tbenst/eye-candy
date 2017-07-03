@@ -67,7 +67,7 @@ class UniformLetter extends Stimulus {
         this.color = color
     }
 }
-exports.Letter = Letter
+exports.UniformLetter = UniformLetter
 
 class EyeChart extends Stimulus {
     constructor(lifespan, backgroundColor, letterMatrix, size, padding, color, metadata) {
