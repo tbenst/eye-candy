@@ -49,7 +49,7 @@ router.post("/window", (ctx) => {
     var session = ctx.session;
     session.windowHeight = ctx.request.header.windowheight
     session.windowWidth = ctx.request.header.windowwidth
-    ctx.body = session;   
+    ctx.body = session;
 });
 
 router.post("/next-stimulus",  (ctx) => {
@@ -163,6 +163,13 @@ router.post("/analysis/start-program", ctx => {
         ctx.status = 200
     }
 
+})
+
+// give metadata for a given program (id)
+router.get("/analysis/metadata/:sid", ctx => {
+    const sid = ctx.params.sid
+    ctx.body = program[sid].metadata
+    ctx.status = 200
 })
 
 // give the next value for a given program (id)

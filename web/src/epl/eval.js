@@ -32,7 +32,9 @@ function compileJSProgram(sid,programJS,seed, windowHeight, windowWidth) {
         's = generator.next();'+
         's.stimulusIndex=si; si++;'+
         's;')}
-    let metadata = () => {return vm.run('metadata;')}
+    const m = /const metadata = (\{.+?\})/.exec(programJS)[1]
+    // let metadata = () => {return vm.run('metadata;')}
+    const metadata = m
     return {vm: vm, next: functionInSandbox, metadata: metadata}
 }
 exports.compileJSProgram = compileJSProgram
