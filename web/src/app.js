@@ -92,7 +92,7 @@ router.post("/start-program", ctx => {
             '/www/src/programs/'+labNotebook.program+'.js',
             "utf-8")
     }
-    program[sid] = compileJSProgram(sid, labNotebook.epl, labNotebook.seed, session.windowHeight,
+    program[sid] = compileJSProgram(labNotebook.epl, labNotebook.seed, session.windowHeight,
         session.windowWidth)
 
     if (submitButton==="start") {
@@ -150,18 +150,36 @@ router.post("/analysis/start-program", ctx => {
         ctx.status = 501
     } else if (body.programType==="javascript") {
         // legacy
-        program[sid] = compileJSProgram(sid, body.program, body.seed, body.windowHeight,
+        program[sid] = compileJSProgram(body.program, body.seed, body.windowHeight,
             body.windowWidth)
 
         ctx.body = sid
         ctx.status = 200
     } else {
-        program[sid] = compileJSProgram(sid, body.epl, body.seed, body.windowHeight,
+        program[sid] = compileJSProgram(body.epl, body.seed, body.windowHeight,
             body.windowWidth)
 
         ctx.body = sid
         ctx.status = 200
     }
+
+})
+router.post("/analysis/run-program", ctx => {
+    const sid = uuid.v4()
+    const body = ctx.request.body
+    let p = compileJSProgram(body.epl, body.seed, body.windowHeight,
+            body.windowWidth)
+
+    let metadata = p.metadata
+    let stimulusList = []
+    let n = p.next()
+    while ( n.done===false) {
+        stimulusList.push(n)
+        n = p.next()
+    }
+    delete p
+    ctx.body = {metadata: metadata, stimulusList: stimulusList}
+    ctx.status = 200
 
 })
 
@@ -172,8 +190,9 @@ router.get("/analysis/metadata/:sid", ctx => {
     ctx.status = 200
 })
 
+
 // give the next value for a given program (id)
-router.get("/analysis/program/:sid", ctx => {
+router.get("/analysis/run/:sid", ctx => {
     const sid = ctx.params.sid
     ctx.body = program[sid].next()
     if (ctx.body.done===true) {
