@@ -1,8 +1,12 @@
-const metadata = {name: "checkerboard-contrast", version: "0.2.4", inverted: false}
+const metadata = {name: "checkerboard-contrast", version: "0.3.0", inverted: false}
+// 0.3 introduces new gamma compression
 
 let repetitions = 25
 let durations = [0.5]
-let contrasts = [0,0.1,1]
+// 0 is 1 (max) contrast, -1 is 0.1 contrast, -2 is 0.01
+// -2.2 is minimal contrast, <=-2.3 is same color for 8 bit color
+let logContrast = [0, -1, -2.3]
+let linearColors = [[0.55,0.45],[0.75,0.25],[1,0]]
 let angle = PI/4
 let nsizes = 8
 let startLogMAR = 2.1
@@ -11,9 +15,16 @@ let logMarStep = 0.1
 
 function linearToHex(f) {
     // gamma compress linear light intensity between zero and one
-    let n = Math.ceil((1.055*Math.pow(f,1/2.4)-0.055)*255)
-    let hex = n.toString(16)
+    let n = Math.round(Math.pow(f,1/2.4)*255)
+    let hex =""
+    if (n < 10) {hex = "0"}
+    hex = hex + n.toString(16)
     return "#"+hex+hex+hex
+}
+
+function logContrastToLinear(logC) {
+    let c = pow(10,logC)/2
+    return [0.5+c, 0.5-c]
 }
 
 function logMARtoPx(logMAR, pxPerDegree=7.5) {
@@ -26,8 +37,9 @@ let sizes = [...Array(nsizes).keys()].map(
     x => x*logMarStep+startLogMAR).map(
     x => logMARtoPx(x))
 
-let colors = contrasts.map(
-    x => linearToHex(x))
+let colors = logContrast.map(
+    logC => logContrastToLinear(logC).map(
+        c => linearToHex(c)))
 
 
 function* measureIntegrity(stimuli,every=5*60) {
@@ -49,21 +61,21 @@ function* measureIntegrity(stimuli,every=5*60) {
     }
 }
 
-function checkerboard_group(class1, class2, duration, size, cohort, color) {
+function checkerboard_group(class1, class2, duration, size, cohort, colorPair) {
     const id = r.uuid()
     let target
     let color1
     let color2
     if (class1=='A') {
-        color1 = [color,"black"]
+        color1 = colorPair
     } else {
-        color1 = ["black", color]
+        color1 = [colorPair[1], colorPair[0]]
     }
 
     if (class2=='A') {
-        color2 = [color,"black"]
+        color2 = colorPair
     } else {
-        color2 = ["black", color]
+        color2 = [colorPair[1], colorPair[0]]
     }
 
     if (class1===class2) {
@@ -92,19 +104,19 @@ let id
 let cohort
 
 for (let size of sizes) {
-    for (let color of colors) {
+    for (let colorPair of colors) {
         for (let duration of durations) {
             for (let i = 0; i < repetitions; i++) {
                 // use cohort to maintain balance in analysis
                 cohort = r.uuid()
                 stimuli.push(checkerboard_group('A','B', duration,size,
-                    cohort, color))
+                    cohort, colorPair))
                 stimuli.push(checkerboard_group('A','A', duration,size,
-                    cohort, color))
+                    cohort, colorPair))
                 stimuli.push(checkerboard_group('B','B', duration,size,
-                    cohort, color))
+                    cohort, colorPair))
                 stimuli.push(checkerboard_group('B','A', duration,size,
-                    cohort, color))
+                    cohort, colorPair))
             }
         }
     }
