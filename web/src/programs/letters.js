@@ -1,4 +1,4 @@
-const metadata = {name: "letters", version: "0.2.0", inverted: false}
+const metadata = {name: "letters", version: "0.3.0", inverted: false}
 // TODO pre-render letters
 let repetitions = 200
 let sizes = [300]
@@ -46,7 +46,7 @@ for (let i = 0; i < repetitions; i++) {
                 y = windowHeight/2 + size/2
                 l = new Letter(duration, "black", letter,x,y,size, 
                     "white", {group: id, cohort: cohort, block: true})
-                before = new Wait(1, {group: id})
+                before = new Wait(duration, {group: id})
                 after = new Wait(r.randi(0.5,1), {group: id, block: true})
 
                 // before + lit + after = lifespan

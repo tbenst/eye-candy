@@ -6,7 +6,6 @@ let durations = [0.5]
 // 0 is 1 (max) contrast, -1 is 0.1 contrast, -2 is 0.01
 // -2.2 is minimal contrast, <=-2.3 is same color for 8 bit color
 let logContrast = [0, -1, -2.3]
-let linearColors = [[0.55,0.45],[0.75,0.25],[1,0]]
 let angle = PI/4
 let nsizes = 8
 let startLogMAR = 2.1
