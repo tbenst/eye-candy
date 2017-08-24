@@ -6,6 +6,7 @@ const STIMULUS = {
     GRATING: 'GRATING',
     CHECKERBOARD: "CHECKERBOARD",
     LETTER: "LETTER",
+    TILED_LETTER: "TILED_LETTER",
     EYECHART: "EYECHART"
 }
 
@@ -57,17 +58,18 @@ class Letter extends Stimulus {
 }
 exports.Letter = Letter
 
-class UniformLetter extends Stimulus {
-    constructor(lifespan, backgroundColor, letter, size, padding, color, metadata) {
+class TiledLetter extends Stimulus {
+    constructor(lifespan, backgroundColor, letter, size, padding, color, angle, metadata) {
         super(lifespan, backgroundColor, metadata)
-        this.stimulusType = STIMULUS.LETTER
+        this.stimulusType = STIMULUS.TILED_LETTER
         this.letter = letter
         this.size = size
         this.padding = padding
         this.color = color
+        this.angle = angle
     }
 }
-exports.UniformLetter = UniformLetter
+exports.TiledLetter = TiledLetter
 
 class EyeChart extends Stimulus {
     constructor(lifespan, backgroundColor, letterMatrix, size, padding, color, metadata) {

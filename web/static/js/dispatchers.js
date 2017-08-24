@@ -6,7 +6,7 @@ DISPATCHERS
 function graphicsDispatcher() {
     const state = store.getState()
     const stimulus = state.stimulus
-    console.log("in graphicsDispatcher", stimulus)
+    // console.log("in graphicsDispatcher", stimulus)
     switch (stimulus.stimulusType) {
         case STIMULUS.BAR:
             if (stimulus.age === 0) {
@@ -53,6 +53,15 @@ function graphicsDispatcher() {
                 checkerboardDispatcher(stimulus.lifespan, stimulus.size,
                     stimulus.color,stimulus.alternateColor, stimulus.angle)
             }
+            break
+        case STIMULUS.TILED_LETTER:
+            if (stimulus.age === 0) {
+                // checkerboardDispatcher(stimulus.lifespan, stimulus.size,
+                    // stimulus.color,stimulus.backgroundColor, stimulus.angle)
+                tiledLetterDispatcher(stimulus.lifespan, stimulus.letter, stimulus.size,
+                    stimulus.padding, stimulus.color,stimulus.backgroundColor, stimulus.angle)
+            }
+            break
     }
 }
 
@@ -80,8 +89,28 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
     }
 }
 
-function uniformLetterDispatcher(lifespan, letter, size, padding, color) {
-    // body...
+function tiledLetterDispatcher(lifespan, letter, size, padding, color, backgroundColor, angle) {
+    var canvasPattern = document.createElement("canvas");
+    canvasPattern.width = size+padding;
+    canvasPattern.height = size+padding;
+    var contextPattern = canvasPattern.getContext("2d");
+
+    contextPattern.fillStyle = backgroundColor
+    contextPattern.fillRect(0, 0, canvasPattern.width, canvasPattern.height);
+
+    contextPattern.fillStyle = color
+    contextPattern.font = size+'px Sloan'
+    contextPattern.fillText(letter, padding/2, padding/2+size)
+
+    var pattern = context.createPattern(canvasPattern,"repeat");
+
+    store.dispatch(addGraphicAC({
+        graphicType: GRAPHIC.PATTERN,
+        pattern: pattern,
+        angle: angle,
+        lifespan: lifespan,
+        age: 0
+    }))
 }
 
 function checkerboardDispatcher(lifespan, size,color,alternateColor, angle) {

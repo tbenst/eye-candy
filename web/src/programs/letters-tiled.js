@@ -2,9 +2,7 @@ const metadata = {name: "eyechart", version: "0.2.0", inverted: false}
 
 let repetitions = 100
 
-// sizes.length == padding.length
 let sizes = [250,200,160,125]
-let padding = [250,200,160,125]
 
 let durations = [0.5]
 
@@ -52,9 +50,8 @@ for (let duration of durations) {
             for (let letter of letters) {
                 id = r.uuid(i)
                 // block means "do not insert a integrity check before me"
-                // backgroundColor, letter, x, y, size, color
-                l = new UniformLetter(duration, "black", letter, size, pad,
-                    "white", {group: id, cohort: cohort, block: true})
+                l = new TiledLetter(duration, "black", letter, size, pad,
+                    "white", 0, {group: id, cohort: cohort, block: true})
                 before = new Wait(1, {group: id})
                 after = new Wait(r.randi(0.5,1), {group: id, block: true})
 

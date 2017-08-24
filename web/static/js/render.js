@@ -39,11 +39,15 @@ function renderTarget(context, graphic) {
 
 function renderPattern(context, pattern,angle) {
     context.fillStyle = pattern;
-    context.translate(WIDTH/2,HEIGHT/2)
-    context.rotate(-angle)
     const diag = getDiagonalLength()
-    context.translate(-diag/2,-diag/2)
-    context.fillRect(0,0, diag, diag);
+    if (angle===0) {
+        context.fillRect(0,0, diag, diag);
+    } else  {
+        context.translate(WIDTH/2,HEIGHT/2)
+        context.rotate(-angle)
+        context.translate(-diag/2,-diag/2)
+        context.fillRect(0,0, diag, diag);
+    }
 
 }
 
