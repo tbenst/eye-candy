@@ -1,7 +1,38 @@
+// The mother of all dispatchers: the render loop affects the world
+// by dispatching a time tick
+function tickDispatcher(timeDelta) {
+    const state = store.getState()
+    
+    // tick world if there is a stimulus
+    if (state.stimulus!=undefined ) {
+        store.dispatch(timetickAC(timeDelta))
+        store.dispatch(stimulusTickAC(timeDelta))
+    }
 
-/***********************************************
-DISPATCHERS
-************************************************/
+    // check if stimulus expired then update signal light
+    if (state.stimulus===undefined ||
+        state.stimulus.age >= state.stimulus.lifespan) {
+
+        newStimulusDispatcher()
+    }
+    switch(state.signalLight) {
+        case SIGNAL_LIGHT.STOPPED:
+            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_A))
+            break
+        case SIGNAL_LIGHT.FRAME_A:
+            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_B))
+            break
+        case SIGNAL_LIGHT.FRAME_B:
+            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_A))
+            break
+    }
+    // graphicsDispatcher will initialize graphics
+    graphicsDispatcher()
+    // graphicsTickAC will initialize correct position
+    store.dispatch(graphicsTickAC(timeDelta))
+    cleanupGraphicsDispatcher()
+}
+
 
 function graphicsDispatcher() {
     const state = store.getState()
@@ -186,41 +217,6 @@ function cleanupGraphicsDispatcher() {
             removeGraphicDispatcher(i)
         }
     }
-}
-
-// The mother of all dispatchers: the render loop affects the world
-// by dispatching a time tick
-function tickDispatcher(timeDelta) {
-    const state = store.getState()
-    
-    // initialize for time=0
-    if (state.stimulus!=undefined ) {
-        store.dispatch(timetickAC(timeDelta))
-        store.dispatch(stimulusTickAC(timeDelta))
-    }
-
-    // check if stimulus expired then update signal light
-    if (state.stimulus===undefined ||
-        state.stimulus.age >= state.stimulus.lifespan) {
-
-        newStimulusDispatcher()
-    }
-    switch(state.signalLight) {
-        case SIGNAL_LIGHT.STOPPED:
-            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_A))
-            break
-        case SIGNAL_LIGHT.FRAME_A:
-            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_B))
-            break
-        case SIGNAL_LIGHT.FRAME_B:
-            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.FRAME_A))
-            break
-    }
-    // graphicsDispatcher will initialize graphics
-    graphicsDispatcher()
-    // graphicsTickAC will initialize correct position
-    store.dispatch(graphicsTickAC(timeDelta))
-    cleanupGraphicsDispatcher()
 }
 
 function newStimulusDispatcher() {
