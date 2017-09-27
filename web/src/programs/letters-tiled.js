@@ -1,4 +1,4 @@
-const metadata = {name: "eyechart", version: "0.2.0", inverted: false}
+const metadata = {name: "letters-tiled", version: "0.2.0", inverted: false}
 
 let repetitions = 100
 
