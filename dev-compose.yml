@@ -1,0 +1,16 @@
+web:
+  restart: always
+  build: .
+  # command: ls /www
+  command: node --harmony src/app.js
+  dockerfile: Dockerfile-dev
+  ports:
+   - "3000:3000"
+  volumes:
+   - ./web/src:/www/src
+   - ./web/static:/www/static
+   - ./web/view:/www/view
+  links:
+   - redis
+redis:
+  image: redis

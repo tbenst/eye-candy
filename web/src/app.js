@@ -32,23 +32,35 @@ var session = koaSession({
     store: store,
     secret: "1nkj98sdfa1will",
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    // cookie: {
+    //   path: '/',
+    //   httpOnly: false,
+    //   maxAge: 24 * 60 * 60 * 1000, //one day in ms
+    //   rewrite: true,
+    //   signed: true
+    // }
 });
 
 
 app.keys = ["8r92scsdf6", "jnt356gc"];
 app
-    .use(convert(session))
+    .use(session)
+    // .use(convert(session))
     .use(bodyParser({jsonLimit: '50mb', formLimit: "50mb"}));
 
 io.use(koaSocketSession(app, session))
 
 
 router.post("/window", (ctx) => {
-    // console.log("got window")
     var session = ctx.session;
+    console.log(ctx.request.header)
+    // const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
     session.windowHeight = ctx.request.header.windowheight
     session.windowWidth = ctx.request.header.windowwidth
+    console.log("got window", sid, session.windowHeight, session.windowWidth)
+    windows[sid] = {windowHeight: session.windowHeight,
+                    windowWidth: session.windowWidth}
     ctx.body = session;
 });
 
@@ -92,8 +104,8 @@ router.post("/start-program", ctx => {
             '/www/src/programs/'+labNotebook.program+'.js',
             "utf-8")
     }
-    program[sid] = compileJSProgram(labNotebook.epl, labNotebook.seed, session.windowHeight,
-        session.windowWidth)
+    // program[sid] = compileJSProgram(labNotebook.epl, labNotebook.seed, session.windowHeight,
+    //     session.windowWidth)
 
     if (submitButton==="start") {
 
@@ -139,6 +151,7 @@ router.post("/start-program", ctx => {
 
 // store all vms here
 let program = {}
+let windows = {}
 
 
 // Return the program id
@@ -255,6 +268,35 @@ io.on("test", (ctx) => {
 
 io.on("reset", ctx => {
     io.broadcast("reset")
+})
+
+io.on("load", (ctx, data) => {
+    const sid = data.sid
+    const program = data.program
+    const seed = data.seed
+    let epl = data.epl
+    console.log("windows", windows)
+    const windowHeight = windows[sid].windowHeight
+    const windowWidth = windows[sid].windowWidth
+    console.log(windowHeight, windowWidth)
+    if (program==="custom") {
+        // program already loaded in epl
+    } else {
+        // this is likely a security vulnerability but sure is convenient
+        // convention over customization
+        epl = fs.readFileSync(
+            '/www/src/programs/'+program+'.js',
+            "utf-8")
+    }
+
+    program[sid] = compileJSProgram(epl, seed, windowHeight,
+        windowWidth)
+
+    let f = () => {
+        console.log(program[sid].metadata)
+        // console.log(program[sid].preRender())
+    }
+    io.broadcast("pre-render", {test: "hello", preRenderFunc: f.toString()})
 })
 
 io.on("target", ctx => {

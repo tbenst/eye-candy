@@ -65,6 +65,20 @@ function renderGrating(context, pattern, width, angle, position) {
 }
 
 
+function renderLetter(context, letter, size, color, x, y) {
+    context.fillStyle = color
+    context.font = size+'px Sloan'
+    context.fillText(letter, x, y)
+}
+
+function renderImageFixation(context, image, fixationX, fixationY) {
+    centerX = WIDTH/2
+    centerY = HEIGHT/2
+    deltaX = centerX - fixationX
+    deltaY = centerY - fixationY
+    context.drawImage(image, deltaX, deltaY)
+}
+
 
 function render(state) {
     context.clearRect(0, 0, WIDTH, HEIGHT)
@@ -87,10 +101,12 @@ function render(state) {
                     renderGrating(context, graphic.pattern, graphic.width, graphic.angle, graphic.position)
                     break
                 case GRAPHIC.LETTER:
-                    context.fillStyle = graphic.color
-                    context.font = graphic.size+'px Sloan'
-                    context.fillText(graphic.letter, graphic.x, graphic.y)
+                    renderLetter(context, graphic.letter, graphic.size,
+                                 graphic.color, graphic.x, graphic.y)
                     break
+                case GRAPHIC.IMAGE_FIXATION:
+                    renderImageFixation(graphic.image, graphic.fixationX,
+                                        graphic.fixationY)
             }
             context.restore()
         })

@@ -6,10 +6,12 @@ const Random = require("./random")
 const Misc = require("./misc")
 
 const math = require("./math")
+const R = require("ramda")
 
 
 // this object has all values usable in EPL
-let EPL = Object.assign({log: console.log},Types,Render,Random,math,Misc)
+let EPL = Object.assign({log: console.log}, {R: R},
+                        Types,Render,Random,math,Misc)
 
 function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
     console.log('compiling EPL.')
@@ -33,8 +35,9 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
         's.stimulusIndex=si; si++;'+
         's;')}
     const m = /const metadata = (\{.+?\})/.exec(programJS)[1]
-    // let metadata = () => {return vm.run('metadata;')}
+    let OGmetadata = () => {return vm.run('metadata;')}
     const metadata = m
-    return {vm: vm, next: functionInSandbox, metadata: metadata}
+    return {vm: vm, next: functionInSandbox, metadata: metadata,
+            preRender: OGmetadata}
 }
 exports.compileJSProgram = compileJSProgram

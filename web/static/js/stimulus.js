@@ -95,6 +95,10 @@ PROGRAM / server communication
 
 var socket = io();
 
+fetch("/hello", {
+    credentials: "include"
+})
+
 fetch("/window", {
     method: "POST",
     headers: {
@@ -107,6 +111,12 @@ fetch("/window", {
 socket.on("run", (stimulusQueue) => {
     store.dispatch(setStimulusQueueAC(stimulusQueue))
     store.dispatch(setStatusAC(STATUS.STARTED))
+})
+
+socket.on("pre-render", (f) => {
+    // TODO exceedingly dangerous, massively insecure
+    // but hey, it's science!
+    eval("var cvjnefwlkjk = " + f.preRenderFunc + "; cvjnefwlkjk()")
 })
 
 socket.on("reset", () => {

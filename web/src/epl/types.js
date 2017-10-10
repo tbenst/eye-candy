@@ -7,7 +7,8 @@ const STIMULUS = {
     CHECKERBOARD: "CHECKERBOARD",
     LETTER: "LETTER",
     TILED_LETTER: "TILED_LETTER",
-    EYECHART: "EYECHART"
+    EYECHART: "EYECHART",
+    IMAGE_SACCADE: "IMAGE_SACCADE"
 }
 
 class Stimulus {
@@ -83,6 +84,20 @@ class EyeChart extends Stimulus {
 }
 exports.EyeChart = EyeChart
 
+class ImageSaccade extends Stimulus {
+    constructor(lifespan, backgroundColor, image,
+                fixationPoints, fixationTime, metadata) {
+        super(lifespan, backgroundColor, metadata)
+        this.stimulusType = STIMULUS.IMAGE_SACCADE
+        this.image = image
+        // cumulative sum of fixation times
+        this.fixationPoints = R.scan(R.add, fixationPoints)
+        this.fixationTimes = fixationTimes
+        this.fixationIndex = 0
+    }
+}
+exports.ImageSaccade = ImageSaccade
+
 class Solid extends Stimulus {
     constructor(lifespan, backgroundColor = "white", metadata) {
         super(lifespan, backgroundColor, metadata)
@@ -107,6 +122,7 @@ class Checkerboard extends Stimulus {
         this.alternateColor = alternateColor
         this.size = size
         this.angle = angle
+        // TODO try deleting--unecessary?
         this.count = 0
     }
 }
