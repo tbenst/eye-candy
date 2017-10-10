@@ -1,5 +1,21 @@
 const metadata = {name: "eyechart-saccade", version: "0.1.0"}
 
+let repetitions = 100
+
+let nsizes = 8
+let startLogMAR = 2.1
+let logMarStep = 0.1
+let fixationTime = 0.5
+
+const nrows = nsizes
+const ncols = 5
+
+function logMARtoLetterPx(logMAR, pxPerDegree=12.524) {
+    let degrees = pow(10,logMAR)/60
+    // letter E has 2.5 wavelengths
+    return round(degrees*pxPerDegree*2.5)
+}
+
 function* balancedLetterMatrix(nrows,ncols, reps=repetitions) {
     // 3d tensor
     let toReturn = [...Array(nrows).keys()].map(x => Array(ncols))
@@ -28,8 +44,7 @@ function renderLetter(context, letter, size, color, x, y) {
 
 function makeEyechart(size, padding, fixationTime) {
     const fullSize  = size + padding
-    const nrows = 7
-    const ncols = 7
+
     const width = nrows * fullSize
     const height = ncols * fullSize
 
@@ -52,7 +67,17 @@ function makeEyechart(size, padding, fixationTime) {
     }
     return new ImageSaccade(sum(fixationTimes),'black',image,
                             fixationPoints, fixationTimes)
+}
 
+function preRender(reps=repetitions) {
+    // TODO
+    let renders = []
+    for (var i = 0; i < reps; i++) {
+        // yield 2D tensor
+        yield toReturn.map(row =>
+            row.map(column => 
+                column[i]))
+    }
 }
 
 let eyechart = makeEyechart(100,100,1)
