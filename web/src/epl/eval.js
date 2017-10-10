@@ -26,8 +26,11 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
 
     // we use stimulus index to ensure correct order and avoid race condition
     vm.run("let r = new DeterministicRandom(seed);"+
-        "const p = function* () {" +
         programJS +
+        "const p = function* () {" +
+            "for (let s of stimulusGenerator) {" +
+                "yield s" +
+            "}" +
         "}; let generator = p(); " +
         "let s='uninitialized'; let si = 0;");
     let functionInSandbox = () => {return vm.run(
@@ -35,9 +38,9 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
         's.stimulusIndex=si; si++;'+
         's;')}
     const m = /const metadata = (\{.+?\})/.exec(programJS)[1]
-    let OGmetadata = () => {return vm.run('metadata;')}
+    let preRender = vm.run('preRender.toString();')
     const metadata = m
     return {vm: vm, next: functionInSandbox, metadata: metadata,
-            preRender: OGmetadata}
+            preRender: () => eval(preRender)}
 }
 exports.compileJSProgram = compileJSProgram

@@ -60,6 +60,3 @@ for (let i = 0; i < repetitions; i++) {
 r.shuffle(stimuli)
 
 let stimulusGenerator = measureIntegrity(flatten(stimuli))
-for (let s of stimulusGenerator) {
-    yield s
-}

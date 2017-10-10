@@ -12,8 +12,7 @@ function loadButton() {
     const program = document.querySelector("select[name=program]").value
     const epl = document.querySelector("textarea[name=epl]").value
     const seed = document.querySelector("input[name=seed]").value
-    const sid = getCookie("koa.sid")
-    console.log(sid, program, epl, seed)
+    const sid = localStorage.getItem("sid")
     socket.emit('load', {sid: sid, program: program, seed: seed, epl: epl})
 }
 

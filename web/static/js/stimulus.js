@@ -99,11 +99,24 @@ fetch("/hello", {
     credentials: "include"
 })
 
+
+function getSIDfromCookie(cookie) {
+    return /koa.sid=([\d\w\W]+);/.exec(cookie)[1]
+}
+
+if (localStorage.getItem('sid') === null) {
+    localStorage.setItem('sid',
+        getSIDfromCookie(document.cookie))
+}
+
+
+// console.log("COOKIE",document.cookie)
 fetch("/window", {
     method: "POST",
     headers: {
         windowHeight: store.getState()["windowHeight"],
-        windowWidth: store.getState()["windowWidth"]
+        windowWidth: store.getState()["windowWidth"],
+        sid: localStorage.getItem('sid')
     },
     credentials: "include"
 })
@@ -116,7 +129,7 @@ socket.on("run", (stimulusQueue) => {
 socket.on("pre-render", (f) => {
     // TODO exceedingly dangerous, massively insecure
     // but hey, it's science!
-    eval("var cvjnefwlkjk = " + f.preRenderFunc + "; cvjnefwlkjk()")
+    eval("var cvjnefwlkjk = " + f.preRender + "; cvjnefwlkjk()")
 })
 
 socket.on("reset", () => {

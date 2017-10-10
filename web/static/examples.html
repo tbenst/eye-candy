@@ -65,9 +65,6 @@ for (let i = 0; i < repetitions; i++) {
 r.shuffle(stimuli)
 
 let stimulusGenerator = measureIntegrity(flatten(stimuli))
-for (let s of stimulusGenerator) {
-    yield s
-}
 
 const metadata = {name: "letters", version: "0.1.0", inverted: true}
 
@@ -131,9 +128,6 @@ for (let i = 0; i < repetitions; i++) {
 r.shuffle(stimuli)
 
 let stimulusGenerator = measureIntegrity(flatten(stimuli))
-for (let s of stimulusGenerator) {
-    yield s
-}
 
 ------------------------------------------------------------
 const metadata = {name: "acuity", version: "0.3.2"}
@@ -197,9 +191,6 @@ for (let speed of speeds) {
 r.shuffle(stimuli)
 
 let stimulusGenerator = measureIntegrity(flatten(stimuli))
-for (let s of stimulusGenerator) {
-	yield s
-}
 
 ------------------------------------------------------------
 // BELOW THIS IS NOT FINISHED

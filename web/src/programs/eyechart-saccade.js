@@ -62,6 +62,3 @@ stimuli = [new ImageSaccade(eyechart.lifespan,'black',eyechart.image,
 
 
 let stimulusGenerator = stimuli
-for (let s of stimulusGenerator) {
-    yield s
-}

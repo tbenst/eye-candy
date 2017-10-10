@@ -31,6 +31,3 @@ for (let speed of speeds) {
 r.shuffle(stimuli)
 
 let stimulusGenerator = flatten(stimuli)
-for (let s of stimulusGenerator) {
-	yield s
-}

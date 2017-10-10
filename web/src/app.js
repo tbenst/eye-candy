@@ -5,7 +5,6 @@ const Koa = require("koa");
 const router = require("koa-router")();
 const path = require("path")
 const co = require("co");
-const cookie = require("cookie")
 const render = require("koa-ejs");
 const serve = require("koa-static");
 const convert = require("koa-convert");
@@ -28,18 +27,22 @@ app.use(logger())
 const io = new IO()
 const store = new redisStore({host: "redis"})
 
+// WARNING. session is mostly broken, using hacks e.g. localstorage
+// and the variable `windows`
+
 var session = koaSession({
     store: store,
     secret: "1nkj98sdfa1will",
     resave: true,
     saveUninitialized: true,
-    // cookie: {
-    //   path: '/',
-    //   httpOnly: false,
-    //   maxAge: 24 * 60 * 60 * 1000, //one day in ms
-    //   rewrite: true,
-    //   signed: true
-    // }
+
+    cookie: {
+      path: '/',
+      httpOnly: false,
+      maxAge: 24 * 60 * 60 * 1000, //one day in ms
+      rewrite: true,
+      signed: true
+    }
 });
 
 
@@ -52,13 +55,15 @@ app
 io.use(koaSocketSession(app, session))
 
 
+function getSIDfromCookie(cookie) {
+    return /koa\.sid=([\d\w\W]+)(;|$)/.exec(cookie)[1]
+}
+
 router.post("/window", (ctx) => {
     var session = ctx.session;
-    console.log(ctx.request.header)
-    // const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
+    const sid = ctx.request.header.sid
     session.windowHeight = ctx.request.header.windowheight
     session.windowWidth = ctx.request.header.windowwidth
-    console.log("got window", sid, session.windowHeight, session.windowWidth)
     windows[sid] = {windowHeight: session.windowHeight,
                     windowWidth: session.windowWidth}
     ctx.body = session;
@@ -66,14 +71,17 @@ router.post("/window", (ctx) => {
 
 router.post("/next-stimulus",  (ctx) => {
     // console.log("next-stimulus", ctx.session)
-    const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
+    const sid = getSIDfromCookie(ctx.request.header.cookie);
     const stimulus = program[sid].next()
     console.log(stimulus)
     ctx.body = stimulus
     ctx.status = 200
 });
 
+
+// initialize cookie
 router.get("/hello", ctx => {
+    ctx.session.initialize = true
     ctx.body = 'Hello Koaer3';
 })
 
@@ -89,8 +97,9 @@ router.get("/count", ctx => {
 router.post("/start-program", ctx => {
     io.broadcast("reset")
     var session = ctx.session
-    console.log("height,width",session.windowHeight,session.windowWidth)
-    const sid = cookie.parse(ctx.request.header.cookie)["koa.sid"];
+    console.log("height,width,cookie",session.windowHeight,
+            session.windowWidth, ctx.request.header.cookie)
+    const sid = getSIDfromCookie(ctx.request.header.cookie);
     let labNotebook = Object.assign({},ctx.request.body)
     let {submitButton} = labNotebook
     delete labNotebook.submitButton
@@ -116,14 +125,14 @@ router.post("/start-program", ctx => {
         console.log(stimulusQueue)
         io.broadcast("run", stimulusQueue)
 
-        labNotebook.windowHeight = session.windowHeight
-        labNotebook.windowWidth = session.windowWidth
+        labNotebook.windowHeight = windows[sid].windowHeight
+        labNotebook.windowWidth = windows[sid].windowWidth
         const date = new Date()
         labNotebook.date = date
         labNotebook.version = 0.5
         labNotebook.flickerVersion = 0.3
 
-
+        console.log("labNotebook", labNotebook)
         ctx.body = "---\n" + yaml.safeDump(labNotebook)
     } else if (submitButton==="preview") {
         let s = program[sid].next()
@@ -272,31 +281,28 @@ io.on("reset", ctx => {
 
 io.on("load", (ctx, data) => {
     const sid = data.sid
-    const program = data.program
+    const eplProgram = data.program
     const seed = data.seed
     let epl = data.epl
-    console.log("windows", windows)
+    console.log("windows", windows, sid)
     const windowHeight = windows[sid].windowHeight
     const windowWidth = windows[sid].windowWidth
     console.log(windowHeight, windowWidth)
-    if (program==="custom") {
+    if (eplProgram==="custom") {
         // program already loaded in epl
     } else {
         // this is likely a security vulnerability but sure is convenient
         // convention over customization
         epl = fs.readFileSync(
-            '/www/src/programs/'+program+'.js',
+            '/www/src/programs/'+eplProgram+'.js',
             "utf-8")
     }
 
     program[sid] = compileJSProgram(epl, seed, windowHeight,
         windowWidth)
-
-    let f = () => {
-        console.log(program[sid].metadata)
-        // console.log(program[sid].preRender())
-    }
-    io.broadcast("pre-render", {test: "hello", preRenderFunc: f.toString()})
+    let f = "() => {console.log(" + program[sid].preRender()+")}"
+    // console.log(program[sid].preRender())
+    io.broadcast("pre-render", {test: "hello", preRenderFunc: f})
 })
 
 io.on("target", ctx => {
