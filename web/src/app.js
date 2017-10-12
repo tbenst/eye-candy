@@ -24,6 +24,11 @@ const {compileYAMLProgram, compileJSProgram} = require("./epl/eval")
 const app = new Koa();
 app.use(logger())
 
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+});
+
 const io = new IO()
 const store = new redisStore({host: "redis"})
 
@@ -119,6 +124,7 @@ router.post("/start-program", ctx => {
     if (submitButton==="start") {
 
         let stimulusQueue = []
+        console.log("start")
         for (var i = 0; i < 5; i++) {
             stimulusQueue.push(program[sid].next())
         }
@@ -161,6 +167,7 @@ router.post("/start-program", ctx => {
 // store all vms here
 let program = {}
 let windows = {}
+let notebooks = {}
 
 
 // Return the program id
@@ -275,8 +282,12 @@ io.on("test", (ctx) => {
     // console.log("test get windowHeight", ctx.session.windowHeight)
 })
 
-io.on("reset", ctx => {
+io.on("reset", (ctx, data) => {
+    console.log("socket 'reset'")
+
+    const sid = data.sid
     io.broadcast("reset")
+    program[sid] = 'reset'
 })
 
 io.on("load", (ctx, data) => {
@@ -297,15 +308,24 @@ io.on("load", (ctx, data) => {
             '/www/src/programs/'+eplProgram+'.js',
             "utf-8")
     }
-
+    console.log("socket 'load': compiling for sid", sid)
     program[sid] = compileJSProgram(epl, seed, windowHeight,
         windowWidth)
-    let f = "() => {console.log(" + program[sid].preRender()+")}"
-    // console.log(program[sid].preRender())
-    io.broadcast("pre-render", {test: "hello", preRenderFunc: f})
+    // let f = "() => {console.log(" + program[sid].preRender()+")}"
+    // io.broadcast("pre-render", {preRender: f})
+    console.log("preRenderFunc", program[sid].preRenderFunc)
+    io.broadcast("pre-render", {func: program[sid].preRenderFunc,
+        args: program[sid].preRenderArgs})
+})
+
+io.on("renderResults", (ctx, data) => {
+    console.log("socket 'renderResults'")
+    const sid = data.sid
+    program[sid].initialize(data.renderResults)
 })
 
 io.on("target", ctx => {
+    console.log("socket 'target'")
     io.broadcast("target")
 })
 // ctx.session.on("error", function (err) {

@@ -71,11 +71,11 @@ function renderLetter(context, letter, size, color, x, y) {
     context.fillText(letter, x, y)
 }
 
-function renderImageFixation(context, image, fixationX, fixationY) {
+function renderImage(context, image, fixationPoint) {
     centerX = WIDTH/2
     centerY = HEIGHT/2
-    deltaX = centerX - fixationX
-    deltaY = centerY - fixationY
+    deltaX = centerX - fixationPoint.x
+    deltaY = centerY - fixationPoint.y
     context.drawImage(image, deltaX, deltaY)
 }
 
@@ -104,9 +104,8 @@ function render(state) {
                     renderLetter(context, graphic.letter, graphic.size,
                                  graphic.color, graphic.x, graphic.y)
                     break
-                case GRAPHIC.IMAGE_FIXATION:
-                    renderImageFixation(graphic.image, graphic.fixationX,
-                                        graphic.fixationY)
+                case GRAPHIC.IMAGE:
+                    renderImage(graphic.image, graphic.fixationPoint)
             }
             context.restore()
         })

@@ -1,7 +1,8 @@
 var socket = io();
 
 function resetButton() {
-    socket.emit('reset')
+    const sid = localStorage.getItem("sid")
+    socket.emit('reset', {sid: sid})
 }
 
 function targetButton() {

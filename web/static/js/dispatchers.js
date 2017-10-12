@@ -42,11 +42,11 @@ function graphicsDispatcher() {
                     stimulus.padding, stimulus.color)
             }
             break
-        case STIMULUS.IMAGE_SACCADE:
+        case STIMULUS.IMAGE:
             if (stimulus.age === 0) {
-                imageSaccadeDispatcher(stimulus.lifespan,
+                imageDispatcher(stimulus.lifespan,
                     stimulus.backgroundColor, stimulus.image,
-                    stimulus.fixationPoints, stimulus.fixationTimes)
+                    stimulus.fixationPoint)
             }
             break
         case STIMULUS.GRATING:
@@ -98,8 +98,8 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
 }
 
 
-function imageSaccadeDispatcher(lifespan, backgroundColor, image,
-                                fixationPoints, fixationTimes) {
+function imageDispatcher(lifespan, backgroundColor, image,
+                                fixationPoint) {
     const height = store.getState()["windowHeight"]
     const width = store.getState()["windowWidth"]
     const fullSize  = size + padding
@@ -109,9 +109,7 @@ function imageSaccadeDispatcher(lifespan, backgroundColor, image,
     store.dispatch(setGraphicsAC([{
             graphicType: GRAPHIC.IMAGE,
             image: image,
-            fixationX: fixationPoints[0].x,
-            fixationY: fixationPoints[0].y,
-            fixationIdx: 0,
+            fixationPoint: fixationPoint,
             lifespan: lifespan,
             age: 0
     }]))

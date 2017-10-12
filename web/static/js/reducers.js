@@ -95,8 +95,6 @@ function tickGraphic(graphic, timeDelta) {
             return tickBar(graphic, timeDelta)
         case GRAPHIC.GRATING:
             return tickGrating(graphic, timeDelta)
-        case GRAPHIC.IMAGE_FIXATION:
-            return tickImageFixation(graphic, timeDelta)
         default:
             return graphic
     }
@@ -141,22 +139,3 @@ function tickGrating(grating, timeDelta) {
         age: grating.age + timeDelta,
     })
 }
-
-function tickImageFixation(imageFixation, timeDelta) {
-    const state = store.getState()
-    let stimulus = state.stimulus
-    let iF = imageFixation
-    let fixationIdx = iF.fixationIdx
-    let nextStartTime = iF.fixationTimes[fixationIdx+1]
-    if (iF.age >= nextStartTime) {
-        fixationIdx++
-    }
-
-    return Object.assign({}, iF, {
-        fixationX: iF.fixationPoints[fixationIdx].fixationX,
-        fixationY: iF.fixationPoints[fixationIdx].fixationY,
-        fixationIdx: fixationIdx,
-        age: iF.age + timeDelta,
-    })
-}
-

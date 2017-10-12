@@ -59,4 +59,10 @@ for (let i = 0; i < repetitions; i++) {
 
 r.shuffle(stimuli)
 
-let stimulusGenerator = measureIntegrity(flatten(stimuli))
+stimuli = measureIntegrity(flatten(stimuli))
+
+function* stimulusGenerator(renderResults) {
+    for (s of stimuli) {
+        yield s
+    }
+}

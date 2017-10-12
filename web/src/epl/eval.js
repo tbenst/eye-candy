@@ -10,7 +10,7 @@ const R = require("ramda")
 
 
 // this object has all values usable in EPL
-let EPL = Object.assign({log: console.log}, {R: R},
+let EPL = Object.assign({log: console.log, JSON: JSON}, {R: R},
                         Types,Render,Random,math,Misc)
 
 function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
@@ -24,23 +24,54 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
         console: 'inherit'
     });
 
-    // we use stimulus index to ensure correct order and avoid race condition
-    vm.run("let r = new DeterministicRandom(seed);"+
-        programJS +
-        "const p = function* () {" +
-            "for (let s of stimulusGenerator) {" +
-                "yield s" +
-            "}" +
-        "}; let generator = p(); " +
-        "let s='uninitialized'; let si = 0;");
-    let functionInSandbox = () => {return vm.run(
+    // initialize program
+    vm.run("let r = new DeterministicRandom(seed);" + programJS)
+
+    const metadata = vm.run("metadata")
+    
+    // this function will be passed as string and run on client
+    let preRenderFunc = vm.run(
+            "if (typeof preRenderFunc !== 'undefined') {" +
+                "preRenderFunc.toString()" +
+                "} else {" +
+                    "'function preRenderFunc() {undefined}'" +
+                "}")
+    let preRenderArgs = vm.run(
+            "if (typeof preRenderArgs !== 'undefined') {" +
+                "preRenderArgs" +
+                "} else {" +
+                    "[undefined]" +
+                "}")
+
+    console.log("eval preRenderFunc", preRenderFunc)
+    function initialize(renderResults) {
+        console.log("Initializing EPL stimulus generator")
+        let r
+        if (renderResults===undefined) {
+            r = "undefined"
+        } else {
+            r = renderResults.toString()
+        }
+        // we use stimulus index to ensure correct order and
+        // avoid race condition
+        vm.run("const postRenderResults = eval(" + r + ");" +
+            "let generator = stimulusGenerator(postRenderResults); " +
+                "let s='uninitialized'; let si = 0;");
+    }
+    
+    function nextStimulus() {
+        return vm.run(
         's = generator.next();'+
         's.stimulusIndex=si; si++;'+
-        's;')}
-    const m = /const metadata = (\{.+?\})/.exec(programJS)[1]
-    let preRender = vm.run('preRender.toString();')
-    const metadata = m
-    return {vm: vm, next: functionInSandbox, metadata: metadata,
-            preRender: () => eval(preRender)}
+        's;')
+    }
+
+    return {vm: vm, metadata: metadata,
+            preRenderFunc: preRenderFunc,
+            preRenderArgs: preRenderArgs,
+            initialize: initialize,
+            next: nextStimulus,
+        }
 }
+
 exports.compileJSProgram = compileJSProgram

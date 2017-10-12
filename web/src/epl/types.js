@@ -8,7 +8,7 @@ const STIMULUS = {
     LETTER: "LETTER",
     TILED_LETTER: "TILED_LETTER",
     EYECHART: "EYECHART",
-    IMAGE_SACCADE: "IMAGE_SACCADE"
+    IMAGE: "IMAGE"
 }
 
 class Stimulus {
@@ -84,19 +84,16 @@ class EyeChart extends Stimulus {
 }
 exports.EyeChart = EyeChart
 
-class ImageSaccade extends Stimulus {
+class Image extends Stimulus {
     constructor(lifespan, backgroundColor, image,
-                fixationPoints, fixationTime, metadata) {
+                fixationPoint, metadata) {
         super(lifespan, backgroundColor, metadata)
-        this.stimulusType = STIMULUS.IMAGE_SACCADE
+        this.stimulusType = STIMULUS.IMAGE
         this.image = image
-        // cumulative sum of fixation times
-        this.fixationPoints = R.scan(R.add, fixationPoints)
-        this.fixationTimes = fixationTimes
-        this.fixationIndex = 0
+        this.fixationPoint = fixationPoint
     }
 }
-exports.ImageSaccade = ImageSaccade
+exports.Image = Image
 
 class Solid extends Stimulus {
     constructor(lifespan, backgroundColor = "white", metadata) {

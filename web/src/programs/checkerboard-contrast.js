@@ -123,4 +123,10 @@ for (let size of sizes) {
 
 r.shuffle(stimuli)
 
-let stimulusGenerator = measureIntegrity(flatten(stimuli))
+stimuli = measureIntegrity(flatten(stimuli))
+
+function* stimulusGenerator(renderResults) {
+    for (s of stimuli) {
+        yield s
+    }
+}

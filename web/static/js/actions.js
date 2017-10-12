@@ -39,7 +39,7 @@ const STIMULUS = {
     CHECKERBOARD: "CHECKERBOARD",
     LETTER: "LETTER",
     TILED_LETTER: "TILED_LETTER",
-    IMAGE_SACCADE: "IMAGE_SACCADE",
+    IMAGE: "IMAGE",
     EYECHART: "EYECHART"
 }
 
@@ -62,7 +62,7 @@ const GRAPHIC = {
     GRATING: "GRATING",
     TARGET: "TARGET",
     LETTER: "LETTER",
-    IMAGE_FIXATION: "IMAGE_FIXATION"
+    IMAGE: "IMAGE"
 }
 
 /***********************************************

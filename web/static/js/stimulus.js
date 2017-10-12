@@ -104,9 +104,11 @@ function getSIDfromCookie(cookie) {
     return /koa.sid=([\d\w\W]+);/.exec(cookie)[1]
 }
 
-if (localStorage.getItem('sid') === null) {
+try {
     localStorage.setItem('sid',
         getSIDfromCookie(document.cookie))
+} catch (e) {
+    console.log("Could not read cookie. Try clearing cookies if having issues)")
 }
 
 
@@ -122,17 +124,26 @@ fetch("/window", {
 })
 
 socket.on("run", (stimulusQueue) => {
+    console.log("socket 'run'")
     store.dispatch(setStimulusQueueAC(stimulusQueue))
     store.dispatch(setStatusAC(STATUS.STARTED))
 })
 
-socket.on("pre-render", (f) => {
+socket.on("pre-render", (preRender) => {
     // TODO exceedingly dangerous, massively insecure
     // but hey, it's science!
-    eval("var cvjnefwlkjk = " + f.preRender + "; cvjnefwlkjk()")
+    console.log("socket 'pre-render':", preRender)
+    eval(preRender.func)
+
+    renderResults = preRenderFunc(...preRender.args)
+
+    socket.emit("renderResults", {renderResults: renderResults,
+                                  sid: localStorage.getItem('sid')})
+
 })
 
 socket.on("reset", () => {
+    console.log("socket 'reset'")
     store.dispatch(resetAC())
 
 })
