@@ -94,34 +94,31 @@ PROGRAM / server communication
 ************************************************/
 
 var socket = io();
+let sid
 
-fetch("/hello", {
-    credentials: "include"
-})
+fetch("/get-sid", {
+    method: "GET"
+}).then(function(response) {  
+    return response.text()  
+  }).then(function(newSid) {
+    sid = newSid
+    console.log("got sid of:", newSid)
+    localStorage.setItem('sid', newSid)
+    fetch("/window", {
+        method: "POST",
+        headers: {
+            windowHeight: store.getState()["windowHeight"],
+            windowWidth: store.getState()["windowWidth"],
+            sid: sid
+        },
+        credentials: "include"
+    })
+})  
 
-
-function getSIDfromCookie(cookie) {
-    return /koa.sid=([\d\w\W]+);/.exec(cookie)[1]
-}
-
-try {
-    localStorage.setItem('sid',
-        getSIDfromCookie(document.cookie))
-} catch (e) {
-    console.log("Could not read cookie. Try clearing cookies if having issues)")
-}
 
 
 // console.log("COOKIE",document.cookie)
-fetch("/window", {
-    method: "POST",
-    headers: {
-        windowHeight: store.getState()["windowHeight"],
-        windowWidth: store.getState()["windowWidth"],
-        sid: localStorage.getItem('sid')
-    },
-    credentials: "include"
-})
+
 
 socket.on("run", (stimulusQueue) => {
     console.log("socket 'run'")
@@ -129,15 +126,18 @@ socket.on("run", (stimulusQueue) => {
     store.dispatch(setStatusAC(STATUS.STARTED))
 })
 
+let renders
+
 socket.on("pre-render", (preRender) => {
     // TODO exceedingly dangerous, massively insecure
     // but hey, it's science!
     console.log("socket 'pre-render':", preRender)
     eval(preRender.func)
 
-    renderResults = preRenderFunc(...preRender.args)
+    let renderResults = preRenderFunc(...preRender.args)
+    renders = renderResults.renders
 
-    socket.emit("renderResults", {renderResults: renderResults,
+    socket.emit("renderResults", {renderResults: renderResults.yield,
                                   sid: localStorage.getItem('sid')})
 
 })
@@ -160,7 +160,10 @@ async function nextStimulus() {
     try {
         var stimulus = await (await fetch("/next-stimulus", {
                 method: "POST",
-                credentials: "include"
+                credentials: "include",
+                headers: {
+                    sid: sid
+                }
            })).json()
     } catch (err) {
         console.error(err);

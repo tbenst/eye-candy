@@ -100,12 +100,6 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
 
 function imageDispatcher(lifespan, backgroundColor, image,
                                 fixationPoint) {
-    const height = store.getState()["windowHeight"]
-    const width = store.getState()["windowWidth"]
-    const fullSize  = size + padding
-    const numberOfRows = Math.ceil(height/fullSize)
-    const numberOfCols = Math.ceil(width/fullSize)
-
     store.dispatch(setGraphicsAC([{
             graphicType: GRAPHIC.IMAGE,
             image: image,

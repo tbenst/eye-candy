@@ -15,6 +15,16 @@ function loadButton() {
     const seed = document.querySelector("input[name=seed]").value
     const sid = localStorage.getItem("sid")
     socket.emit('load', {sid: sid, program: program, seed: seed, epl: epl})
+
+    if (document.querySelector("input[name=sid]")==null) {
+        var inputSid = document.createElement("input");
+        inputSid.setAttribute("type", "hidden");
+        inputSid.setAttribute("name", "sid");
+        inputSid.setAttribute("value", sid);
+        document.getElementById("stimulus").appendChild(inputSid);
+    } else {
+        document.querySelector("input[name=sid]").value = sid
+    }
 }
 
 function toggleRequired() {

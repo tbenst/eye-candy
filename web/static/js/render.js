@@ -72,11 +72,13 @@ function renderLetter(context, letter, size, color, x, y) {
 }
 
 function renderImage(context, image, fixationPoint) {
-    centerX = WIDTH/2
-    centerY = HEIGHT/2
-    deltaX = centerX - fixationPoint.x
-    deltaY = centerY - fixationPoint.y
-    context.drawImage(image, deltaX, deltaY)
+    const centerX = WIDTH/2
+    const centerY = HEIGHT/2
+    console.log("renderImage image, fixationPoint:", image, fixationPoint)
+    const deltaX = centerX - fixationPoint.x
+    const deltaY = centerY - fixationPoint.y
+    // renders is a special client-side object
+    context.drawImage(renders[image], deltaX, deltaY)
 }
 
 
@@ -105,7 +107,7 @@ function render(state) {
                                  graphic.color, graphic.x, graphic.y)
                     break
                 case GRAPHIC.IMAGE:
-                    renderImage(graphic.image, graphic.fixationPoint)
+                    renderImage(context, graphic.image, graphic.fixationPoint)
             }
             context.restore()
         })

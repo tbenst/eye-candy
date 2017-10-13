@@ -3,6 +3,7 @@ const koaSession = require("koa-generic-session");
 
 const Koa = require("koa");
 const router = require("koa-router")();
+var assert = require('assert');
 const path = require("path")
 const co = require("co");
 const render = require("koa-ejs");
@@ -76,18 +77,20 @@ router.post("/window", (ctx) => {
 
 router.post("/next-stimulus",  (ctx) => {
     // console.log("next-stimulus", ctx.session)
-    const sid = getSIDfromCookie(ctx.request.header.cookie);
+    const sid = ctx.request.header.sid
     const stimulus = program[sid].next()
-    console.log(stimulus)
+    console.log("next stimulus:", stimulus)
     ctx.body = stimulus
     ctx.status = 200
 });
 
 
 // initialize cookie
-router.get("/hello", ctx => {
-    ctx.session.initialize = true
-    ctx.body = 'Hello Koaer3';
+router.get("/get-sid", ctx => {
+    const sid = uuid.v4()
+    ctx.session.sid = sid
+    ctx.body = sid;
+    ctx.status = 200
 })
 
 router.get("/count", ctx => {
@@ -101,13 +104,12 @@ router.get("/count", ctx => {
 
 router.post("/start-program", ctx => {
     io.broadcast("reset")
-    var session = ctx.session
-    console.log("height,width,cookie",session.windowHeight,
-            session.windowWidth, ctx.request.header.cookie)
-    const sid = getSIDfromCookie(ctx.request.header.cookie);
     let labNotebook = Object.assign({},ctx.request.body)
-    let {submitButton} = labNotebook
+    let {submitButton, sid} = labNotebook
     delete labNotebook.submitButton
+    delete labNotebook.sid
+    console.log('start program sid:', sid)
+    assert(sid!==undefined, "assert sid is not undefined")
 
     if (labNotebook.program==="custom") {
         // program already loaded in labNotebook.epl
@@ -124,7 +126,13 @@ router.post("/start-program", ctx => {
     if (submitButton==="start") {
 
         let stimulusQueue = []
-        console.log("start")
+        console.log("start program")
+        try {
+            assert(program[sid]!==undefined, "No program found")
+        } catch(err) {
+            console.log("sid, program:", sid, program)
+            throw err
+        }
         for (var i = 0; i < 5; i++) {
             stimulusQueue.push(program[sid].next())
         }
@@ -133,6 +141,7 @@ router.post("/start-program", ctx => {
 
         labNotebook.windowHeight = windows[sid].windowHeight
         labNotebook.windowWidth = windows[sid].windowWidth
+        // TODO generate date cllient side
         const date = new Date()
         labNotebook.date = date
         labNotebook.version = 0.5
@@ -287,7 +296,7 @@ io.on("reset", (ctx, data) => {
 
     const sid = data.sid
     io.broadcast("reset")
-    program[sid] = 'reset'
+    delete program[sid]
 })
 
 io.on("load", (ctx, data) => {
@@ -313,7 +322,7 @@ io.on("load", (ctx, data) => {
         windowWidth)
     // let f = "() => {console.log(" + program[sid].preRender()+")}"
     // io.broadcast("pre-render", {preRender: f})
-    console.log("preRenderFunc", program[sid].preRenderFunc)
+    console.log("finished loading, triggering pre-render")
     io.broadcast("pre-render", {func: program[sid].preRenderFunc,
         args: program[sid].preRenderArgs})
 })
