@@ -37,9 +37,9 @@ let cohort
 for (let i = 0; i < repetitions; i++) {
     for (let size of sizes) {
         for (let duration of durations) {
-            cohort = r.uuid(i)
+            cohort = r.uuid()
             for (let letter of letters) {
-                id = r.uuid(i)
+                id = r.uuid()
                 // block means "do not insert a integrity check before me"
                 // backgroundColor, letter, x, y, size, color
                 x = windowWidth/2 - size/2

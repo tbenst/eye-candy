@@ -3,6 +3,15 @@ var socket = io();
 function resetButton() {
     const sid = localStorage.getItem("sid")
     socket.emit('reset', {sid: sid})
+    document.querySelector(
+        "input[name=submitButton][value=start]").disabled = true
+    document.querySelector(
+        "input[name=submitButton][value=preview]").disabled = true
+    document.querySelector(
+        "input[name=submitButton][value=estimate-duration]").disabled = true
+    document.querySelector(
+        "#load").disabled = false
+
 }
 
 function targetButton() {
@@ -25,6 +34,17 @@ function loadButton() {
     } else {
         document.querySelector("input[name=sid]").value = sid
     }
+    // ensure preRender finishes first
+    document.querySelector(
+        "input[name=submitButton][value=start]").disabled = true
+    document.querySelector(
+        "input[name=submitButton][value=preview]").disabled = true
+    document.querySelector(
+        "input[name=submitButton][value=estimate-duration]").disabled = true
+
+    document.querySelector(
+        "#load").disabled = true
+    
 }
 
 function toggleRequired() {
@@ -58,9 +78,13 @@ function getCookie(cname) {
 }
 
 
-socket.on("enableStartButton", () => {
-    console.log('enabling start button')
+socket.on("enableSubmitButton", () => {
     document.querySelector(
         "input[name=submitButton][value=start]").disabled = false
-
+    document.querySelector(
+        "input[name=submitButton][value=preview]").disabled = false
+    document.querySelector(
+        "input[name=submitButton][value=estimate-duration]").disabled = false
+    document.querySelector(
+        "#load").disabled = false
 })

@@ -156,7 +156,7 @@ router.post("/start-program", ctx => {
             ctx.body=ctx.body+JSON.stringify(s.value)+"\n"
             s = program[sid].next()
         }
-    } else if (submitButton==="estimate duration") {
+    } else if (submitButton==="estimate-duration") {
         let s = program[sid].next()
         let lifespan = 0
         while (s.done===false) {
@@ -332,7 +332,7 @@ io.on("renderResults", (ctx, data) => {
     console.log("socket 'renderResults'")
     const sid = data.sid
     program[sid].initialize(data.renderResults)
-    io.broadcast("enableStartButton")
+    io.broadcast("enableSubmitButton")
 })
 
 io.on("target", ctx => {
