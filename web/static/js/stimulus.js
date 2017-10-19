@@ -145,6 +145,7 @@ socket.on("pre-render", (preRender) => {
 socket.on("reset", () => {
     console.log("socket 'reset'")
     store.dispatch(resetAC())
+    renders = undefined
 
 })
 

@@ -137,6 +137,8 @@ function renderLoop(time) {
             tickDispatcher(timeDelta)
             render(store.getState())
             break
+        case STATUS.DEBUG:
+            break
     }
     requestAnimationFrame(renderLoop)
 }

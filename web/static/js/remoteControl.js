@@ -32,11 +32,13 @@ function toggleRequired() {
 }
 
 function startButton() {
-	fetch('/start-program', {
-		method: 'post',
-		body: new FormData(document.getElementById('programYAML')),
-		credentials: 'include'
-	});
+    document.querySelector(
+        "input[name=submitButton][value=start]").disabled = true
+    fetch('/start-program', {
+        method: 'post',
+        body: new FormData(document.getElementById('programYAML')),
+        credentials: 'include'
+    });
 }
 
 function getCookie(cname) {
@@ -54,3 +56,11 @@ function getCookie(cname) {
     }
     return "";
 }
+
+
+socket.on("enableStartButton", () => {
+    console.log('enabling start button')
+    document.querySelector(
+        "input[name=submitButton][value=start]").disabled = false
+
+})

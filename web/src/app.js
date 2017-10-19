@@ -103,7 +103,7 @@ router.get("/count", ctx => {
 
 
 router.post("/start-program", ctx => {
-    io.broadcast("reset")
+    
     let labNotebook = Object.assign({},ctx.request.body)
     let {submitButton, sid} = labNotebook
     delete labNotebook.submitButton
@@ -300,6 +300,7 @@ io.on("reset", (ctx, data) => {
 })
 
 io.on("load", (ctx, data) => {
+    io.broadcast("reset")
     const sid = data.sid
     const eplProgram = data.program
     const seed = data.seed
@@ -331,6 +332,7 @@ io.on("renderResults", (ctx, data) => {
     console.log("socket 'renderResults'")
     const sid = data.sid
     program[sid].initialize(data.renderResults)
+    io.broadcast("enableStartButton")
 })
 
 io.on("target", ctx => {

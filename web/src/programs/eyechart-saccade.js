@@ -1,13 +1,13 @@
 const metadata = {name: "eyechart-saccade", version: "0.1.0"}
 
-let repetitions = 1
+let repetitions = 100
 
 let nsizes = 8
 let startLogMAR = 2.1
 let logMarStep = 0.1
 let fixationTime = 0.5
 const nrows = nsizes
-const color = 'black'
+const color = 'white'
 
 // hardcoded
 const ncols = 5
@@ -43,7 +43,7 @@ function twoLetterMatrices(nrows) {
             letterMatrices[1][i][j] = newLetters[j+5]
         }
     }
-    log("letterMatrices!!", letterMatrices)
+    // log("letterMatrices!!", letterMatrices)
     return letterMatrices
 }
 
@@ -77,7 +77,7 @@ function preRenderFunc(sizes, reps, fixationTime, ncols, color, letterTensor) {
 
 
     function renderLetter(context, letter, size, color, x, y) {
-        console.log("renderLetter")
+        // console.log("renderLetter")
         context.fillStyle = color
         context.font = size+'px Sloan'
         context.fillText(letter, x, y)
@@ -85,7 +85,7 @@ function preRenderFunc(sizes, reps, fixationTime, ncols, color, letterTensor) {
 
 
     function makeEyechart(sizes, fixationTime, ncols, letterMatrix, color) {
-        console.log("makeEyechart")
+        // console.log("makeEyechart")
         let width = Math.max(...sizes) * (ncols*2+1)
         let nrows = sizes.length
         let size
@@ -95,8 +95,8 @@ function preRenderFunc(sizes, reps, fixationTime, ncols, color, letterTensor) {
             // proportional padding
             height = height + 2*size
         }
-        console.log(letterMatrix)
-        console.log(sizes)
+        // console.log(letterMatrix)
+        // console.log(sizes)
         // pre-render eyechart
         var canvas = document.createElement("canvas");
         var context = canvas.getContext("2d")
@@ -106,40 +106,46 @@ function preRenderFunc(sizes, reps, fixationTime, ncols, color, letterTensor) {
         let y = 0
         let fixationPoints = []
         let letter
+        let maxRowWidth
+        let rowWidth
         for (var i = 0; i < nrows; i++) {
             size = sizes[i]
-            console.log("size", size)
-            // padding
-            x = x + size
+            y = y + 2*size 
+
+            rowWidth = (2*ncols+1) * size
+            if (i==0) {
+                maxRowWidth = rowWidth
+            } else {
+                // center row
+                x = (maxRowWidth - rowWidth)/2
+            }
+
             for (var j = 0; j < ncols; j++) {
-                // padding
-                y = y + size
-                console.log("about to log letter", i, j)
+
+                // console.log("about to log letter", i, j)
                 letter = letterMatrix[i][j]
-                console.log("letter", letter)
+                // console.log("letter", letter)
                 renderLetter(context, letter, size, color, x, y)
                 fixationPoints.push({x: x+size/2,
-                                     y: y+size/2})
+                                     y: y-size/2})
 
-                // start next col beside letter
-                y = y + size
+                // start next col spaced from letter
+                x = x + 2* size
             }
-            y = 0
-            // start next row below letter
-            x = x + size 
+            x = 0
         }
         return [canvas, fixationPoints]
     }
 
     // actual function start
-    console.log('TENSOR', letterTensor)
+    // console.log('TENSOR', letterTensor)
 
     let nrows = sizes.length
     let eyecharts = []
     
     let eyeFixations = []
     for (var i = 0; i < letterTensor.length; i++) {
-        console.log("letterTensor[i]", letterTensor[i])
+        // console.log("letterTensor[i]", letterTensor[i])
         let [image, fixationPoints] = makeEyechart(sizes, fixationTime, ncols,
                                                    letterTensor[i], color)
         eyecharts.push(image)
@@ -153,7 +159,6 @@ function preRenderFunc(sizes, reps, fixationTime, ncols, color, letterTensor) {
 const preRenderArgs = [sizes, repetitions, fixationTime, ncols, color, letterTensor]
 
 function* stimulusGenerator(renderResults) {
-    log("got shit", renderResults)
     let eyeFixations = renderResults.eyeFixations
     let fixationPoints
     for (var i = 0; i < eyeFixations.length; i++) {

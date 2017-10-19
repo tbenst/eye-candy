@@ -21,7 +21,8 @@ const RESET = "RESET"
 const STATUS = {
     STARTED: "STARTED",
     STOPPED: "STOPPED",
-    FINISHED: "FINISHED"
+    FINISHED: "FINISHED",
+    DEBUG: "DEBUG"
 }
 
 const SIGNAL_LIGHT = {
