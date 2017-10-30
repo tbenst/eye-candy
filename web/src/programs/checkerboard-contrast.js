@@ -26,7 +26,7 @@ function logContrastToLinear(logC) {
     return [0.5+c, 0.5-c]
 }
 
-function logMARtoPx(logMAR, pxPerDegree=7.5) {
+function logMARtoPx(logMAR, pxPerDegree=12.524) {
     let degrees = pow(10,logMAR)/60
     return round(degrees*pxPerDegree)
 }
