@@ -129,8 +129,10 @@ socket.on("run", (stimulusQueue) => {
 let renders
 
 socket.on("pre-render", (preRender) => {
-    // TODO exceedingly dangerous, massively insecure
+    // TODO dangerous, insecure
     // but hey, it's science!
+    // also, this is client side so not *so* bad..
+    
     console.log("socket 'pre-render':", preRender)
     eval(preRender.func)
 

@@ -22,6 +22,8 @@ const {compileYAMLProgram, compileJSProgram} = require("./epl/eval")
 // import {buildGenerator} from "./parser"
 // import session from "./session"
 
+// io.load, then router.get("start-program")
+
 const app = new Koa();
 app.use(logger())
 
@@ -181,6 +183,7 @@ let notebooks = {}
 
 // Return the program id
 router.post("/analysis/start-program", ctx => {
+    console.log("analysis/start-program (legacy)")
     const sid = uuid.v4()
     const body = ctx.request.body
     if (body.programType==="YAML") {
@@ -200,14 +203,16 @@ router.post("/analysis/start-program", ctx => {
         ctx.body = sid
         ctx.status = 200
     }
-
 })
+
 router.post("/analysis/run-program", ctx => {
+    console.log("analysis/run-program")
     const sid = uuid.v4()
     const body = ctx.request.body
     let p = compileJSProgram(body.epl, body.seed, body.windowHeight,
             body.windowWidth)
 
+    p.initialize({test: undefined})
     let metadata = p.metadata
     let stimulusList = []
     let n = p.next()
@@ -218,7 +223,7 @@ router.post("/analysis/run-program", ctx => {
     delete p
     ctx.body = {metadata: metadata, stimulusList: stimulusList}
     ctx.status = 200
-
+    // no pre-rendering for analysis at the moment..
 })
 
 // give metadata for a given program (id)
