@@ -1,4 +1,4 @@
-const metadata = {name: "eyechart-saccade", version: "0.1.0"}
+const metadata = {name: "eyechart-saccade", version: "0.1.1"}
 
 let repetitions = 100
 
