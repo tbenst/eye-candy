@@ -12,6 +12,26 @@ const color = 'white'
 // hardcoded
 const ncols = 5
 
+function* measureIntegrity(stimuli,every=5*60) {
+    // every N seconds, do a flash
+    let integrityMeta
+    let elapsedTime = every
+    for (let s of stimuli) {
+        if (elapsedTime>=every && s.metadata.block===undefined) {
+            integrityMeta = {group: r.uuid(), label: "integrity"}
+            yield new Wait(1, integrityMeta)
+            yield new Solid(0.5, "white", integrityMeta)
+            yield new Wait(2, integrityMeta)
+            elapsedTime = 0
+            yield s
+        } else {
+            yield s
+        }
+        elapsedTime=elapsedTime+s["lifespan"]
+    }
+}
+
+
 function logMARtoLetterPx(logMAR, pxPerDegree=12.524) {
     let degrees = pow(10,logMAR)/60
     // letter E has 2.5 wavelengths
@@ -179,8 +199,7 @@ function preRenderFunc(sizes, reps, ncols, color, letterTensor,
 // special object for pre-rendering
 const preRenderArgs = [sizes, repetitions, ncols, color, letterTensor, fixationPoints]
 
-// TODO add integrity
-function* stimulusGenerator(renderResults) {
+function* gen() {
     let letterMatrix, cohort, id, letter
     for (var n = 0; n < letterTensor.length; n++) {
         letterMatrix = letterTensor[n]
@@ -198,5 +217,12 @@ function* stimulusGenerator(renderResults) {
                 yield new Wait(r.randi(0.5,1), {group: id, block: true})
             }
         }
+    }
+}
+
+// TODO add integrity
+function* stimulusGenerator(renderResults) {
+    for (let s of measureIntegrity(gen())) {
+        yield s
     }
 }
