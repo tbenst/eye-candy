@@ -1,12 +1,16 @@
-const metadata = {name: "checkerboard-flashes", version: "0.1.0", inverted: false}
+const metadata = {name: "checkerboard-flicker", version: "0.1.0", inverted: false}
 
-let repetitions = 40
+let repetitions = 15
 let durations = [1]
+// 0 is 1 (max) contrast, -1 is 0.1 contrast, -2 is 0.01
+// -2.2 is minimal contrast, <=-2.3 is same color for 8 bit color
+let logContrast = [ 0., -0.3, -0.6, -0.9, -1.2, -1.5, -1.8, -2.1]
 let flickerDuration = 0.1
 let angle = PI/4
 let nsizes = 8
-let startLogMAR = 1.8
+let startLogMAR = 1.9
 let logMarStep = 0.1
+
 
 
 function logMARtoPx(logMAR, pxPerDegree=12.524) {
@@ -15,10 +19,27 @@ function logMARtoPx(logMAR, pxPerDegree=12.524) {
 }
 
 
+function linearToHex(f) {
+    // gamma compress linear light intensity between zero and one
+    let n = Math.round(Math.pow(f,1/2.4)*255)
+    let hex =""
+    if (n < 10) {hex = "0"}
+    hex = hex + n.toString(16)
+    return "#"+hex+hex+hex
+}
+
+function logContrastToLinear(logC) {
+    let c = pow(10,logC)/2
+    return [0.5+c, 0.5-c]
+}
+
 let sizes = [...Array(nsizes).keys()].map(
     x => x*logMarStep+startLogMAR).map(
     x => logMARtoPx(x))
 
+let colors = logContrast.map(
+    logC => logContrastToLinear(logC).map(
+        c => linearToHex(c)))
 
 function* measureIntegrity(stimuli,every=5*60) {
     // every N seconds, do a flash
@@ -39,13 +60,13 @@ function* measureIntegrity(stimuli,every=5*60) {
     }
 }
 
-function checkerboard_group(class1, target, duration, flickerDuration, size, cohort) {
+function checkerboard_group(class1, target, duration, flickerDuration, size, cohort, colorPair) {
     const id = r.uuid()
     let color
     if (class1=='A') {
-        color = ["white","black"]
+        color = colorPair
     } else if (class1=='B') {
-        color = ["black", "white"]
+        color = [colorPair[1], colorPair[0]]
     }
     let group = []
 
@@ -84,14 +105,16 @@ let id
 let cohort
 
 for (let size of sizes) {
-    for (let duration of durations) {
-        for (let i = 0; i < repetitions; i++) {
-            // use cohort to maintain balance in analysis
-            cohort = r.uuid()
-            stimuli.push(checkerboard_group('A','SAME', duration,flickerDuration, size, cohort))
-            stimuli.push(checkerboard_group('A','DIFFERENT', duration,flickerDuration, size, cohort))
-            stimuli.push(checkerboard_group('B','SAME', duration,flickerDuration, size, cohort))
-            stimuli.push(checkerboard_group('B','DIFFERENT', duration,flickerDuration, size, cohort))
+    for (let colorPair of colors) {
+        for (let duration of durations) {
+            for (let i = 0; i < repetitions; i++) {
+                // use cohort to maintain balance in analysis
+                cohort = r.uuid()
+                stimuli.push(checkerboard_group('A','SAME', duration,flickerDuration, size, cohort, colorPair))
+                stimuli.push(checkerboard_group('A','DIFFERENT', duration,flickerDuration, size, cohort, colorPair))
+                stimuli.push(checkerboard_group('B','SAME', duration,flickerDuration, size, cohort, colorPair))
+                stimuli.push(checkerboard_group('B','DIFFERENT', duration,flickerDuration, size, cohort, colorPair))
+            }
         }
     }
 }
