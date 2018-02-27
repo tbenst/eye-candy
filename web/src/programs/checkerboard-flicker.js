@@ -80,7 +80,7 @@ function checkerboard_group(class1, target, duration, flickerDuration, size, coh
     let i = 0
     let color1
     let color2
-    while (time<duration) {
+    while (time+flickerDuration<=duration) {
         if (target=='SAME') {
             color1 = color[0]
             color2 = color[1]
