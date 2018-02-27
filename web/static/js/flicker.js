@@ -6,7 +6,7 @@ canvas.height = window.innerHeight
 
 function numberToColor(f) {
     // gamma compress linear light intensity between zero and one
-    let n = Math.ceil((1.055*Math.pow(f,1/2.4)-0.055)*255)
+    let n = Math.ceil((1.055*Math.pow(f,1/2.2)-0.055)*255)
     let hex = n.toString(16)
     return "#"+hex+hex+hex
 }

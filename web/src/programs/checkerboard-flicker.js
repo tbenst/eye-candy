@@ -23,7 +23,7 @@ function logMARtoPx(logMAR, pxPerDegree=12.524) {
 
 function linearToHex(f) {
     // gamma compress linear light intensity between zero and one
-    let n = Math.round(Math.pow(f,1/2.4)*255)
+    let n = Math.round(Math.pow(f,1/2.2)*255)
     let hex =""
     if (n < 10) {hex = "0"}
     hex = hex + n.toString(16)
