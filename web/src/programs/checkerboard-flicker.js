@@ -4,7 +4,9 @@ let repetitions = 15
 let durations = [1]
 // 0 is 1 (max) contrast, -1 is 0.1 contrast, -2 is 0.01
 // -2.2 is minimal contrast, <=-2.3 is same color for 8 bit color
-let logContrast = [ 0., -0.3, -0.6, -0.9, -1.2, -1.5, -1.8, -2.1]
+let startLogContrast = 0
+let logContrastStep = -0.1
+let ncontrasts = 8
 let flickerDuration = 0.1
 let angle = PI/4
 let nsizes = 8
@@ -37,7 +39,9 @@ let sizes = [...Array(nsizes).keys()].map(
     x => x*logMarStep+startLogMAR).map(
     x => logMARtoPx(x))
 
-let colors = logContrast.map(
+
+let colors = [...Array(ncontrasts).keys()].map(
+    x => x*logContrastStep+startLogContrast).map(
     logC => logContrastToLinear(logC).map(
         c => linearToHex(c)))
 
