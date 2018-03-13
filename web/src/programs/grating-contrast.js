@@ -73,7 +73,7 @@ function* measureIntegrity(stimuli,every=5*60) {
 function* insertBreaks(stimuli,every=10*60) {
     // every N seconds, do a WAIT
     let integrityMeta
-    let elapsedTime = every
+    let elapsedTime = 0
     for (let s of stimuli) {
         if (elapsedTime>=every && s.metadata.block===undefined) {
             integrityMeta = {group: r.uuid(), label: "break"}
