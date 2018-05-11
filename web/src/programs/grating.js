@@ -10,7 +10,7 @@ let startLogMAR = 2.1
 let logMarStep = 0.1
 
 
-function logMARtoPx(logMAR, pxPerDegree=7.5) {
+function logMARtoPx(logMAR, pxPerDegree=12.524) {
     let degrees = pow(10,logMAR)/60
     return round(degrees*pxPerDegree)
 }

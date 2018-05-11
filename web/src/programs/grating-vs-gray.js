@@ -1,12 +1,14 @@
-const metadata = {name: "grating-durations", version: "0.1.2"}
+const metadata = {name: "grating-vs-gray", version: "0.1.2"}
 
 
-let repetitions = 50
-let durations = [0.5,1,1.5]
+let repetitions = 75
+let durations = [2]
 let angles = [PI/4]
 let speeds = [200]
+let gratingColor = ['black', 'white']
+let solidColor = ['#bfbfbf']
 let nsizes = 8
-let startLogMAR = 2.1
+let startLogMAR = 1.8
 let logMarStep = 0.1
 
 
@@ -45,8 +47,8 @@ function* measureIntegrity(stimuli,every=5*60) {
 }
 
 let stimuli = []
-let left
-let right
+let positive
+let negative
 let before
 let after
 let id
@@ -60,19 +62,19 @@ for (let size of sizes) {
                     // use cohort to maintain balance in analysis
                     cohort = r.uuid()
                     before = new Wait(1, {group: id})
-                    
+
                     id = r.uuid()
-                    left = new Grating(duration,"black", speed, size, angle, "white",
-                        {group: id, cohort: cohort, class: "FORWARD", block: true})
+                    positive = new Grating(duration,gratingColor[0], speed, size, angle, gratingColor[1],
+                        {group: id, cohort: cohort, class: "POSITIVE", block: true})
                     after = new Wait(r.randi(1,1.5), {group: id, block: true})
-                    stimuli.push([before,left,after])
-                    
+                    stimuli.push([before,positive,after])
+
                     id = r.uuid()
                     meta = {group: id, block: true}
-                    right = new Grating(duration,"black", speed, size, inverseAngle(angle), "white",
-                        {group: id, cohort: cohort, class: "REVERSE", block: true})
+                    negative = new Solid(duration,solidColor,
+                        {group: id, cohort: cohort, class: "NEGATIVE", block: true})
                     after = new Wait(r.randi(1,1.5), {group: id, block: true})
-                    stimuli.push([before,right,after])
+                    stimuli.push([before,negative,after])
                 }
             }
         }
@@ -81,10 +83,7 @@ for (let size of sizes) {
 
 r.shuffle(stimuli)
 
-stimuli = measureIntegrity(flatten(stimuli))
-
-function* stimulusGenerator(renderResults) {
-    for (s of stimuli) {
-        yield s
-    }
+let stimulusGenerator = measureIntegrity(flatten(stimuli))
+for (let s of stimulusGenerator) {
+    yield s
 }
