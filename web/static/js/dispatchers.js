@@ -23,6 +23,7 @@ function graphicsDispatcher() {
             }]))
             break
         case STIMULUS.LETTER:
+            // TODO wrap in an if ?
             store.dispatch(setGraphicsAC([{
                 graphicType: GRAPHIC.LETTER,
                 letter: stimulus.letter,
@@ -39,6 +40,13 @@ function graphicsDispatcher() {
             if (stimulus.age === 0) {
                 eyeChartDispatcher(stimulus.lifespan, stimulus.letterMatrix, stimulus.size,
                     stimulus.padding, stimulus.color)
+            }
+            break
+        case STIMULUS.IMAGE:
+            if (stimulus.age === 0) {
+                imageDispatcher(stimulus.lifespan,
+                    stimulus.backgroundColor, stimulus.image,
+                    stimulus.fixationPoint)
             }
             break
         case STIMULUS.GRATING:
@@ -87,6 +95,18 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
             }))
         }
     }
+}
+
+
+function imageDispatcher(lifespan, backgroundColor, image,
+                                fixationPoint) {
+    store.dispatch(setGraphicsAC([{
+            graphicType: GRAPHIC.IMAGE,
+            image: image,
+            fixationPoint: fixationPoint,
+            lifespan: lifespan,
+            age: 0
+    }]))
 }
 
 function tiledLetterDispatcher(lifespan, letter, size, padding, color, backgroundColor, angle) {

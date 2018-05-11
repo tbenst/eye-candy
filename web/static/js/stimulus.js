@@ -94,23 +94,60 @@ PROGRAM / server communication
 ************************************************/
 
 var socket = io();
+let sid
 
-fetch("/window", {
-    method: "POST",
-    headers: {
-        windowHeight: store.getState()["windowHeight"],
-        windowWidth: store.getState()["windowWidth"]
-    },
-    credentials: "include"
-})
+fetch("/get-sid", {
+    method: "GET"
+}).then(function(response) {  
+    return response.text()  
+  }).then(function(newSid) {
+    sid = newSid
+    console.log("got sid of:", newSid)
+    localStorage.setItem('sid', newSid)
+    fetch("/window", {
+        method: "POST",
+        headers: {
+            windowHeight: store.getState()["windowHeight"],
+            windowWidth: store.getState()["windowWidth"],
+            sid: sid
+        },
+        credentials: "include"
+    })
+})  
+
+
+
+// console.log("COOKIE",document.cookie)
+
 
 socket.on("run", (stimulusQueue) => {
+    console.log("socket 'run'")
     store.dispatch(setStimulusQueueAC(stimulusQueue))
     store.dispatch(setStatusAC(STATUS.STARTED))
 })
 
+let renders
+
+socket.on("pre-render", (preRender) => {
+    // TODO dangerous, insecure
+    // but hey, it's science!
+    // also, this is client side so not *so* bad..
+    
+    console.log("socket 'pre-render':", preRender)
+    eval(preRender.func)
+
+    let renderResults = preRenderFunc(...preRender.args)
+    renders = renderResults.renders
+
+    socket.emit("renderResults", {renderResults: renderResults.yield,
+                                  sid: localStorage.getItem('sid')})
+
+})
+
 socket.on("reset", () => {
+    console.log("socket 'reset'")
     store.dispatch(resetAC())
+    renders = undefined
 
 })
 
@@ -126,7 +163,10 @@ async function nextStimulus() {
     try {
         var stimulus = await (await fetch("/next-stimulus", {
                 method: "POST",
-                credentials: "include"
+                credentials: "include",
+                headers: {
+                    sid: sid
+                }
            })).json()
     } catch (err) {
         console.error(err);

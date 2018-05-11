@@ -21,7 +21,8 @@ const RESET = "RESET"
 const STATUS = {
     STARTED: "STARTED",
     STOPPED: "STOPPED",
-    FINISHED: "FINISHED"
+    FINISHED: "FINISHED",
+    DEBUG: "DEBUG"
 }
 
 const SIGNAL_LIGHT = {
@@ -39,6 +40,7 @@ const STIMULUS = {
     CHECKERBOARD: "CHECKERBOARD",
     LETTER: "LETTER",
     TILED_LETTER: "TILED_LETTER",
+    IMAGE: "IMAGE",
     EYECHART: "EYECHART"
 }
 
@@ -60,7 +62,8 @@ const GRAPHIC = {
     PATTERN: "PATTERN",
     GRATING: "GRATING",
     TARGET: "TARGET",
-    LETTER: "LETTER"
+    LETTER: "LETTER",
+    IMAGE: "IMAGE"
 }
 
 /***********************************************

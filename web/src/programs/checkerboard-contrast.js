@@ -145,7 +145,10 @@ for (let size of sizes) {
 
 r.shuffle(stimuli)
 
-let stimulusGenerator = insertBreaks(measureIntegrity(flatten(stimuli)))
-for (let s of stimulusGenerator) {
-    yield s
+stimuli = insertBreaks(measureIntegrity(flatten(stimuli)))
+
+function* stimulusGenerator(renderResults) {
+    for (s of stimuli) {
+        yield s
+    }
 }

@@ -1,0 +1,228 @@
+const metadata = {name: "eyechart-saccade", version: "0.1.1"}
+
+let repetitions = 100
+
+let nsizes = 5
+let startLogMAR = 2.1
+let logMarStep = 0.1
+let duration = 0.5
+const nrows = nsizes
+const color = 'white'
+
+// hardcoded
+const ncols = 5
+
+function* measureIntegrity(stimuli,every=5*60) {
+    // every N seconds, do a flash
+    let integrityMeta
+    let elapsedTime = every
+    for (let s of stimuli) {
+        if (elapsedTime>=every && s.metadata.block===undefined) {
+            integrityMeta = {group: r.uuid(), label: "integrity"}
+            yield new Wait(1, integrityMeta)
+            yield new Solid(0.5, "white", integrityMeta)
+            yield new Wait(2, integrityMeta)
+            elapsedTime = 0
+            yield s
+        } else {
+            yield s
+        }
+        elapsedTime=elapsedTime+s["lifespan"]
+    }
+}
+
+
+function logMARtoLetterPx(logMAR, pxPerDegree=12.524) {
+    let degrees = pow(10,logMAR)/60
+    // letter E has 2.5 wavelengths
+    return round(degrees*pxPerDegree*2.5)
+}
+
+let sizes = [...Array(nsizes).keys()].map(
+    x => x*logMarStep+startLogMAR).map(
+    x => logMARtoLetterPx(x))
+
+// big to small
+sizes.reverse()
+
+
+let letters = ["C", "D", "H", "K", "N", "O", "R", "S", "V", "Z"]
+
+// hardcoded 10 letters and 5 columns
+function twoLetterMatrices(nrows) {
+    // retain balance per cohort while random letters within
+    let newLetters
+    let cohortID
+    let cohortMatrix = []
+    cohortMatrix = [...Array(nrows).keys()].map(x => Array(ncols))
+    let letterMatrices = []
+    firstLetterMatrix = [...Array(nrows).keys()].map(x => Array(ncols))
+    secondLetterMatrix = [...Array(nrows).keys()].map(x => Array(ncols))
+    for (var i = 0; i < nrows; i++) {
+        cohortID = r.uuid()
+        r.shuffle(letters)
+        newLetters = letters.slice()
+        for (var j = 0; j < ncols; j++) {
+            firstLetterMatrix[i][j] = newLetters[j]
+            secondLetterMatrix[i][j] = newLetters[j+5]
+            
+            cohortMatrix[i][j] = cohortID
+        }
+    }
+    // log("letterMatrices!!", letterMatrices)
+    // cohortMatrix is the same for both first and second
+    return [firstLetterMatrix, secondLetterMatrix, cohortMatrix]
+}
+
+
+function calcFixationPoints(sizes, ncols) {
+    let width = Math.max(...sizes) * (ncols*2+1)
+    let nrows = sizes.length
+    let size
+    let height = 0
+
+    for (size of sizes) {
+        // proportional padding
+        height = height + 2*size
+    }
+    let x = 0
+    let y = 0
+    // array of arrays
+    let fixationPoints = [...Array(nrows).keys()].map(x => Array(ncols))
+    let maxRowWidth
+    let rowWidth
+    for (var i = 0; i < nrows; i++) {
+        size = sizes[i]
+        y = y + 2*size 
+
+        rowWidth = (2*ncols+1) * size
+        if (i==0) {
+            maxRowWidth = rowWidth
+        } else {
+            // center row
+            x = (maxRowWidth - rowWidth)/2
+        }
+
+        for (var j = 0; j < ncols; j++) {
+            fixationPoints[i][j] = {x: x+size/2,
+                                 y: y-size/2}
+
+            // start next col spaced from letter
+            x = x + 2* size
+        }
+        x = 0
+    }
+    return fixationPoints
+}
+
+
+let letterTensor = []
+let cohortTensor = []
+let fixationPoints = calcFixationPoints(sizes, ncols)
+
+for (var rep = 0; rep < repetitions; rep++) {
+    // one cohort is two eyecharts (10 letters each size)
+    let [firstLetterMatrix, secondLetterMatrix, cohortMatrix] = twoLetterMatrices(nrows)
+    letterTensor.push(firstLetterMatrix)
+    letterTensor.push(secondLetterMatrix)
+    cohortTensor.push(cohortMatrix)
+    cohortTensor.push(cohortMatrix)
+}
+
+
+
+
+
+// special function for pre-rendering. This is passed as a string
+// and run client-side
+function preRenderFunc(sizes, reps, ncols, color, letterTensor,
+        fixationPoints) {
+
+
+    function drawLetter(context, letter, size, color, x, y) {
+        // render letter with center at (x,y)
+        // console.log("drawLetter")
+        context.fillStyle = color
+        context.font = size+'px Sloan'
+        context.fillText(letter, x-size/2, y+size/2)
+    }
+
+
+    function renderEyechart(sizes, ncols, letterMatrix, color) {
+        // console.log("renderEyechart")
+        let width = Math.max(...sizes) * (ncols*2+1)
+        let nrows = sizes.length
+        let height = 0
+        var size
+        for (size of sizes) {
+            // proportional padding
+            height = height + 2*size
+        }
+        // console.log(letterMatrix)
+        // console.log(sizes)
+        // pre-render eyechart
+        var canvas = document.createElement("canvas");
+        var context = canvas.getContext("2d")
+        canvas.width = width
+        canvas.height = height
+
+        let letter, fixationPoint
+        for (var i = 0; i < nrows; i++) {
+            size = sizes[i]
+            for (var j = 0; j < ncols; j++) {
+                fixationPoint = fixationPoints[i][j]
+                letter = letterMatrix[i][j]
+                drawLetter(context, letter, size, color,
+                    fixationPoint.x, fixationPoint.y)
+            }
+        }
+
+        return canvas
+    }
+
+
+    // actual function start
+    // console.log('TENSOR', letterTensor)
+
+    let nrows = sizes.length
+    let eyecharts = []
+    
+    for (var i = 0; i < letterTensor.length; i++) {
+        // console.log("letterTensor[i]", letterTensor[i])
+        let image = renderEyechart(sizes, ncols, letterTensor[i], color)
+        eyecharts.push(image)
+    }
+    return {renders: eyecharts,
+            yield: {}}
+}
+
+// special object for pre-rendering
+const preRenderArgs = [sizes, repetitions, ncols, color, letterTensor, fixationPoints]
+
+function* gen() {
+    let letterMatrix, cohort, id, letter
+    for (var n = 0; n < letterTensor.length; n++) {
+        letterMatrix = letterTensor[n]
+        cohortMatrix = cohortTensor[n]
+        for (var i = 0; i < nrows; i++) {
+            size = sizes[i]
+            for (var j = 0; j < ncols; j++) {
+                id = r.uuid()
+                fixationPoint = fixationPoints[i][j]
+                letter = letterMatrix[i][j]
+                yield new Wait(duration, {group: id})
+                yield new Image(duration, 'black', i, fixationPoint,
+                    {target: letter, cohort: cohortMatrix[i][j], group: id,
+                        block: true, parameter: size, parameterType: "size"})
+                yield new Wait(r.randi(0.5,1), {group: id, block: true})
+            }
+        }
+    }
+}
+
+// TODO add integrity
+function* stimulusGenerator(renderResults) {
+    for (let s of measureIntegrity(gen())) {
+        yield s
+    }
+}

@@ -65,6 +65,22 @@ function renderGrating(context, pattern, width, angle, position) {
 }
 
 
+function renderLetter(context, letter, size, color, x, y) {
+    context.fillStyle = color
+    context.font = size+'px Sloan'
+    context.fillText(letter, x, y)
+}
+
+function renderImage(context, image, fixationPoint) {
+    const centerX = WIDTH/2
+    const centerY = HEIGHT/2
+    console.log("renderImage image, fixationPoint:", image, fixationPoint)
+    const deltaX = centerX - fixationPoint.x
+    const deltaY = centerY - fixationPoint.y
+    // renders is a special client-side object
+    context.drawImage(renders[image], deltaX, deltaY)
+}
+
 
 function render(state) {
     context.clearRect(0, 0, WIDTH, HEIGHT)
@@ -87,10 +103,11 @@ function render(state) {
                     renderGrating(context, graphic.pattern, graphic.width, graphic.angle, graphic.position)
                     break
                 case GRAPHIC.LETTER:
-                    context.fillStyle = graphic.color
-                    context.font = graphic.size+'px Sloan'
-                    context.fillText(graphic.letter, graphic.x, graphic.y)
+                    renderLetter(context, graphic.letter, graphic.size,
+                                 graphic.color, graphic.x, graphic.y)
                     break
+                case GRAPHIC.IMAGE:
+                    renderImage(context, graphic.image, graphic.fixationPoint)
             }
             context.restore()
         })
@@ -119,6 +136,8 @@ function renderLoop(time) {
         case STATUS.STARTED:
             tickDispatcher(timeDelta)
             render(store.getState())
+            break
+        case STATUS.DEBUG:
             break
     }
     requestAnimationFrame(renderLoop)

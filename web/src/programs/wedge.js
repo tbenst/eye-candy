@@ -14,11 +14,20 @@ for (let i=0.1; i<=6; i=i+0.1) {
 	solid.push(group)
 }
 
+let stimuli = []
 // 5 repetitions
 for (let i = 0; i < 5; i++) {
 	r.shuffle(solid)
 	for (let group of solid) {
 		for (let stimulus of group)
-		yield stimulus
+		stimuli.push(stimulus)
 	}
+}
+
+stimuli = stimuli
+
+function* stimulusGenerator(renderResults) {
+    for (s of stimuli) {
+        yield s
+    }
 }

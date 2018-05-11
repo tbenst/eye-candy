@@ -139,4 +139,3 @@ function tickGrating(grating, timeDelta) {
         age: grating.age + timeDelta,
     })
 }
-

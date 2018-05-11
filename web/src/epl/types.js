@@ -7,7 +7,8 @@ const STIMULUS = {
     CHECKERBOARD: "CHECKERBOARD",
     LETTER: "LETTER",
     TILED_LETTER: "TILED_LETTER",
-    EYECHART: "EYECHART"
+    EYECHART: "EYECHART",
+    IMAGE: "IMAGE"
 }
 
 class Stimulus {
@@ -83,6 +84,17 @@ class EyeChart extends Stimulus {
 }
 exports.EyeChart = EyeChart
 
+class Image extends Stimulus {
+    constructor(lifespan, backgroundColor, image,
+                fixationPoint, metadata) {
+        super(lifespan, backgroundColor, metadata)
+        this.stimulusType = STIMULUS.IMAGE
+        this.image = image
+        this.fixationPoint = fixationPoint
+    }
+}
+exports.Image = Image
+
 class Solid extends Stimulus {
     constructor(lifespan, backgroundColor = "white", metadata) {
         super(lifespan, backgroundColor, metadata)
@@ -107,6 +119,7 @@ class Checkerboard extends Stimulus {
         this.alternateColor = alternateColor
         this.size = size
         this.angle = angle
+        // TODO try deleting--unecessary?
         this.count = 0
     }
 }

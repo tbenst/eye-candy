@@ -110,6 +110,7 @@ Toggle Required
       <option value="checkerboard-durations">Checkerboard-durations</option>
       <option value="checkerboard-flicker">Checkerboard-flicker</option>
       <!-- <option value="eyechart-balanced">Eyechart - Balanced</option> -->
+      <option value="eyechart-saccade">Eyechart - Saccade</option>
       <option value="grating">Grating</option>
       <option value="grating-durations">Grating-durations</option>
       <option value="grating-speeds">Grating-speeds</option>
@@ -126,9 +127,12 @@ Toggle Required
 
     Custom program:<br>
     <textarea name="epl" cols="60" rows="20"></textarea><br>
-  <input type="submit" name="submitButton" value="start">
-  <input type="submit" name="submitButton" value="preview">
-  <input type="submit" name="submitButton" value="estimate duration">
+  <button type="button" id="load" onclick="JavaScript: loadButton()">
+  Load
+  </button>
+  <input type="submit" name="submitButton" value="start", disabled="">
+  <input type="submit" name="submitButton" value="preview", disabled="">
+  <input type="submit" name="submitButton" value="estimate-duration", disabled="">
 </form>
 <button type="button" onclick="JavaScript: resetButton()">
 Reset

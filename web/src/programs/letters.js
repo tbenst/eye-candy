@@ -37,9 +37,9 @@ let cohort
 for (let i = 0; i < repetitions; i++) {
     for (let size of sizes) {
         for (let duration of durations) {
-            cohort = r.uuid(i)
+            cohort = r.uuid()
             for (let letter of letters) {
-                id = r.uuid(i)
+                id = r.uuid()
                 // block means "do not insert a integrity check before me"
                 // backgroundColor, letter, x, y, size, color
                 x = windowWidth/2 - size/2
@@ -59,7 +59,10 @@ for (let i = 0; i < repetitions; i++) {
 
 r.shuffle(stimuli)
 
-let stimulusGenerator = measureIntegrity(flatten(stimuli))
-for (let s of stimulusGenerator) {
-    yield s
+stimuli = measureIntegrity(flatten(stimuli))
+
+function* stimulusGenerator(renderResults) {
+    for (s of stimuli) {
+        yield s
+    }
 }
