@@ -1,8 +1,8 @@
 const metadata = {name: "letters-saccade", version: "0.1.0", inverted: false}
 // TODO pre-render letters
 
-let nsizes = 10
-let repetitions = 1
+let nsizes = 3
+let repetitions = 100
 let startLogMAR = 2.1
 let logMarStep = 0.1
 let duration = 1
