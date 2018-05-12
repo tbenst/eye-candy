@@ -59,6 +59,21 @@ class Letter extends Stimulus {
 }
 exports.Letter = Letter
 
+class LetterSaccade extends Stimulus {
+    constructor(lifespan, backgroundColor, letter, x, y, size, color, saccadeSize, metadata) {
+        // saccadeSize is a square of diameter 2*saccadeSize
+        super(lifespan, backgroundColor, metadata)
+        this.stimulusType = STIMULUS.LETTER
+        this.letter = letter
+        this.x = x
+        this.y = y
+        this.size = size
+        this.color = color
+        this.saccadeSize = saccadeSize
+    }
+}
+exports.Letter = Letter
+
 class TiledLetter extends Stimulus {
     constructor(lifespan, backgroundColor, letter, size, padding, color, angle, metadata) {
         super(lifespan, backgroundColor, metadata)
