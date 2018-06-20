@@ -71,6 +71,7 @@ function renderLetter(context, letter, size, color, x, y) {
     context.fillText(letter, x, y)
 }
 
+
 function renderImage(context, image, fixationPoint) {
     const centerX = WIDTH/2
     const centerY = HEIGHT/2
@@ -142,4 +143,3 @@ function renderLoop(time) {
     }
     requestAnimationFrame(renderLoop)
 }
-

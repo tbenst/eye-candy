@@ -98,8 +98,8 @@ let sid
 
 fetch("/get-sid", {
     method: "GET"
-}).then(function(response) {  
-    return response.text()  
+}).then(function(response) {
+    return response.text()
   }).then(function(newSid) {
     sid = newSid
     console.log("got sid of:", newSid)
@@ -113,7 +113,7 @@ fetch("/get-sid", {
         },
         credentials: "include"
     })
-})  
+})
 
 
 
@@ -132,11 +132,13 @@ socket.on("pre-render", (preRender) => {
     // TODO dangerous, insecure
     // but hey, it's science!
     // also, this is client side so not *so* bad..
-    
+
     console.log("socket 'pre-render':", preRender)
     eval(preRender.func)
+    console.log("finished preRender func eval, about to render...")
 
     let renderResults = preRenderFunc(...preRender.args)
+    console.log("finished render")
     renders = renderResults.renders
 
     socket.emit("renderResults", {renderResults: renderResults.yield,
