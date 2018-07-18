@@ -212,7 +212,7 @@ function cleanupGraphicsDispatcher() {
 // by dispatching a time tick
 function tickDispatcher(timeDelta) {
     const state = store.getState()
-    
+
     // initialize for time=0
     if (state.stimulus!=undefined ) {
         store.dispatch(timetickAC(timeDelta))
@@ -250,8 +250,11 @@ function newStimulusDispatcher() {
     const nextStimulus = state.stimulusQueue[stimulusIndex]
 
     if (nextStimulus.done===true) {
-        store.dispatch(setStatusAC(STATUS.FINISHED)) 
+        store.dispatch(setStatusAC(STATUS.FINISHED))
         store.dispatch(setSignalLightAC(SIGNAL_LIGHT.STOPPED))
+        if (state.status==STATUS.VIDEO) {
+            serverRender()
+        }
     } else {
         store.dispatch(incrementStimulusIndexAC())
         store.dispatch(setStimulusAC(nextStimulus.value))

@@ -15,14 +15,14 @@ const redisStore = require("koa-redis")
 var uuid = require("uuid");
 const logger = require("koa-logger")
 const yaml = require("js-yaml")
+const sprintf = require("sprintf-js").sprintf
 const fs = require('fs')
+var cp = require('child_process');
 
 const random = require("./epl/random")
 const {compileYAMLProgram, compileJSProgram} = require("./epl/eval")
-// import {buildGenerator} from "./parser"
-// import session from "./session"
 
-// io.load, then router.get("start-program")
+const DATADIR = "/data/"
 
 const app = new Koa();
 app.use(logger())
@@ -103,13 +103,35 @@ router.get("/count", ctx => {
     ctx.body = session;
 })
 
+function makeLabNotebook(labNotebook) {
+    labNotebook.windowHeight = windows[labNotebook.sid].windowHeight
+    labNotebook.windowWidth = windows[labNotebook.sid].windowWidth
+    delete labNotebook.sid
+    // TODO generate date cllient side
+    const date = new Date()
+    labNotebook.date = date
+    labNotebook.version = 0.5
+    labNotebook.flickerVersion = 0.3
+
+    console.log("labNotebook", labNotebook)
+    return "---\n" + yaml.safeDump(labNotebook)
+}
+
+function initStimulusQueue(prog) {
+    let stimulusQueue = []
+    assert(prog!==undefined, "No program found")
+    for (var i = 0; i < 5; i++) {
+        stimulusQueue.push(prog.next())
+    }
+    console.log(stimulusQueue)
+    return stimulusQueue
+}
 
 router.post("/start-program", ctx => {
-    
+
     let labNotebook = Object.assign({},ctx.request.body)
     let {submitButton, sid} = labNotebook
     delete labNotebook.submitButton
-    delete labNotebook.sid
     console.log('start program sid:', sid)
     assert(sid!==undefined, "assert sid is not undefined")
 
@@ -126,31 +148,10 @@ router.post("/start-program", ctx => {
     //     session.windowWidth)
 
     if (submitButton==="start") {
-
-        let stimulusQueue = []
         console.log("start program")
-        try {
-            assert(program[sid]!==undefined, "No program found")
-        } catch(err) {
-            console.log("sid, program:", sid, program)
-            throw err
-        }
-        for (var i = 0; i < 5; i++) {
-            stimulusQueue.push(program[sid].next())
-        }
-        console.log(stimulusQueue)
+        let stimulusQueue = initStimulusQueue(program[sid])
         io.broadcast("run", stimulusQueue)
-
-        labNotebook.windowHeight = windows[sid].windowHeight
-        labNotebook.windowWidth = windows[sid].windowWidth
-        // TODO generate date cllient side
-        const date = new Date()
-        labNotebook.date = date
-        labNotebook.version = 0.5
-        labNotebook.flickerVersion = 0.3
-
-        console.log("labNotebook", labNotebook)
-        ctx.body = "---\n" + yaml.safeDump(labNotebook)
+        ctx.body = makeLabNotebook(labNotebook)
     } else if (submitButton==="preview") {
         let s = program[sid].next()
         ctx.body = ""
@@ -158,6 +159,11 @@ router.post("/start-program", ctx => {
             ctx.body=ctx.body+JSON.stringify(s.value)+"\n"
             s = program[sid].next()
         }
+    } else if (submitButton==="video") {
+        console.log("start video")
+        let stimulusQueue = initStimulusQueue(program[sid])
+        io.broadcast("video", stimulusQueue)
+        ctx.body = makeLabNotebook(labNotebook)
     } else if (submitButton==="estimate-duration") {
         let s = program[sid].next()
         let lifespan = 0
@@ -177,6 +183,8 @@ router.post("/start-program", ctx => {
 
 // store all vms here
 let program = {}
+let program_vid_name = {}
+let program_log = {}
 let windows = {}
 let notebooks = {}
 
@@ -243,7 +251,6 @@ router.get("/analysis/run/:sid", ctx => {
     }
     ctx.status = 200
 })
-
 
 
 app
@@ -347,5 +354,89 @@ io.on("target", ctx => {
 // ctx.session.on("error", function (err) {
 //     console.log("Redis error " + err);
 // });
+
+io.on("addFrame", (ctx, data) => {
+    const sid = data.sid
+    let vidname, stream
+    if (program_vid_name[sid]===undefined) {
+        vidname = DATADIR + (new Date().toISOString())
+        fs.mkdirSync(vidname)
+        program_vid_name[sid] = vidname
+        stream = fs.createWriteStream(vidname+".txt", {flags:'a'})
+        program_log[sid] = stream
+        stream.write("frame_number,time,stimulus_index\n")
+    } else {
+        vidname = program_vid_name[sid]
+        stream = program_log[sid]
+    }
+    const png = data.png.replace(/^data:image\/png;base64,/, "")
+    var filename = sprintf('image-%010d.png', data.frameNum);
+    // const filename = "s="+data.stimulusIndex + ",t=" + data.time+'.png'
+    stream.write(data.frameNum+","+data.time+","+data.stimulusIndex+"\n")
+    fs.writeFileSync(vidname+"/"+filename, png, 'base64', (error) => {
+        if (error) {
+            console.error('Error saving frame:', error.message)
+            throw(error)
+        }
+    })
+})
+
+var deleteFolderRecursive = function(path) {
+    // https://stackoverflow.com/questions/18052762/remove-directory-which-is-not-empty
+  if (fs.existsSync(path)) {
+    fs.readdirSync(path).forEach(function(file, index){
+      var curPath = path + "/" + file;
+      if (fs.lstatSync(curPath).isDirectory()) { // recurse
+        deleteFolderRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
+};
+
+function cleanupRender(sid, deleteDir=true) {
+    let vidname = program_vid_name[sid]
+    let stream = program_log[sid]
+    if (deleteDir) {deleteFolderRecursive(vidname)}
+    program_log[sid].end()
+    delete program_log[sid]
+    delete program_vid_name[sid]
+
+}
+
+io.on("renderVideo", (ctx, data) => {
+    // TODO: THIS IS A RACE CONDITION! stream write could come in slowly
+    const sid = data.sid
+    let vidname = program_vid_name[sid]
+    let stream = program_log[sid]
+    console.log("Rendering your video. This might take a long time...")
+    var ffmpeg = cp.spawn('ffmpeg', [
+      '-framerate', '60',
+      '-start_number', '0',
+      '-i', vidname+'/image-%010d.png',
+      '-refs', '6',
+      '-c:v', 'libx264',
+      '-pix_fmt', 'yuv444p',
+      '-preset', 'veryslow',
+      '-crf', '18',
+      vidname + '.mp4'
+    ])
+    ffmpeg.on('error', function(error) {
+      console.error('Error starting FFmpeg:', error.message);
+      cleanupRender(sid, deleteDir=false)
+    });
+    ffmpeg.on('close', function(code) {
+      if (code !== 0) {
+        console.log('FFmpeg process closed with code', code);
+        cleanupRender(sid, deleteDir=false)
+      } else {
+        console.log('Finished rendering video. You can find it at ' + vidname + '.mp4')
+        cleanupRender(sid)
+      }
+    })
+})
+
 
 app.listen(3000);

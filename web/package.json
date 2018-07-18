@@ -34,10 +34,12 @@
     "koa-socket": "4.4.0",
     "koa-socket-session": "1.1.0",
     "koa-static": "3.0.0",
+    "marmottajax": "^2.2.0",
     "mersennetwister": "0.2.3",
-    "uuid": "3.0.1",
     "ramda": "0.24.1",
     "redux": "3.6.0",
+    "sprintf-js": "^1.1.1",
+    "uuid": "3.0.1",
     "vm2": "3.1.0"
   }
 }
