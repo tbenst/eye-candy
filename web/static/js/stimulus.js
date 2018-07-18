@@ -36,6 +36,7 @@ const storeInitialState = {
     status: STATUS.STOPPED,
     signalLight: SIGNAL_LIGHT.STOPPED,
     time: 0,
+    frameNum: 0,
     stimulusIndex: 0,
     stimulusQueue: [],
     graphics: []
@@ -124,6 +125,12 @@ socket.on("run", (stimulusQueue) => {
     console.log("socket 'run'")
     store.dispatch(setStimulusQueueAC(stimulusQueue))
     store.dispatch(setStatusAC(STATUS.STARTED))
+})
+
+socket.on("video", (stimulusQueue) => {
+    console.log("socket 'video'")
+    store.dispatch(setStimulusQueueAC(stimulusQueue))
+    store.dispatch(setStatusAC(STATUS.VIDEO))
 })
 
 let renders

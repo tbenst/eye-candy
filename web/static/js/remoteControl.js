@@ -10,6 +10,8 @@ function resetButton() {
     document.querySelector(
         "input[name=submitButton][value=estimate-duration]").disabled = true
     document.querySelector(
+        "input[name=submitButton][value=video]").disabled = true
+    document.querySelector(
         "#load").disabled = false
 
 }
@@ -41,14 +43,16 @@ function loadButton() {
         "input[name=submitButton][value=preview]").disabled = true
     document.querySelector(
         "input[name=submitButton][value=estimate-duration]").disabled = true
+    document.querySelector(
+        "input[name=submitButton][value=video]").disabled = true
 
     document.querySelector(
         "#load").disabled = true
-    
+
 }
 
 function toggleRequired() {
-    
+
 }
 
 function startButton() {
@@ -85,6 +89,8 @@ socket.on("enableSubmitButton", () => {
         "input[name=submitButton][value=preview]").disabled = false
     document.querySelector(
         "input[name=submitButton][value=estimate-duration]").disabled = false
+    document.querySelector(
+        "input[name=submitButton][value=video]").disabled = false
     document.querySelector(
         "#load").disabled = false
 })

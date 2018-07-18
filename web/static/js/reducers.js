@@ -50,7 +50,8 @@ function eyeCandyApp(state, action) {
             })
         case TIME_TICK:
             return Object.assign({}, state, {
-                time: state.time + action.timeDelta
+                time: state.time + action.timeDelta,
+                frameNum: state.frameNum+1
             })
         case GRAPHICS_TICK:
             return Object.assign({}, state, {
@@ -105,7 +106,7 @@ function tickBar(bar, timeDelta) {
     if (bar.position === undefined) {
         newPosition = {r: bar.startR, theta: -bar.angle}
     } else {
-        newPosition = {r: bar.position.r - bar.speed*timeDelta, 
+        newPosition = {r: bar.position.r - bar.speed*timeDelta,
             theta: bar.position.theta}
     }
 

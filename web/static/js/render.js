@@ -82,39 +82,44 @@ function renderImage(context, image, fixationPoint) {
     context.drawImage(renders[image], deltaX, deltaY)
 }
 
+function renderBackground(color) {
+    context.fillStyle = color
+    context.fillRect(0,0,WIDTH,HEIGHT)
+
+}
 
 function render(state) {
     context.clearRect(0, 0, WIDTH, HEIGHT)
-    document.body.style.backgroundColor = state.stimulus.backgroundColor
 
-    // if (state.graphics != undefined) {
-        state.graphics.forEach(graphic => {
-            context.save()
-            switch (graphic.graphicType) {
-                case GRAPHIC.BAR:
-                    renderBar(context, graphic)
-                    break
-                case GRAPHIC.TARGET:
-                    renderTarget(context, graphic)
-                    break
-                case GRAPHIC.PATTERN:
-                    renderPattern(context, graphic.pattern, graphic.angle)
-                    break
-                case GRAPHIC.GRATING:
-                    renderGrating(context, graphic.pattern, graphic.width, graphic.angle, graphic.position)
-                    break
-                case GRAPHIC.LETTER:
-                    renderLetter(context, graphic.letter, graphic.size,
-                                 graphic.color, graphic.x, graphic.y)
-                    break
-                case GRAPHIC.IMAGE:
-                    renderImage(context, graphic.image, graphic.fixationPoint)
-            }
-            context.restore()
-        })
-    // }
+    context.save()
+    renderBackground(state.stimulus.backgroundColor)
+    context.restore()
+
+    state.graphics.forEach(graphic => {
+        context.save()
+        switch (graphic.graphicType) {
+            case GRAPHIC.BAR:
+                renderBar(context, graphic)
+                break
+            case GRAPHIC.TARGET:
+                renderTarget(context, graphic)
+                break
+            case GRAPHIC.PATTERN:
+                renderPattern(context, graphic.pattern, graphic.angle)
+                break
+            case GRAPHIC.GRATING:
+                renderGrating(context, graphic.pattern, graphic.width, graphic.angle, graphic.position)
+                break
+            case GRAPHIC.LETTER:
+                renderLetter(context, graphic.letter, graphic.size,
+                             graphic.color, graphic.x, graphic.y)
+                break
+            case GRAPHIC.IMAGE:
+                renderImage(context, graphic.image, graphic.fixationPoint)
+        }
+        context.restore()
+    })
 }
-
 
 var lastTime
 function renderLoop(time) {
@@ -137,6 +142,12 @@ function renderLoop(time) {
         case STATUS.STARTED:
             tickDispatcher(timeDelta)
             render(store.getState())
+            break
+        case STATUS.VIDEO:
+            tickDispatcher(timeDelta)
+            let state = store.getState()
+            render(state)
+            sendFrame(canvas,state.frameNum, time, state.stimulusIndex)
             break
         case STATUS.DEBUG:
             break

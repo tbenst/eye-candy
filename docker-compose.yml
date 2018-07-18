@@ -4,7 +4,8 @@ web:
   command: node --harmony src/app.js
   ports:
    - "3000:3000"
-  # volumes:
+  volumes:
+   - /data/eye-candy:/data
   #  - .:/web
   links:
    - redis

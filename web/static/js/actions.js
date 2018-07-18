@@ -22,7 +22,8 @@ const STATUS = {
     STARTED: "STARTED",
     STOPPED: "STOPPED",
     FINISHED: "FINISHED",
-    DEBUG: "DEBUG"
+    DEBUG: "DEBUG",
+    VIDEO: "VIDEO"
 }
 
 const SIGNAL_LIGHT = {
