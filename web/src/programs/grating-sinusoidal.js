@@ -62,14 +62,14 @@ for (let size of sizes) {
                     before = new Wait(1, {group: id})
 
                     id = r.uuid()
-                    left = new Grating(duration,"black", speed, size, angle, "white",
+                    left = new SinusoidalGrating(duration,"black", speed, size, angle, "white",
                         {group: id, cohort: cohort, class: "FORWARD", block: true})
                     after = new Wait(r.randi(1,1.5), {group: id, block: true})
                     stimuli.push([before,left,after])
 
                     id = r.uuid()
                     meta = {group: id, block: true}
-                    right = new Grating(duration,"black", speed, size, inverseAngle(angle), "white",
+                    right = new SinusoidalGrating(duration,"black", speed, size, inverseAngle(angle), "white",
                         {group: id, cohort: cohort, class: "REVERSE", block: true})
                     after = new Wait(r.randi(1,1.5), {group: id, block: true})
                     stimuli.push([before,right,after])

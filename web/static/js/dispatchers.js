@@ -183,6 +183,7 @@ function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, an
     canvasPattern.height = width
     var contextPattern = canvasPattern.getContext("2d")
 
+    console.log("GRATING")
     if (sinusoidal) {
         let maxColor = colorToRGB(barColor)
         let minColor = colorToRGB(backgroundColor)
@@ -191,7 +192,7 @@ function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, an
         colorScale.g = (maxColor.g-minColor.g)/2
         colorScale.b = (maxColor.b-minColor.b)/2
 
-        let scale
+        let scale, graphicType
         let rgb = {}
         for (var x = 0; x < width*2; x++) {
             scale = sin(x/width*PI)
@@ -209,6 +210,7 @@ function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, an
         contextPattern.fillStyle = barColor
         contextPattern.fillRect(0, 0, width, width)
     }
+    console.log("MADE PATTERN")
     var pattern = context.createPattern(canvasPattern,"repeat");
 
     store.dispatch(addGraphicAC({

@@ -56,7 +56,7 @@ class SinusoidalGrating extends Stimulus {
         this.barColor = barColor
     }
 }
-exports.Grating = Grating
+exports.SinusoidalGrating = SinusoidalGrating
 
 class Letter extends Stimulus {
     constructor(lifespan, backgroundColor, letter, x, y, size, color, metadata) {
