@@ -56,6 +56,14 @@ function graphicsDispatcher() {
                 // increment count by 1 after bar is dispatched
             }
             break
+        case STIMULUS.SINUSOIDAL_GRATING:
+            if (stimulus.age === 0) {
+                gratingDispatcher(stimulus.lifespan, stimulus.width, stimulus.barColor, stimulus.backgroundColor,
+                    stimulus.speed, stimulus.angle,
+                    sinusoidal=true)
+                // increment count by 1 after bar is dispatched
+            }
+            break
         case STIMULUS.CHECKERBOARD:
             if (stimulus.age === 0) {
                 checkerboardDispatcher(stimulus.lifespan, stimulus.size,
@@ -168,19 +176,39 @@ function barDispatcher(lifespan, width, barColor, backgroundColor, speed, angle,
     }))
 }
 
-function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, angle) {
+function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, angle, sinusoidal=false) {
 
-    var canvasPattern = document.createElement("canvas");
-    canvasPattern.width = width*2;
-    canvasPattern.height = width;
-    var contextPattern = canvasPattern.getContext("2d");
+    var canvasPattern = document.createElement("canvas")
+    canvasPattern.width = width*2
+    canvasPattern.height = width
+    var contextPattern = canvasPattern.getContext("2d")
 
-    contextPattern.fillStyle =  backgroundColor
-    contextPattern.fillRect(0, 0, canvasPattern.width, canvasPattern.height);
+    if (sinusoidal) {
+        let maxColor = colorToRGB(barColor)
+        let minColor = colorToRGB(backgroundColor)
+        let colorScale = {}
+        colorScale.r = (maxColor.r-minColor.r)/2
+        colorScale.g = (maxColor.g-minColor.g)/2
+        colorScale.b = (maxColor.b-minColor.b)/2
 
-    contextPattern.fillStyle = barColor
-    contextPattern.fillRect(0, 0, width, width)
+        let scale
+        let rgb = {}
+        for (var x = 0; x < width*2; x++) {
+            scale = sin(x/width*PI)
+            // (b-a)/2 * sin(x) + a + (b-a)/2
+            rgb.r = colorScale.r * scale + minColor.r + colorScale.r
+            rgb.g = colorScale.g * scale + minColor.g + colorScale.g
+            rgb.b = colorScale.b * scale + minColor.b + colorScale.b
+            contextPattern.fillStyle = rgb
+            contextPattern.fillRect(x, 0, x+1, canvasPattern.height);
+        }
+    } else {
+        contextPattern.fillStyle =  backgroundColor
+        contextPattern.fillRect(0, 0, canvasPattern.width, canvasPattern.height);
 
+        contextPattern.fillStyle = barColor
+        contextPattern.fillRect(0, 0, width, width)
+    }
     var pattern = context.createPattern(canvasPattern,"repeat");
 
     store.dispatch(addGraphicAC({

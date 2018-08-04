@@ -1,4 +1,4 @@
-To use, please open Google Chrome 57 or later. Go to chrome://flags and enable "Experimental JavaScript."
+To use, please open Google Chrome 67 or later.
 
 You also need Docker. Clone this repository to a local folder, change into it, and execute:
 
@@ -27,3 +27,15 @@ Client socket emit 'renderResults'
 Client index.html POST '/start-program'
 
 
+# How to add a new stimulus
+1. add to types.js
+2. add to actions.js
+3. add to dispatchers.js
+3. add to reducers.js
+4. add to static/js/render.js
+
+Or by using Image type, can just define in EPL preRenderFunc! See eyechart-saccade.js for an example.
+
+# How to add new protocol
+1. create web/src/epl/programs/myProtocol.js
+2. add option tag to index.js

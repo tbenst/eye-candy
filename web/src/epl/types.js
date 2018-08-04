@@ -46,6 +46,18 @@ class Grating extends Stimulus {
 }
 exports.Grating = Grating
 
+class SinusoidalGrating extends Stimulus {
+    constructor(lifespan, backgroundColor, speed, width, angle, barColor, metadata) {
+        super(lifespan, backgroundColor, metadata)
+        this.stimulusType = STIMULUS.SINUSOIDAL_GRATING
+        this.speed = speed
+        this.width = width
+        this.angle = angle
+        this.barColor = barColor
+    }
+}
+exports.Grating = Grating
+
 class Letter extends Stimulus {
     constructor(lifespan, backgroundColor, letter, x, y, size, color, metadata) {
         super(lifespan, backgroundColor, metadata)
