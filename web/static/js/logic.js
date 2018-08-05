@@ -21,6 +21,10 @@ function colorToRGB(color) {
     return hexToRgb(color)
 }
 
+function rgbToHex(rgb) {
+    return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
+}
+
 function hexToRgb(hex) {
     // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
     var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;

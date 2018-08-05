@@ -52,6 +52,7 @@ function renderPattern(context, pattern,angle) {
 }
 
 function renderGrating(context, pattern, width, angle, position) {
+    console.log("render GRATING")
     context.fillStyle = pattern;
     // move to the center of the canvas
     context.translate(WIDTH/2,HEIGHT/2)

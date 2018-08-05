@@ -197,11 +197,11 @@ function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, an
         for (var x = 0; x < width*2; x++) {
             scale = sin(x/width*PI)
             // (b-a)/2 * sin(x) + a + (b-a)/2
-            rgb.r = colorScale.r * scale + minColor.r + colorScale.r
-            rgb.g = colorScale.g * scale + minColor.g + colorScale.g
-            rgb.b = colorScale.b * scale + minColor.b + colorScale.b
-            contextPattern.fillStyle = rgb
-            contextPattern.fillRect(x, 0, x+1, canvasPattern.height);
+            rgb.r = Math.round(colorScale.r * scale + minColor.r + colorScale.r)
+            rgb.g = Math.round(colorScale.g * scale + minColor.g + colorScale.g)
+            rgb.b = Math.round(colorScale.b * scale + minColor.b + colorScale.b)
+            contextPattern.fillStyle = rgbToHex(rgb)
+            contextPattern.fillRect(x, 0, x+1, canvasPattern.height)
         }
     } else {
         contextPattern.fillStyle =  backgroundColor
