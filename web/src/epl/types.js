@@ -4,6 +4,7 @@ const STIMULUS = {
     WAIT: 'WAIT',
     TARGET: 'TARGET',
     GRATING: 'GRATING',
+    SINUSOIDAL_GRATING: 'SINUSOIDAL_GRATING',
     CHECKERBOARD: "CHECKERBOARD",
     LETTER: "LETTER",
     TILED_LETTER: "TILED_LETTER",
@@ -45,6 +46,18 @@ class Grating extends Stimulus {
     }
 }
 exports.Grating = Grating
+
+class SinusoidalGrating extends Stimulus {
+    constructor(lifespan, backgroundColor, speed, width, angle, barColor, metadata) {
+        super(lifespan, backgroundColor, metadata)
+        this.stimulusType = STIMULUS.SINUSOIDAL_GRATING
+        this.speed = speed
+        this.width = width
+        this.angle = angle
+        this.barColor = barColor
+    }
+}
+exports.SinusoidalGrating = SinusoidalGrating
 
 class Letter extends Stimulus {
     constructor(lifespan, backgroundColor, letter, x, y, size, color, metadata) {

@@ -52,6 +52,7 @@ function renderPattern(context, pattern,angle) {
 }
 
 function renderGrating(context, pattern, width, angle, position) {
+    console.log("render GRATING")
     context.fillStyle = pattern;
     // move to the center of the canvas
     context.translate(WIDTH/2,HEIGHT/2)
@@ -108,6 +109,9 @@ function render(state) {
                 renderPattern(context, graphic.pattern, graphic.angle)
                 break
             case GRAPHIC.GRATING:
+                renderGrating(context, graphic.pattern, graphic.width, graphic.angle, graphic.position)
+                break
+            case GRAPHIC.SINUSOIDAL_GRATING:
                 renderGrating(context, graphic.pattern, graphic.width, graphic.angle, graphic.position)
                 break
             case GRAPHIC.LETTER:

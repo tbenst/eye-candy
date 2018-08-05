@@ -96,6 +96,8 @@ function tickGraphic(graphic, timeDelta) {
             return tickBar(graphic, timeDelta)
         case GRAPHIC.GRATING:
             return tickGrating(graphic, timeDelta)
+        case GRAPHIC.SINUSOIDAL_GRATING:
+            return tickGrating(graphic, timeDelta)
         default:
             return graphic
     }
