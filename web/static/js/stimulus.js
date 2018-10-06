@@ -37,7 +37,7 @@ const storeInitialState = {
     signalLight: SIGNAL_LIGHT.STOPPED,
     time: 0,
     frameNum: 0,
-    stimulusIndex: 0,
+    stimulusIndex: -1,
     stimulusQueue: [],
     graphics: []
 }

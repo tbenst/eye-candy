@@ -277,7 +277,7 @@ function newStimulusDispatcher() {
     queueStimulusDispatcher()
     const state = store.getState()
     const stimulusIndex = state.stimulusIndex
-    const nextStimulus = state.stimulusQueue[stimulusIndex]
+    const nextStimulus = state.stimulusQueue[stimulusIndex+1]
 
     if (nextStimulus.done===true) {
         store.dispatch(setStatusAC(STATUS.FINISHED))
