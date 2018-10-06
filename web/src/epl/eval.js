@@ -30,7 +30,7 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
     vm.run("let r = new DeterministicRandom(seed);" + programJS)
 
     const metadata = vm.run("metadata")
-    
+
     // this function will be passed as string and run on client
     let preRenderFunc = vm.run(
             "if (typeof preRenderFunc !== 'undefined') {" +
@@ -66,7 +66,7 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
         vm.run("let generator = stimulusGenerator(renderResults.yield); " +
                 "let s='uninitialized'; let si = 0;");
     }
-    
+
     function nextStimulus() {
         return vm.run(
         's = generator.next();'+
