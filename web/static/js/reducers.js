@@ -55,7 +55,7 @@ function eyeCandyApp(state, action) {
             })
         case GRAPHICS_TICK:
             return Object.assign({}, state, {
-                graphics: graphicsReducer(state.graphics, action.timeDelta)
+                graphics: graphicsReducer(state, action.timeDelta)
             })
         case STIMULUS_TICK:
             return Object.assign({}, state, {
@@ -75,12 +75,13 @@ function stimulusTickReducer(stimulus, timeDelta) {
     })
 }
 
-function graphicsReducer(graphics, timeDelta) {
+function graphicsReducer(state, timeDelta) {
+    let graphics = state.graphics
     // if (graphics === undefined) {
         // return graphics
     // } else {
         return graphics.map(graphic => {
-            return tickGraphic(graphic, timeDelta)
+            return tickGraphic(state, graphic, timeDelta)
        })/*.filter((x) => {return x}) // TODO add code to expire graphics*/
     // }
 }
@@ -90,10 +91,10 @@ function graphicsReducer(graphics, timeDelta) {
 GRAPHICS TICK
 ************************************************/
 
-function tickGraphic(graphic, timeDelta) {
+function tickGraphic(state, graphic, timeDelta) {
     switch (graphic.graphicType) {
         case GRAPHIC.BAR:
-            return tickBar(graphic, timeDelta)
+            return tickBar(state, graphic, timeDelta)
         case GRAPHIC.GRATING:
             return tickGrating(graphic, timeDelta)
         case GRAPHIC.SINUSOIDAL_GRATING:
@@ -103,7 +104,7 @@ function tickGraphic(graphic, timeDelta) {
     }
 }
 
-function tickBar(bar, timeDelta) {
+function tickBar(state, bar, timeDelta) {
     let newPosition = undefined
     if (bar.position === undefined) {
         newPosition = {r: bar.startR, theta: -bar.angle}
@@ -111,8 +112,6 @@ function tickBar(bar, timeDelta) {
         newPosition = {r: bar.position.r - bar.speed*timeDelta,
             theta: bar.position.theta}
     }
-
-    const state = store.getState()
 
     return Object.assign({}, bar, {
         position: newPosition,
@@ -134,8 +133,6 @@ function tickGrating(grating, timeDelta) {
     } else {
         newPosition = (grating.position + grating.speed*timeDelta) % (2*grating.width)
     }
-
-    const state = store.getState()
 
     return Object.assign({}, grating, {
         position: newPosition,

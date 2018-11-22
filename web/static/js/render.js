@@ -52,7 +52,7 @@ function renderPattern(context, pattern,angle) {
 }
 
 function renderGrating(context, pattern, width, angle, position) {
-    console.log("render GRATING")
+    // console.log("render GRATING")
     context.fillStyle = pattern;
     // move to the center of the canvas
     context.translate(WIDTH/2,HEIGHT/2)
@@ -76,7 +76,7 @@ function renderLetter(context, letter, size, color, x, y) {
 function renderImage(context, image, fixationPoint) {
     const centerX = WIDTH/2
     const centerY = HEIGHT/2
-    console.log("renderImage image, fixationPoint:", image, fixationPoint)
+    // console.log("renderImage image, fixationPoint:", image, fixationPoint)
     const deltaX = centerX - fixationPoint.x
     const deltaY = centerY - fixationPoint.y
     // renders is a special client-side object

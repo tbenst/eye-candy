@@ -17,29 +17,29 @@
   },
   "homepage": "https://github.com/tbenst/eye-candy#readme",
   "devDependencies": {
-    "koa-logger": "^2.0.0"
+    "koa-logger": "3.2.0"
   },
   "dependencies": {
     "co": "4.6.0",
-    "co-body": "4.2.0",
-    "ejs": "2.5.2",
-    "js-yaml": "3.6.1",
-    "koa": "2.0.0",
-    "koa-bodyparser": "3.1.0",
-    "koa-ejs": "3.0.0",
-    "koa-generic-session": "2.0.0",
-    "koa-json-body": "5.0.0",
-    "koa-redis": "2.1.2",
-    "koa-router": "7.0.1",
+    "co-body": "6.0.0",
+    "ejs": "2.6.1",
+    "js-yaml": "3.12.0",
+    "koa": "2.6.2",
+    "koa-bodyparser": "4.2.1",
+    "koa-ejs": "4.1.2",
+    "koa-generic-session": "2.0.1",
+    "koa-json-body": "5.3.0",
+    "koa-redis": "3.1.3",
+    "koa-router": "7.4.0",
     "koa-socket": "4.4.0",
     "koa-socket-session": "1.1.0",
-    "koa-static": "3.0.0",
-    "marmottajax": "^2.2.0",
+    "koa-static": "5.0.0",
+    "marmottajax": "3.0.6",
     "mersennetwister": "0.2.3",
-    "ramda": "0.24.1",
-    "redux": "3.6.0",
+    "ramda": "0.26.0",
+    "redux": "4.0.1",
     "sprintf-js": "^1.1.1",
-    "uuid": "3.0.1",
-    "vm2": "3.1.0"
+    "uuid": "3.3.2",
+    "vm2": "3.6.4"
   }
 }

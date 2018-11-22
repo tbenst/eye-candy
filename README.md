@@ -39,3 +39,12 @@ Or by using Image type, can just define in EPL preRenderFunc! See eyechart-sacca
 # How to add new protocol
 1. create web/src/epl/programs/myProtocol.js
 2. add option tag to index.js
+
+# Dev
+
+## TODOs
+replace koa-socket-session with something better supported (1.2.0 fails)
+update to koa-socket-2
+
+## minified src:
+https://github.com/ramda/ramda/blob/master/dist/ramda.min.js

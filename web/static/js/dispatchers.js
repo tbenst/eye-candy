@@ -10,7 +10,7 @@ function graphicsDispatcher() {
     switch (stimulus.stimulusType) {
         case STIMULUS.BAR:
             if (stimulus.age === 0) {
-                console.log("len is 0")
+                // console.log("len is 0")
                 barDispatcher(stimulus.lifespan, stimulus.width, stimulus.barColor, stimulus.backgroundColor,
                     stimulus.speed, stimulus.angle)
             }
@@ -183,7 +183,7 @@ function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, an
     canvasPattern.height = width
     var contextPattern = canvasPattern.getContext("2d")
 
-    console.log("GRATING")
+    // console.log("GRATING")
     if (sinusoidal) {
         let maxColor = colorToRGB(barColor)
         let minColor = colorToRGB(backgroundColor)
@@ -210,7 +210,7 @@ function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, an
         contextPattern.fillStyle = barColor
         contextPattern.fillRect(0, 0, width, width)
     }
-    console.log("MADE PATTERN")
+    // console.log("MADE PATTERN")
     var pattern = context.createPattern(canvasPattern,"repeat");
 
     store.dispatch(addGraphicAC({
