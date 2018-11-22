@@ -8,6 +8,7 @@ RUN apt-get update && apt-get -y install \
     ffmpeg \
     libx264-dev
 COPY web/package.json /www
+COPY web/package-lock.json /www
 RUN npm install --quiet
 COPY web/src /www/src
 COPY web/static /www/static
