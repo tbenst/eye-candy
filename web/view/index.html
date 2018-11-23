@@ -98,18 +98,19 @@ Toggle Required
     <!-- <input type="radio" name="programType" value="select" checked> Select -->
     <!-- <input type="radio" name="programType" value="javascript"> Javascript<br> -->
 
-    Seed: <input type="number" name="seed" min="0" class="required"
-                  value="<%- Math.floor(Math.random() * 2147483647) %>"><br>
 
     Program:
-    <select name="program">
-      <option value="acuity">Acuity</option>
+    <select name="program" onchange="programSelection()">
+      <!-- <% for (let file of programChoices) {%> -->
+        <!-- <% console.log(file) %> -->
+        <!-- <option value="<%= file %>"><%= file %></option> -->
+      <!-- <% } %> -->
+      <!-- <option value="acuity">Acuity</option>
       <option value="acuity-with-flashes">Acuity with Flashes</option>
       <option value="checkerboard">Checkerboard</option>
       <option value="checkerboard-contrast">Checkerboard-contrast</option>
       <option value="checkerboard-durations">Checkerboard-durations</option>
       <option value="checkerboard-flicker">Checkerboard-flicker</option>
-      <!-- <option value="eyechart-balanced">Eyechart - Balanced</option> -->
       <option value="eyechart-saccade">Eyechart - Saccade</option>
       <option value="grating">Grating</option>
       <option value="grating-durations">Grating-durations</option>
@@ -125,24 +126,33 @@ Toggle Required
       <option value="letters-inverted">Letters-inverted</option>
       <option value="letters-tiled">Letters - Tiled</option>
       <option value="letters-saccade">Letters - Saccade</option>
-      <option value="wedge">Wedge</option>
+      <option value="wedge">Wedge</option> -->
       <option value="custom">Custom</option>
     </select>
-  <input type="submit" name="submitButton" value="view source code"><br>
 
+    <select name=video hidden>
+        <option value=""
+    </select>
+  <input type="submit" name="submitButton" value="view source code"><br>
+  <div id="customBox" hidden>
     Custom program:<br>
     <textarea name="epl" cols="60" rows="20"></textarea><br>
+  </div>
   <button type="button" id="load" onclick="JavaScript: loadButton()">
   Load
   </button>
   <input type="submit" name="submitButton" value="start", disabled="">
   <input type="submit" name="submitButton" value="preview", disabled="">
   <input type="submit" name="submitButton" value="estimate-duration", disabled="">
-  <input type="submit" name="submitButton" value="video", disabled="">
+  <input type="submit" name="submitButton" value="save-video", disabled="">
 </form>
 <button type="button" onclick="JavaScript: resetButton()">
 Reset
 </button>
+<button type="button" onclick="JavaScript: toggleVideoButton()">
+toggle video
+</button>
+
 
 <a href="/examples.html">Examples</a><br>
 <!-- <button type="button" onclick="JavaScript: targetButton()">

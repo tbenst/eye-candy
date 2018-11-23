@@ -41,7 +41,7 @@ io.use(convert(session({
     })));
 
 io.on( 'connection', ( ctx, data ) => {
-  console.log( 'User connected!!!', data )
+  console.log( 'User connected!!!')
 })
 
 io.on('window', (ctx, data) => {

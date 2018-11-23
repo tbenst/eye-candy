@@ -81,6 +81,22 @@ function getCookie(cname) {
     return "";
 }
 
+function programSelection() {
+    let program = document.querySelector("select[name=program] option:checked").value;
+    if (program=="custom") {
+        document.querySelector("#customBox").hidden = false
+    } else {
+        document.querySelector("#customBox").hidden = true
+    }
+    if (program=="video") {
+        document.querySelector("#customBox").hidden = false
+    }
+}
+
+function toggleVideoButton() {
+    socket.emit('toggleVideoButton')
+}
+
 
 socket.on("enableSubmitButton", () => {
     document.querySelector(

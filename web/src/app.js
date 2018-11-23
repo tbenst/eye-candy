@@ -159,7 +159,7 @@ router.post("/start-program", ctx => {
             ctx.body=ctx.body+JSON.stringify(s.value)+"\n"
             s = program[sid].next()
         }
-    } else if (submitButton==="video") {
+    } else if (submitButton==="save-video") {
         console.log("start video")
         let stimulusQueue = initStimulusQueue(program[sid])
         io.broadcast("video", stimulusQueue)
@@ -253,6 +253,11 @@ router.get("/analysis/run/:sid", ctx => {
 })
 
 
+router.get('/video', ctx => {
+    ctx.type = 'video/mp4';
+    ctx.body = fs.createReadStream(DATADIR+"videos/" + 'cropped.mp4');
+  });
+
 app
     .use(serve("static"))
     .use(router.routes())
@@ -269,7 +274,11 @@ render(app, {
 app.context.render = co.wrap(app.context.render);
 
 app.use(async (ctx, next) => {
-    await ctx.render("index");
+
+    // const programChoices = fs.readdirSync(DATADIR+"videos")
+    await ctx.render("index", {
+        // programChoices
+    });
 });
 
 // IO
@@ -351,6 +360,11 @@ io.on("target", ctx => {
     console.log("socket 'target'")
     io.broadcast("target")
 })
+
+io.on("toggleVideoButton", ctx => {
+    console.log("socket 'toggleVideoButton'")
+    io.broadcast("toggleVideo")
+})
 // ctx.session.on("error", function (err) {
 //     console.log("Redis error " + err);
 // });
@@ -359,7 +373,7 @@ io.on("addFrame", (ctx, data) => {
     const sid = data.sid
     let vidname, stream
     if (program_vid_name[sid]===undefined) {
-        vidname = DATADIR + (new Date().toISOString())
+        vidname = DATADIR + "renders/" + (new Date().toISOString())
         fs.mkdirSync(vidname)
         program_vid_name[sid] = vidname
         stream = fs.createWriteStream(vidname+".txt", {flags:'a'})
@@ -380,6 +394,8 @@ io.on("addFrame", (ctx, data) => {
         }
     })
 })
+
+io.broadcast("play-video", {})
 
 var deleteFolderRecursive = function(path) {
     // https://stackoverflow.com/questions/18052762/remove-directory-which-is-not-empty

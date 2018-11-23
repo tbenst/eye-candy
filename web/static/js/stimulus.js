@@ -44,10 +44,10 @@ const storeInitialState = {
 
 
 // USE THIS FOR NO LOGGER
-let store = createStore(eyeCandyApp, storeInitialState)
+// let store = createStore(eyeCandyApp, storeInitialState)
 
 // USE THIS FOR LOGGER
-// let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
+let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
 
 // GET FROM SERVER (NOT OPERATIONAL)
 // let store = createStore(todoApp, window.STATE_FROM_SERVER)
@@ -140,7 +140,8 @@ socket.on("pre-render", (preRender) => {
     // but hey, it's science!
     // also, this is client side so not *so* bad..
 
-    console.log("socket 'pre-render':", preRender)
+    console.log("socket 'pre-render' started")
+    // console.log("socket 'pre-render':", preRender)
     eval(preRender.func)
     console.log("finished preRender func eval, about to render...")
 
@@ -155,6 +156,7 @@ socket.on("pre-render", (preRender) => {
 
 socket.on("reset", () => {
     console.log("socket 'reset'")
+    document.querySelector("#video").src = undefined
     store.dispatch(resetAC())
     renders = undefined
 
@@ -167,6 +169,26 @@ socket.on("target", () => {
         backgroundColor: "black"}]))
     store.dispatch(setStatusAC(STATUS.STARTED))
 })
+
+socket.on("play-video", vidSrc => {
+    document.querySelector("#video").src = vidSrc
+})
+
+socket.on("toggleVideo", () => {
+    console.log("toggle vid!")
+    if (document.querySelector("#video-overlay").style.visibility=="visible") {
+        document.querySelector("#video-overlay").style.visibility = 'hidden';
+    } else {
+        document.querySelector("#video-overlay").style.visibility = 'visible';
+    }
+})
+
+
+
+socket.on('stream',function(image){
+            $('#play').attr('src',image);
+            $('#logger').text(image);
+        });
 
 async function nextStimulus() {
     try {

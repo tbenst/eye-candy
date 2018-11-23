@@ -16,3 +16,11 @@ canvas {
     font-family: Sloan;
     src: url(Sloan.ttf)
 }
+
+/* #video-overlay {
+    visibility: hidden;
+} */
+
+/* video {
+    object-fit: fill;
+} */
