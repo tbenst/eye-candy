@@ -98,40 +98,22 @@ Toggle Required
     <!-- <input type="radio" name="programType" value="select" checked> Select -->
     <!-- <input type="radio" name="programType" value="javascript"> Javascript<br> -->
 
+    Seed: <input type="number" name="seed" min="0" class="required"
+                 value="<%- Math.floor(Math.random() * 2147483647) %>"><br>
 
     Program:
     <select name="program" onchange="programSelection()">
-      <!-- <% for (let file of programChoices) {%> -->
-        <!-- <% console.log(file) %> -->
-        <!-- <option value="<%= file %>"><%= file %></option> -->
-      <!-- <% } %> -->
-      <!-- <option value="acuity">Acuity</option>
-      <option value="acuity-with-flashes">Acuity with Flashes</option>
-      <option value="checkerboard">Checkerboard</option>
-      <option value="checkerboard-contrast">Checkerboard-contrast</option>
-      <option value="checkerboard-durations">Checkerboard-durations</option>
-      <option value="checkerboard-flicker">Checkerboard-flicker</option>
-      <option value="eyechart-saccade">Eyechart - Saccade</option>
-      <option value="grating">Grating</option>
-      <option value="grating-durations">Grating-durations</option>
-      <option value="grating-sinusoidal-durations">Grating-sinusoidal-durations</option>
-      <option value="grating-sinusoidal">Grating-sinusoidal</option>
-      <option value="grating-speeds">Grating-speeds</option>
-      <option value="grating-sinusoidal-speeds">Grating-sinusoidal-speeds</option>
-      <option value="grating-contrast">Grating-contrast</option>
-      <option value="grating-sinusoidal-contrast">Grating-sinusoidal-contrast</option>
-      <option value="grating-vs-gray">Grating-vs-gray</option>
-      <option value="kinetics">Kinetics</option>
-      <option value="letters">Letters</option>
-      <option value="letters-inverted">Letters-inverted</option>
-      <option value="letters-tiled">Letters - Tiled</option>
-      <option value="letters-saccade">Letters - Saccade</option>
-      <option value="wedge">Wedge</option> -->
-      <option value="custom">Custom</option>
+      <% for (let file of programChoices) {%>
+        <option value=<%= file %> > <%= file %> </option>
+      <% } %>
+      <option value="video">video</option>
+      <option value="custom">custom</option>
     </select>
 
     <select name=video hidden>
-        <option value=""
+      <% for (let file of videoChoices) {%>
+        <option value=<%= file %> > <%= file %> </option>
+      <% } %>
     </select>
   <input type="submit" name="submitButton" value="view source code"><br>
   <div id="customBox" hidden>

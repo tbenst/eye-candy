@@ -83,13 +83,34 @@ function getCookie(cname) {
 
 function programSelection() {
     let program = document.querySelector("select[name=program] option:checked").value;
+    let showSource = true
     if (program=="custom") {
         document.querySelector("#customBox").hidden = false
+        showSource = false
     } else {
         document.querySelector("#customBox").hidden = true
     }
     if (program=="video") {
-        document.querySelector("#customBox").hidden = false
+        document.querySelector("select[name=video]").hidden = false
+        document.querySelector(
+            "input[name=submitButton][value=start]").disabled = false
+        document.querySelector(
+            "input[name=submitButton][value=preview]").disabled = true
+        // TODO add estimate duration for video
+        document.querySelector(
+            "input[name=submitButton][value=estimate-duration]").disabled = true
+        document.querySelector(
+            "input[name=submitButton][value=save-video]").disabled = true
+        document.querySelector(
+            "button#load").disabled = true
+        showSource = false
+    } else {
+        document.querySelector(
+            "button#load").disabled = false
+        document.querySelector("select[name=save-video]").hidden = true
+    }
+    if (showSource) {
+        document.querySelector("input[value='view source code']").hidden = false
     }
 }
 
@@ -106,7 +127,7 @@ socket.on("enableSubmitButton", () => {
     document.querySelector(
         "input[name=submitButton][value=estimate-duration]").disabled = false
     document.querySelector(
-        "input[name=submitButton][value=video]").disabled = false
+        "input[name=submitButton][value=save-video]").disabled = false
     document.querySelector(
         "#load").disabled = false
 })

@@ -268,16 +268,18 @@ render(app, {
     layout: false,
     viewExt: "html",
     cache: false,
-    debug: true
+    debug: false
 });
 
 app.context.render = co.wrap(app.context.render);
 
 app.use(async (ctx, next) => {
 
-    // const programChoices = fs.readdirSync(DATADIR+"videos")
+    const programChoices = fs.readdirSync("/www/src/programs/").map(s => s.slice(0, -3))
+    let videoChoices = fs.readdirSync(DATADIR+"videos/")
     await ctx.render("index", {
-        // programChoices
+        programChoices,
+        videoChoices
     });
 });
 
