@@ -9,7 +9,8 @@ const STIMULUS = {
     LETTER: "LETTER",
     TILED_LETTER: "TILED_LETTER",
     EYECHART: "EYECHART",
-    IMAGE: "IMAGE"
+    IMAGE: "IMAGE",
+    VIDEO: "VIDEO"
 }
 
 class Stimulus {
@@ -122,6 +123,15 @@ class Image extends Stimulus {
     }
 }
 exports.Image = Image
+
+class Video extends Stimulus {
+    constructor(lifespan, backgroundColor, src, metadata) {
+        super(lifespan, backgroundColor, metadata)
+        this.stimulusType = STIMULUS.VIDEO
+        this.src = src
+    }
+}
+exports.Video = Video
 
 class Solid extends Stimulus {
     constructor(lifespan, backgroundColor = "white", metadata) {

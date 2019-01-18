@@ -83,6 +83,21 @@ function renderImage(context, image, fixationPoint) {
     context.drawImage(renders[image], deltaX, deltaY)
 }
 
+function renderVideo(context, video, scale) {
+    if(video.paused){    
+          video.play();
+    }
+    const centerX = WIDTH/2
+    const centerY = HEIGHT/2
+    var vidH = video.videoHeight/2;
+    var vidW = video.videoWidth/2;
+    // console.log("renderImage image, fixationPoint:", image, fixationPoint)
+    const left = centerX - vidW * scale
+    const top = centerY - vidH * scale
+    // renders is a special client-side object
+    context.drawImage(video, left, top)
+}
+
 function renderBackground(color) {
     context.fillStyle = color
     context.fillRect(0,0,WIDTH,HEIGHT)
@@ -120,6 +135,8 @@ function render(state) {
                 break
             case GRAPHIC.IMAGE:
                 renderImage(context, graphic.image, graphic.fixationPoint)
+            case GRAPHIC.VIDEO:
+                renderVideo(context, graphic.video, graphic.scale)
         }
         context.restore()
     })

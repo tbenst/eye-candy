@@ -49,6 +49,12 @@ function graphicsDispatcher() {
                     stimulus.fixationPoint)
             }
             break
+        case STIMULUS.VIDEO:
+            if (stimulus.age === 0) {
+                videoDispatcher(stimulus.lifespan,
+                    stimulus.backgroundColor, stimulus.src)
+            }
+            break
         case STIMULUS.GRATING:
             if (stimulus.age === 0) {
                 gratingDispatcher(stimulus.lifespan, stimulus.width, stimulus.barColor, stimulus.backgroundColor,
@@ -112,6 +118,27 @@ function imageDispatcher(lifespan, backgroundColor, image,
             graphicType: GRAPHIC.IMAGE,
             image: image,
             fixationPoint: fixationPoint,
+            lifespan: lifespan,
+            age: 0
+    }]))
+}
+
+function videoDispatcher(lifespan, backgroundColor, src) {
+    let video = document.createElement("video")
+    video.src = src
+    video.preload = "auto" // this means yes
+    video.autoPlay = false
+    video.loop = false
+    video.muted = true
+    // might this fail if src has not loaded..?
+    const scale = Math.min(
+                         WIDTH / video.videoWidth,
+                         HEIGHT.height / video.videoHeight);
+
+    store.dispatch(setGraphicsAC([{
+            graphicType: GRAPHIC.VIDEO,
+            video: video,
+            scale: scale,
             lifespan: lifespan,
             age: 0
     }]))
