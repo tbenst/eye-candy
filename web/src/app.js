@@ -21,9 +21,9 @@ var cp = require('child_process');
 
 const random = require("./epl/random")
 const {compileYAMLProgram, compileJSProgram} = require("./epl/eval")
+const {DATADIR} = require('./vars.js')
 
-const DATADIR = "/data/"
-
+console.log("DATADIR: " + DATADIR)
 const app = new Koa();
 app.use(logger())
 
