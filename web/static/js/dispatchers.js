@@ -281,7 +281,6 @@ function newStimulusDispatcher() {
 
     if (nextStimulus.done===true) {
         store.dispatch(setStatusAC(STATUS.FINISHED))
-        store.dispatch(setSignalLightAC(SIGNAL_LIGHT.STOPPED))
         if (state.status==STATUS.VIDEO) {
             serverRender()
         }

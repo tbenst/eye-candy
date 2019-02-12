@@ -138,10 +138,12 @@ function renderLoop(time) {
         case STATUS.STOPPED:
             context.clearRect(0, 0, WIDTH, HEIGHT)
             document.body.style.backgroundColor = "black"
+            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.STOPPED))
             break
         case STATUS.FINISHED:
             context.clearRect(0, 0, WIDTH, HEIGHT)
             document.body.style.backgroundColor = "black"
+            store.dispatch(setSignalLightAC(SIGNAL_LIGHT.STOPPED))
             break
         case STATUS.STARTED:
             tickDispatcher(timeDelta)
