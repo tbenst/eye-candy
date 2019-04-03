@@ -1,6 +1,6 @@
 // Compile and run EyeCandy Programming Language
-const {vm} = require('vm'); // TODO security risk, only for debug
-// const {VM} = require('vm2');
+// const {VM} = require('vm'); // TODO security risk, only for debug
+const {VM} = require('vm2');
 const Types = require("./types")
 const Render = require("./render")
 const Random = require("./random")
@@ -19,25 +19,25 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
     console.log('compiling EPL.')
     let renderResults = {}
     // FOR VM2 (production)
-    // const vm = new VM({
-    //     sandbox: Object.assign({
-    //         windowHeight: windowHeight,
-    //         windowWidth: windowWidth,
-    //         seed: seed,
-    //         renderResults: renderResults
-    //     }, EPL),
-    //     console: 'inherit'
-    // })
+    const vm = new VM({
+        sandbox: Object.assign({
+            windowHeight: windowHeight,
+            windowWidth: windowWidth,
+            seed: seed,
+            renderResults: renderResults
+        }, EPL),
+        console: 'inherit'
+    })
     // ---- FOR VM2 ----
 
     // FOR VM (testing)
-    const sandbox = Object.assign({
-        windowHeight: windowHeight,
-        windowWidth: windowWidth,
-        seed: seed,
-        renderResults: renderResults
-    }, EPL)
-    const vm = VM.createContext(sandbox)
+    // const sandbox = Object.assign({
+    //     windowHeight: windowHeight,
+    //     windowWidth: windowWidth,
+    //     seed: seed,
+    //     renderResults: renderResults
+    // }, EPL)
+    // const vm = VM.createContext(sandbox)
     // ---- FOR VM ----
 
     // initialize program
@@ -93,6 +93,7 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
             preRenderArgs: preRenderArgs,
             initialize: initialize,
             next: nextStimulus,
+            epl: programJS
         }
 }
 

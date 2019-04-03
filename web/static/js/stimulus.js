@@ -156,6 +156,7 @@ socket.on("pre-render", (preRender) => {
 
 socket.on("reset", () => {
     console.log("socket 'reset'")
+    // TODO next line causes TypeError: document.querySelector(...) is null on reset
     document.querySelector("#video").src = undefined
     store.dispatch(resetAC())
     renders = undefined

@@ -22,10 +22,12 @@ function targetButton() {
 
 function loadButton() {
     const program = document.querySelector("select[name=program]").value
+    const video = document.querySelector("select[name=video]").value
     const epl = document.querySelector("textarea[name=epl]").value
     const seed = document.querySelector("input[name=seed]").value
     const sid = localStorage.getItem("sid")
-    socket.emit('load', {sid: sid, program: program, seed: seed, epl: epl})
+    socket.emit('load', {sid: sid, program: program, seed: seed,
+        epl: epl, video: video})
 
     if (document.querySelector("input[name=sid]")==null) {
         var inputSid = document.createElement("input");
@@ -91,24 +93,12 @@ function programSelection() {
         document.querySelector("#customBox").hidden = true
     }
     if (program=="video") {
+        // show dropdown populated with videoSrc options
         document.querySelector("select[name=video]").hidden = false
-        document.querySelector(
-            "input[name=submitButton][value=start]").disabled = false
-        document.querySelector(
-            "input[name=submitButton][value=preview]").disabled = true
-        // TODO add estimate duration for video
-        document.querySelector(
-            "input[name=submitButton][value=estimate-duration]").disabled = true
-        document.querySelector(
-            "input[name=submitButton][value=save-video]").disabled = true
-        document.querySelector(
-            "button#load").disabled = true
-        showSource = false
-    } else {
-        document.querySelector(
-            "button#load").disabled = false
-        document.querySelector("select[name=save-video]").hidden = true
     }
+    document.querySelector(
+        "button#load").disabled = false
+    document.querySelector("select[name=save-video]").hidden = true
     if (showSource) {
         document.querySelector("input[value='view source code']").hidden = false
     }

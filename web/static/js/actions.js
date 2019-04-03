@@ -23,6 +23,7 @@ const STATUS = {
     STOPPED: "STOPPED",
     FINISHED: "FINISHED",
     DEBUG: "DEBUG",
+    // TODO: change name of VIDEO to something like STARTED_SAVEVID
     VIDEO: "VIDEO"
 }
 
@@ -32,6 +33,7 @@ const SIGNAL_LIGHT = {
     STOPPED: "STOPPED"
 }
 
+// warning: must edit epl types, too
 const STIMULUS = {
     BAR: "BAR",
     SOLID: "SOLID",
@@ -43,6 +45,7 @@ const STIMULUS = {
     LETTER: "LETTER",
     TILED_LETTER: "TILED_LETTER",
     IMAGE: "IMAGE",
+    VIDEO: "VIDEO",
     EYECHART: "EYECHART"
 }
 
@@ -65,7 +68,8 @@ const GRAPHIC = {
     GRATING: "GRATING",
     TARGET: "TARGET",
     LETTER: "LETTER",
-    IMAGE: "IMAGE"
+    IMAGE: "IMAGE",
+    VIDEO: "VIDEO"
 }
 
 /***********************************************

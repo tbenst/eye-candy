@@ -1,4 +1,4 @@
-const metadata = {name: "generic-video", version: "0.1.0"}
+const metadata = {name: "test", version: "0.1.0"}
 
 let stimuli = []
 let meta = {}

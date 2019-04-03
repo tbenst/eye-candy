@@ -135,17 +135,7 @@ router.post("/start-program", ctx => {
     console.log('start program sid:', sid)
     assert(sid!==undefined, "assert sid is not undefined")
 
-    if (labNotebook.program==="custom") {
-        // program already loaded in labNotebook.epl
-    } else {
-        // this is likely a security vulnerability but sure is convenient
-        // convention over customization
-        labNotebook.epl = fs.readFileSync(
-            '/www/src/programs/'+labNotebook.program+'.js',
-            "utf-8")
-    }
-    // program[sid] = compileJSProgram(labNotebook.epl, labNotebook.seed, session.windowHeight,
-    //     session.windowWidth)
+    labNotebook.epl = program[sid].epl
 
     if (submitButton==="start") {
         console.log("start program")
@@ -334,6 +324,13 @@ io.on("load", (ctx, data) => {
     console.log(windowHeight, windowWidth)
     if (eplProgram==="custom") {
         // program already loaded in epl
+    } else if (eplProgram=="video") {
+        // TODO create basic EPL program
+        const regex = /\$\{VID\_SRC\}/gi;
+        const videoSrc = data.video
+        epl = fs.readFileSync(
+            '/www/src/program-templates/single-video.js',
+            "utf-8").replace(regex, videoSrc)
     } else {
         // this is likely a security vulnerability but sure is convenient
         // convention over customization

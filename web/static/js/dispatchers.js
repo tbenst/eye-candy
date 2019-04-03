@@ -6,7 +6,8 @@ DISPATCHERS
 function graphicsDispatcher() {
     const state = store.getState()
     const stimulus = state.stimulus
-    // console.log("in graphicsDispatcher", stimulus)
+    console.log("in graphicsDispatcher", stimulus)
+    console.log("stim type", stimulus.stimulusType)
     switch (stimulus.stimulusType) {
         case STIMULUS.BAR:
             if (stimulus.age === 0) {
@@ -50,7 +51,9 @@ function graphicsDispatcher() {
             }
             break
         case STIMULUS.VIDEO:
+            console.log("case: video");
             if (stimulus.age === 0) {
+                console.log("age: 0");
                 videoDispatcher(stimulus.lifespan,
                     stimulus.backgroundColor, stimulus.src)
             }
@@ -124,6 +127,7 @@ function imageDispatcher(lifespan, backgroundColor, image,
 }
 
 function videoDispatcher(lifespan, backgroundColor, src) {
+    console.log("inside videoDispatcher");
     let video = document.createElement("video")
     video.src = src
     video.preload = "auto" // this means yes
@@ -135,6 +139,13 @@ function videoDispatcher(lifespan, backgroundColor, src) {
                          WIDTH / video.videoWidth,
                          HEIGHT.height / video.videoHeight);
 
+    console.log("inside videoDispatcher:", [{
+            graphicType: GRAPHIC.VIDEO,
+            video: video,
+            scale: scale,
+            lifespan: lifespan,
+            age: 0
+    }]);
     store.dispatch(setGraphicsAC([{
             graphicType: GRAPHIC.VIDEO,
             video: video,

@@ -1,3 +1,4 @@
+// warning: must edit actions.js too
 const STIMULUS = {
     BAR: 'BAR',
     SOLID: 'SOLID',
