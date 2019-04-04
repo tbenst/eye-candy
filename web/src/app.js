@@ -330,7 +330,7 @@ io.on("load", (ctx, data) => {
         const videoSrc = data.video
         epl = fs.readFileSync(
             '/www/src/program-templates/single-video.js',
-            "utf-8").replace(regex, videoSrc)
+            "utf-8").replace(regex, "videos/" + videoSrc)
     } else {
         // this is likely a security vulnerability but sure is convenient
         // convention over customization
@@ -360,10 +360,6 @@ io.on("target", ctx => {
     io.broadcast("target")
 })
 
-io.on("toggleVideoButton", ctx => {
-    console.log("socket 'toggleVideoButton'")
-    io.broadcast("toggleVideo")
-})
 // ctx.session.on("error", function (err) {
 //     console.log("Redis error " + err);
 // });
@@ -373,7 +369,7 @@ io.on("addFrame", (ctx, data) => {
     let vidname, stream
     if (program_vid_name[sid]===undefined) {
         vidname = DATADIR + "renders/" + (new Date().toISOString())
-        fs.mkdirSync(vidname)
+        fs.mkdirSync(vidname, { recursive: true })
         program_vid_name[sid] = vidname
         stream = fs.createWriteStream(vidname+".txt", {flags:'a'})
         program_log[sid] = stream

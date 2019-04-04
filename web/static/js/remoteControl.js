@@ -53,9 +53,6 @@ function loadButton() {
 
 }
 
-function toggleRequired() {
-
-}
 
 function startButton() {
     document.querySelector(
@@ -102,10 +99,6 @@ function programSelection() {
     if (showSource) {
         document.querySelector("input[value='view source code']").hidden = false
     }
-}
-
-function toggleVideoButton() {
-    socket.emit('toggleVideoButton')
 }
 
 

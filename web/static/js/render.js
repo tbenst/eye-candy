@@ -84,7 +84,7 @@ function renderImage(context, image, fixationPoint) {
 }
 
 function renderVideo(context, video, scale) {
-    if(video.paused){    
+    if(video.paused){
           video.play();
     }
     const centerX = WIDTH/2
@@ -94,8 +94,9 @@ function renderVideo(context, video, scale) {
     // console.log("renderImage image, fixationPoint:", image, fixationPoint)
     const left = centerX - vidW * scale
     const top = centerY - vidH * scale
-    // renders is a special client-side object
-    context.drawImage(video, left, top)
+    const width = 2*vidW * scale
+    const height = 2*vidH * scale
+    context.drawImage(video, left, top, width, height)
 }
 
 function renderBackground(color) {

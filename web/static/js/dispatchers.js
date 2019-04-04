@@ -55,7 +55,8 @@ function graphicsDispatcher() {
             if (stimulus.age === 0) {
                 console.log("age: 0");
                 videoDispatcher(stimulus.lifespan,
-                    stimulus.backgroundColor, stimulus.src)
+                    stimulus.backgroundColor, stimulus.src,
+                    stimulus.fixationPoint, stimulus.scale)
             }
             break
         case STIMULUS.GRATING:
@@ -126,7 +127,8 @@ function imageDispatcher(lifespan, backgroundColor, image,
     }]))
 }
 
-function videoDispatcher(lifespan, backgroundColor, src) {
+function videoDispatcher(lifespan, backgroundColor, src, fixationPoint,
+                         scale) {
     console.log("inside videoDispatcher");
     let video = document.createElement("video")
     video.src = src
@@ -134,25 +136,28 @@ function videoDispatcher(lifespan, backgroundColor, src) {
     video.autoPlay = false
     video.loop = false
     video.muted = true
-    // might this fail if src has not loaded..?
-    const scale = Math.min(
-                         WIDTH / video.videoWidth,
-                         HEIGHT.height / video.videoHeight);
+    // might be a race condition..?
+    video.addEventListener('durationchange', (event) => {
+        console.log('duration Change.');
+        const scale = Math.min(
+                             WIDTH / video.videoWidth,
+                             HEIGHT / video.videoHeight);
 
-    console.log("inside videoDispatcher:", [{
-            graphicType: GRAPHIC.VIDEO,
-            video: video,
-            scale: scale,
-            lifespan: lifespan,
-            age: 0
-    }]);
-    store.dispatch(setGraphicsAC([{
-            graphicType: GRAPHIC.VIDEO,
-            video: video,
-            scale: scale,
-            lifespan: lifespan,
-            age: 0
-    }]))
+        console.log("inside videoDispatcher:", [{
+                graphicType: GRAPHIC.VIDEO,
+                video: video,
+                scale: scale,
+                lifespan: lifespan,
+                age: 0
+        }])
+        store.dispatch(setGraphicsAC([{
+                graphicType: GRAPHIC.VIDEO,
+                video: video,
+                scale: scale,
+                lifespan: lifespan,
+                age: 0
+        }]))
+    })
 }
 
 function tiledLetterDispatcher(lifespan, letter, size, padding, color, backgroundColor, angle) {

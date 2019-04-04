@@ -52,8 +52,9 @@ replace koa-socket-session with something better supported (1.2.0 fails)
 update to koa-socket-2
 
 ### video
-- should hash video or metadata as ID + filename for convenience
-- video src does not work (http://localhost:3000/godfather.mp4 is not a thing)
+- video loops...?
+- Reset does not clear previous saved frames!! will instead be concatenated on next run it seems..reproduce by 1. running save-video 2. reset 3. another save-video
+
 
 ## minified src:
 https://github.com/ramda/ramda/blob/master/dist/ramda.min.js

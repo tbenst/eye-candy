@@ -157,7 +157,6 @@ socket.on("pre-render", (preRender) => {
 socket.on("reset", () => {
     console.log("socket 'reset'")
     // TODO next line causes TypeError: document.querySelector(...) is null on reset
-    document.querySelector("#video").src = undefined
     store.dispatch(resetAC())
     renders = undefined
 
@@ -174,17 +173,6 @@ socket.on("target", () => {
 socket.on("play-video", vidSrc => {
     document.querySelector("#video").src = vidSrc
 })
-
-socket.on("toggleVideo", () => {
-    console.log("toggle vid!")
-    if (document.querySelector("#video-overlay").style.visibility=="visible") {
-        document.querySelector("#video-overlay").style.visibility = 'hidden';
-    } else {
-        document.querySelector("#video-overlay").style.visibility = 'visible';
-    }
-})
-
-
 
 socket.on('stream',function(image){
             $('#play').attr('src',image);
