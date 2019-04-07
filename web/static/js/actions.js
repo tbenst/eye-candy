@@ -9,6 +9,7 @@ const SET_STATUS = "SET_STATUS"
 const SET_STIMULUS = "SET_STIMULUS"
 const SET_STIMULUS_QUEUE = "SET_STIMULUS_QUEUE"
 const ADD_STIMULUS = "ADD_STIMULUS"
+const REMOVE_STIMULUS_VALUE = "REMOVE_STIMULUS_VALUE"
 const INCREMENT_STIMULUS_INDEX = "INCREMENT_STIMULUS_INDEX"
 const SET_GRAPHICS = "SET_GRAPHICS"
 const ADD_GRAPHIC = "ADD_GRAPHIC"
@@ -115,6 +116,10 @@ function removeGraphicAC(index) {
 
 function addStimulusAC(stimulus, index) {
     return { type: ADD_STIMULUS, stimulus: stimulus, index: index }
+}
+
+function removeStimulusValueAC(index) {
+    return { type: REMOVE_STIMULUS_VALUE, index: index }
 }
 
 function graphicsTickAC(timeDelta) {

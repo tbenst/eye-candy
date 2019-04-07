@@ -6,7 +6,6 @@ web:
    - "3000:3000"
   volumes:
    - /data/eye-candy:/data
-  #  - .:/web
   links:
    - redis
 redis:

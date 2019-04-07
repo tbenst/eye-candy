@@ -29,6 +29,12 @@ function eyeCandyApp(state, action) {
             return Object.assign({}, state, {
                 stimulusQueue: newStimulusQueue
             })
+        case REMOVE_STIMULUS_VALUE:
+            var newStimulusQueue = state.stimulusQueue.slice()
+            newStimulusQueue[action.index] = "removed"
+            return Object.assign({}, state, {
+                stimulusQueue: newStimulusQueue
+            })
         case SET_GRAPHICS:
             return Object.assign({}, state, {
                 graphics: action.graphics

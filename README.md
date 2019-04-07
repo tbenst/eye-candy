@@ -52,8 +52,10 @@ replace koa-socket-session with something better supported (1.2.0 fails)
 update to koa-socket-2
 
 ### video
-- video loops...?
 - Reset does not clear previous saved frames!! will instead be concatenated on next run it seems..reproduce by 1. running save-video 2. reset 3. another save-video
+- choose start time
+    - need to serve videos with nginx for media fragment URI support: https://www.digitalocean.com/community/tutorials/how-to-secure-a-containerized-node-js-application-with-nginx-let-s-encrypt-and-docker-compose
+- Always save video
 
 
 ## minified src:

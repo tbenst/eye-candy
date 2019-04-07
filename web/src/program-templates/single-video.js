@@ -10,7 +10,8 @@ let repetitions = 1
 // stimuli.push(new Video(5, "black", "${VID_SRC}", meta))
 
 for (var i = 0; i < repetitions; i++) {
-    stimuli.push(new Video(262, "black", "${VID_SRC}", meta))
+    // Video(lifespan, backgroundColor, src, startTime, metadata)
+    stimuli.push(new Video(262, "black", "${VID_SRC}", 0, meta))
 }
 
 

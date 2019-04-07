@@ -126,12 +126,9 @@ class Image extends Stimulus {
 exports.Image = Image
 
 class Video extends Stimulus {
-    constructor(lifespan, backgroundColor, src, startTime, fixationPoint, scale, metadata) {
+    constructor(lifespan, backgroundColor, src, startTime, metadata) {
         super(lifespan, backgroundColor, metadata)
         this.stimulusType = STIMULUS.VIDEO
-        // TODO NEXT THREE NOT IMPLEMENTED
-        this.fixationPoint = fixationPoint
-        this.scale = scale
         this.startTime = startTime
         this.src = src
     }

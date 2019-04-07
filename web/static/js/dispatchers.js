@@ -51,12 +51,10 @@ function graphicsDispatcher() {
             }
             break
         case STIMULUS.VIDEO:
-            console.log("case: video");
             if (stimulus.age === 0) {
-                console.log("age: 0");
                 videoDispatcher(stimulus.lifespan,
                     stimulus.backgroundColor, stimulus.src,
-                    stimulus.fixationPoint, stimulus.scale)
+                    stimulus.startTime)
             }
             break
         case STIMULUS.GRATING:
@@ -127,29 +125,23 @@ function imageDispatcher(lifespan, backgroundColor, image,
     }]))
 }
 
-function videoDispatcher(lifespan, backgroundColor, src, fixationPoint,
-                         scale) {
-    console.log("inside videoDispatcher");
+function videoDispatcher(lifespan, backgroundColor, src, startTime) {
     let video = document.createElement("video")
-    video.src = src
+    // add extra 1s to endTime to avoid loop to begining if expiration of stimulus happens late
+    const endTime = startTime + lifespan + 1
+    // construct media fragment to stream only desired clip
+    const timeStr = "#t=" + startTime + "," + endTime
+    video.src = src + timeStr
     video.preload = "auto" // this means yes
     video.autoPlay = false
     video.loop = false
     video.muted = true
     // might be a race condition..?
     video.addEventListener('durationchange', (event) => {
-        console.log('duration Change.');
         const scale = Math.min(
                              WIDTH / video.videoWidth,
                              HEIGHT / video.videoHeight);
 
-        console.log("inside videoDispatcher:", [{
-                graphicType: GRAPHIC.VIDEO,
-                video: video,
-                scale: scale,
-                lifespan: lifespan,
-                age: 0
-        }])
         store.dispatch(setGraphicsAC([{
                 graphicType: GRAPHIC.VIDEO,
                 video: video,
@@ -332,6 +324,8 @@ function newStimulusDispatcher() {
         store.dispatch(incrementStimulusIndexAC())
         store.dispatch(setStimulusAC(nextStimulus.value))
         store.dispatch(setGraphicsAC([]))
+        // For debugging, may be useful to remove this such that stimulusQueue is not removed after being shown
+        store.dispatch(removeStimulusValueAC(stimulusIndex))
     }
 
 }

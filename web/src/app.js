@@ -242,12 +242,6 @@ router.get("/analysis/run/:sid", ctx => {
     ctx.status = 200
 })
 
-
-router.get('/video', ctx => {
-    ctx.type = 'video/mp4';
-    ctx.body = fs.createReadStream(DATADIR+"videos/" + 'cropped.mp4');
-  });
-
 app
     .use(serve("static"))
     .use(router.routes())
