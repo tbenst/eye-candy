@@ -14,3 +14,4 @@ COPY web/src /www/src
 COPY web/static /www/static
 COPY web/view /www/view
 RUN ln -s /data/videos /www/static/videos
+RUN ln -s /data/images /www/static/images

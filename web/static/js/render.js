@@ -79,8 +79,7 @@ function renderImage(context, image, fixationPoint) {
     // console.log("renderImage image, fixationPoint:", image, fixationPoint)
     const deltaX = centerX - fixationPoint.x
     const deltaY = centerY - fixationPoint.y
-    // renders is a special client-side object
-    context.drawImage(renders[image], deltaX, deltaY)
+    context.drawImage(image, deltaX, deltaY)
 }
 
 function renderVideo(context, video, scale) {
@@ -136,8 +135,10 @@ function render(state) {
                 break
             case GRAPHIC.IMAGE:
                 renderImage(context, graphic.image, graphic.fixationPoint)
+                    break
             case GRAPHIC.VIDEO:
                 renderVideo(context, graphic.video, graphic.scale)
+                break
         }
         context.restore()
     })

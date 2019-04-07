@@ -116,13 +116,46 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
 
 function imageDispatcher(lifespan, backgroundColor, image,
                                 fixationPoint) {
-    store.dispatch(setGraphicsAC([{
-            graphicType: GRAPHIC.IMAGE,
-            image: image,
-            fixationPoint: fixationPoint,
-            lifespan: lifespan,
-            age: 0
-    }]))
+    let img
+    let dont_dispatch = false
+    if (typeof(image)==="number") {
+        // renders is a special client-side object
+        img = renders[image]
+    } else if (typeof(image)==="string") {
+        // assume image src (get from server)
+        img = document.createElement("img")
+        img.onload = (event) => {
+            if (fixationPoint===undefined) {
+                fixationPoint = {x: img.width / 2, y: img.height / 2}
+            }
+            store.dispatch(setGraphicsAC([{
+                    graphicType: GRAPHIC.IMAGE,
+                    image: img,
+                    fixationPoint: fixationPoint,
+                    lifespan: lifespan,
+                    age: 0
+            }]))
+        }
+        img.src = image
+        dont_dispatch = true
+    } else {
+        img = image
+    }
+
+    if (!dont_dispatch) {
+        if (fixationPoint===undefined) {
+            // race condition?
+            fixationPoint = {x: img.width / 2, y: img.height / 2}
+        }
+
+        store.dispatch(setGraphicsAC([{
+                graphicType: GRAPHIC.IMAGE,
+                image: img,
+                fixationPoint: fixationPoint,
+                lifespan: lifespan,
+                age: 0
+        }]))
+    }
 }
 
 function videoDispatcher(lifespan, backgroundColor, src, startTime) {
@@ -136,7 +169,7 @@ function videoDispatcher(lifespan, backgroundColor, src, startTime) {
     video.autoPlay = false
     video.loop = false
     video.muted = true
-    // might be a race condition..?
+    // TODO might not run if cached..?
     video.addEventListener('durationchange', (event) => {
         const scale = Math.min(
                              WIDTH / video.videoWidth,
