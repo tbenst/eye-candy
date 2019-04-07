@@ -59,7 +59,8 @@ update to koa-socket-2
 - Reset does not clear previous saved frames on server!! will instead be concatenated on next run it seems..reproduce by 1. running save-video 2. reset 3. another save-video
 - start time does not work
     - need to serve videos with nginx for media fragment URI support: https://www.digitalocean.com/community/tutorials/how-to-secure-a-containerized-node-js-application-with-nginx-let-s-encrypt-and-docker-compose
-- initial img render does not calculate properly for fixationPoint = undefined
+- Server crashes after serving godfather ~6 times
+    - try nginx
 
 ## minified src:
 https://github.com/ramda/ramda/blob/master/dist/ramda.min.js
