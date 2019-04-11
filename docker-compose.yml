@@ -2,11 +2,20 @@ web:
   restart: always
   build: .
   command: node --harmony src/app.js
-  ports:
-   - "3000:3000"
   volumes:
    - /data/eye-candy:/data
   links:
    - redis
 redis:
   image: redis
+nginx:
+  image: nginx
+  ports:
+    - "3000:80"
+  volumes:
+    - ./nginx-conf:/etc/nginx/conf.d:ro
+    - ./web/static:/www:ro
+    - /data/eye-candy/videos:/www/videos:ro
+    - /data/eye-candy/images:/www/images:ro
+  links:
+    - web

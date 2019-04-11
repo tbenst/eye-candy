@@ -7,7 +7,6 @@ var assert = require('assert');
 const path = require("path")
 const co = require("co");
 const render = require("koa-ejs");
-const serve = require("koa-static");
 const convert = require("koa-convert");
 const IO = require( "koa-socket" )
 const koaSocketSession = require("koa-socket-session")
@@ -243,7 +242,6 @@ router.get("/analysis/run/:sid", ctx => {
 })
 
 app
-    .use(serve("static"))
     .use(router.routes())
     .use(router.allowedMethods());
 
@@ -304,6 +302,7 @@ io.on("reset", (ctx, data) => {
     const sid = data.sid
     io.broadcast("reset")
     delete program[sid]
+    cleanupRender(sid, deleteDir=false)
 })
 
 io.on("load", (ctx, data) => {
@@ -367,7 +366,7 @@ io.on("addFrame", (ctx, data) => {
         program_vid_name[sid] = vidname
         stream = fs.createWriteStream(vidname+".txt", {flags:'a'})
         program_log[sid] = stream
-        stream.write("frame_number,time,stimulus_index\n")
+        stream.write("frame_number,time,stimulus_index,error\n")
     } else {
         vidname = program_vid_name[sid]
         stream = program_log[sid]
@@ -375,11 +374,14 @@ io.on("addFrame", (ctx, data) => {
     const png = data.png.replace(/^data:image\/png;base64,/, "")
     var filename = sprintf('image-%010d.png', data.frameNum);
     // const filename = "s="+data.stimulusIndex + ",t=" + data.time+'.png'
-    stream.write(data.frameNum+","+data.time+","+data.stimulusIndex+"\n")
-    fs.writeFileSync(vidname+"/"+filename, png, 'base64', (error) => {
+    fs.writeFile(vidname+"/"+filename, png, 'base64', (error) => {
         if (error) {
             console.error('Error saving frame:', error.message)
+            stream.write(data.frameNum+","+data.time+","+data.stimulusIndex+",1\n")
             throw(error)
+        } else {
+            stream.write(data.frameNum+","+data.time+","+data.stimulusIndex+",0\n")
+
         }
     })
 })
@@ -411,36 +413,49 @@ function cleanupRender(sid, deleteDir=true) {
 
 }
 
+function sleep(ms){
+    return new Promise(resolve=>{
+        setTimeout(resolve,ms)
+    })
+}
+
+async function saveVideo(sid) {
+    let vidname = program_vid_name[sid]
+    let stream = program_log[sid]
+    // TODO add condition to wait for frames??
+    // horrible hack, race condition!!!
+    await sleep(10000)
+    var ffmpeg = cp.spawn('ffmpeg', [
+        '-framerate', '60',
+        '-start_number', '0',
+        '-i', vidname+'/image-%010d.png',
+        '-refs', '6',
+        '-c:v', 'libx264',
+        '-pix_fmt', 'yuv444p',
+        '-preset', 'veryslow',
+        '-crf', '18',
+        vidname + '.mp4'
+    ])
+    ffmpeg.on('error', function(error) {
+        console.error('Error starting FFmpeg:', error.message);
+        cleanupRender(sid, deleteDir=false)
+    });
+    ffmpeg.on('close', function(code) {
+        if (code !== 0) {
+            console.log('FFmpeg process closed with code', code);
+            cleanupRender(sid, deleteDir=false)
+        } else {
+            console.log('Finished rendering video. You can find it at ' + vidname + '.mp4')
+            cleanupRender(sid)
+        }
+    })
+}
+
 io.on("renderVideo", (ctx, data) => {
     // TODO: THIS IS A RACE CONDITION! stream write could come in slowly
     const sid = data.sid
-    let vidname = program_vid_name[sid]
-    let stream = program_log[sid]
     console.log("Rendering your video. This might take a long time...")
-    var ffmpeg = cp.spawn('ffmpeg', [
-      '-framerate', '60',
-      '-start_number', '0',
-      '-i', vidname+'/image-%010d.png',
-      '-refs', '6',
-      '-c:v', 'libx264',
-      '-pix_fmt', 'yuv444p',
-      '-preset', 'veryslow',
-      '-crf', '18',
-      vidname + '.mp4'
-    ])
-    ffmpeg.on('error', function(error) {
-      console.error('Error starting FFmpeg:', error.message);
-      cleanupRender(sid, deleteDir=false)
-    });
-    ffmpeg.on('close', function(code) {
-      if (code !== 0) {
-        console.log('FFmpeg process closed with code', code);
-        cleanupRender(sid, deleteDir=false)
-      } else {
-        console.log('Finished rendering video. You can find it at ' + vidname + '.mp4')
-        cleanupRender(sid)
-      }
-    })
+    saveVideo(sid)
 })
 
 
