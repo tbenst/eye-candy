@@ -50,6 +50,8 @@ Or by using Image type, can just define in EPL preRenderFunc! See eyechart-sacca
 ## TODOs
 replace koa-socket-session with something better supported (1.2.0 fails)
 update to koa-socket-2
+make sure I didn't break shuffle with new randint
+websockets are crapping out on sending random frames, so need to do MT client-side & pass seed..?
 
 ### video
 - Always save video
@@ -57,6 +59,7 @@ update to koa-socket-2
 
 ### BUGS
 - fix race condition on video save (wait for all frames to be received)
+- Stimulus should change on global timer (no increasing drift from estimate, make sure not adding frame on stim switch?)
 
 ## minified src:
 https://github.com/ramda/ramda/blob/master/dist/ramda.min.js

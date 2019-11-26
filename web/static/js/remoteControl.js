@@ -1,4 +1,5 @@
 var socket = io();
+socket.heartbeatTimeout = 6000000;
 
 function resetButton() {
     const sid = localStorage.getItem("sid")

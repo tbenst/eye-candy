@@ -2,7 +2,7 @@ web:
   restart: always
   build: .
   # command: ls /www
-  command: node --harmony src/app.js
+  command: node --max-old-space-size=8192 --harmony src/app.js
   dockerfile: Dockerfile-dev
   ports:
    - "3000:3000"

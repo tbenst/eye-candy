@@ -95,6 +95,7 @@ PROGRAM / server communication
 ************************************************/
 
 var socket = io();
+socket.heartbeatTimeout = 6000000; // long render workaround
 let sid
 
 fetch("/get-sid", {

@@ -65,6 +65,11 @@ function renderGrating(context, pattern, width, angle, position) {
 
 }
 
+function renderChirp(context, color) {
+    context.fillStyle = color
+    context.fillRect(0,0,WIDTH,HEIGHT)
+}
+
 
 function renderLetter(context, letter, size, color, x, y) {
     context.fillStyle = color
@@ -128,6 +133,9 @@ function render(state) {
                 break
             case GRAPHIC.SINUSOIDAL_GRATING:
                 renderGrating(context, graphic.pattern, graphic.width, graphic.angle, graphic.position)
+                break
+            case GRAPHIC.CHIRP:
+                renderChirp(context, graphic.color)
                 break
             case GRAPHIC.LETTER:
                 renderLetter(context, graphic.letter, graphic.size,

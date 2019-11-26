@@ -72,6 +72,13 @@ function graphicsDispatcher() {
                 // increment count by 1 after bar is dispatched
             }
             break
+        case STIMULUS.CHIRP:
+            if (stimulus.age === 0) {
+                chirpDispatcher(stimulus.lifespan, stimulus.f0,
+                    stimulus.f1, stimulus.a0, stimulus.a1,
+                    stimulus.t1, stimulus.phi)
+            }
+            break
         case STIMULUS.CHECKERBOARD:
             if (stimulus.age === 0) {
                 checkerboardDispatcher(stimulus.lifespan, stimulus.size,
@@ -287,6 +294,28 @@ function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, an
         speed: speed,
         angle: angle,
         pattern: pattern,
+        lifespan: lifespan,
+        age: 0
+    }))
+}
+
+function chirpDispatcher(lifespan, f0, f1, a0, a1, t1, phi) {
+    const scale = Math.cos(phi)
+    // stay centered around gray
+    const colorVal = Math.round(a0 * scale + 127.5)
+    const initColor = {r: colorVal, g: colorVal, b: colorVal}
+
+    store.dispatch(addGraphicAC({
+        graphicType: GRAPHIC.CHIRP,
+        f0: f0,
+        f1: f1,
+        a0: a0,
+        a1: a1,
+        t1: t1,
+        phi: phi,
+        color: rgbToHex(initColor),
+        // TODO remove
+        debug: "updated",
         lifespan: lifespan,
         age: 0
     }))

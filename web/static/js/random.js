@@ -1,4 +1,4 @@
-const MT = require("mersennetwister")
+const MT = MersenneTwister
 
 class DeterministicRandom {
     constructor(seed) {

@@ -43,8 +43,8 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
     // initialize program
     vm.run("let r = new DeterministicRandom(seed);" + programJS)
 
+    console.log("reading program metadata")
     const metadata = vm.run("metadata")
-
     // this function will be passed as string and run on client
     let preRenderFunc = vm.run(
             "if (typeof preRenderFunc !== 'undefined') {" +

@@ -38,6 +38,7 @@ const SIGNAL_LIGHT = {
 const STIMULUS = {
     BAR: "BAR",
     SOLID: "SOLID",
+    CHIRP: "CHIRP",
     WAIT: "WAIT",
     TARGET: "TARGET",
     GRATING: "GRATING",
@@ -65,6 +66,7 @@ const LETTER = {
 
 const GRAPHIC = {
     BAR: "BAR",
+    CHIRP: "CHIRP",
     PATTERN: "PATTERN",
     GRATING: "GRATING",
     TARGET: "TARGET",

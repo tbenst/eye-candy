@@ -31,6 +31,46 @@ process.on('unhandledRejection', (reason, p) => {
   // application specific logging, throwing an error, or other logic here
 });
 
+
+
+// VM2 ERROR HANDLING (per https://github.com/patriksimek/vm2/issues/87)
+// can remove after pull request is merged
+const StackTracey = require ('stacktracey');
+const sourceCode = `function f() {
+	throw Exception('e');
+}
+f();`;
+const scriptName = "epl.js";
+
+process.on("uncaughtException",  e => {
+	if (!e.stack.includes("/node_modules/vm2/")) {
+		// This is not a vm2 error, so print it normally
+		console.log(e);
+		return;
+	}
+	const oldStack = new StackTracey(e);
+	const newStack = [];
+	for (const line of oldStack) {
+		// Discard internal code
+		if (line.file.includes("/cjs"))
+			continue;
+		if (line.thirdParty && line.file.includes("/node_modules/vm2/"))
+			continue;
+		if (line.callee == "Script.runInContext")
+			continue;
+		// Replace the default filename with the user-provided one
+		if (line.fileName == "vm.js")
+			line.fileRelative = line.fileShort = line.fileName = scriptName;
+		newStack.push(line);
+	}
+	console.log("[vm2] A clean stack trace follows:");
+	console.log(new StackTracey(newStack).pretty);
+});
+
+// END ERROR HANDLING
+
+
+
 const io = new IO()
 const store = new redisStore({host: "redis"})
 
@@ -404,12 +444,20 @@ var deleteFolderRecursive = function(path) {
 };
 
 function cleanupRender(sid, deleteDir=true) {
-    let vidname = program_vid_name[sid]
-    let stream = program_log[sid]
-    if (deleteDir) {deleteFolderRecursive(vidname)}
-    program_log[sid].end()
-    delete program_log[sid]
-    delete program_vid_name[sid]
+    if (sid in program_vid_name) {
+        let vidname = program_vid_name[sid]
+        delete program_vid_name[sid]
+        if (deleteDir) {deleteFolderRecursive(vidname)}
+    } else {
+        console.log("Warning: asked to delete sid:", sid, "but this is not found in program_vid_name");
+    }
+    if (sid in program_log) {
+        program_log[sid].end()
+        delete program_log[sid]
+    } else {
+        console.log("Warning: asked to delete sid:", sid, "but this is not found in program_log");
+
+    }
 
 }
 
