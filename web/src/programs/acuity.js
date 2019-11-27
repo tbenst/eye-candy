@@ -22,20 +22,40 @@ function* measureIntegrity(stimuli,every=5*60) {
 
 // special function for pre-rendering. This is passed as a string
 // and run client-side
-function preRenderFunc(nframes, pixelArrays) {
+function preRenderFunc(binaryNoiseNframes, randomSeed) {
     console.log("In preRender...")
+
+	console.assert(binaryNoiseNframes % 2 == 0)
+	// client-side
+	let r = new DeterministicRandom(randomSeed)
+
 	// render random binary frames that are balanced
 	// so average intensity per pixel over time is 0.5
 	// nframes must be even!
 	let nPixels = HEIGHT * WIDTH
+// TODO delete / benchmark
+	// let r = new DeterministicRandom(10)
+	// let binaryNoiseNframes =14
+	let pixelArrays = []
+	let singlePixel = Uint8ClampedArray.from(Array(binaryNoiseNframes/2).fill(0).concat(Array(binaryNoiseNframes/2).fill(255)))
+	for (var p = 0; p < nPixels; p++) {
+		// benchmark: 50% of time is from shuffle
+		r.shuffle(singlePixel)
+		// ... allows for array copy
+		pixelArrays.push([...singlePixel])
+		if (p % 10000 == 0) {
+			console.log("pushed array for pixel: ", p)
+		}
+	}
+
 
 	// RGBA array https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Pixel_manipulation_with_canvas
-	let allFrames = new Uint8ClampedArray(nframes*nPixels*4)
+	let allFrames = new Uint8ClampedArray(binaryNoiseNframes*nPixels*4)
 	// values of single pixel over time
-	let singlePixel
+	// TODO why does making this nPixels/2 leave only ~1/4 of pixels with value??
 	for (var p = 0; p < nPixels; p++) {
 		singlePixel = pixelArrays[p]
-		for (var n = 0; n < nframes; n++) {
+		for (var n = 0; n < binaryNoiseNframes; n++) {
 			// For example, to read the blue component's value from the pixel at column 200, row 50 in the image, you would do the following:
 			// blueComponent = imageData.data[(50 * (imageData.width * 4)) + (200 * 4) + 2]
 			allFrames[p*4 + n*nPixels*4] = singlePixel[n] // red
@@ -43,6 +63,10 @@ function preRenderFunc(nframes, pixelArrays) {
 			allFrames[2+p*4 + n*nPixels*4] = singlePixel[n] // blue
 			allFrames[3+p*4 + n*nPixels*4] = 255 // alpha
 		}
+		if (p % 10000 == 0) {
+			console.log("pushed array for pixel: ", p)
+		}
+
 	}
 
     function renderFrame(flatPixelArray) {
@@ -56,9 +80,8 @@ function preRenderFunc(nframes, pixelArrays) {
     }
 
 	let frames = []
-	for (var n = 0; n < nframes; n++) {
+	for (var n = 0; n < binaryNoiseNframes; n++) {
 		frames.push(renderFrame(allFrames.slice(n*nPixels*4,(n+1)*nPixels*4)))
-		console.log("Rendered frame: ", n)
 	}
 	console.log("frames[0]", frames[0])
 
@@ -67,20 +90,14 @@ function preRenderFunc(nframes, pixelArrays) {
 }
 
 // special object for pre-rendering
-const binaryNoiseDuration = 1*60
+const binaryNoiseDuration = 0.1*60
 const frameRate = 60
 const hz = 5
 const binaryNoiseLifespan = 1 / hz
 const binaryNoiseNframes = hz*binaryNoiseDuration
-let nPixels = windowHeight * windowWidth
-let pixelArrays = []
-let singlePixel = Uint8ClampedArray.from(Array(binaryNoiseNframes/2).fill(0).concat(Array(binaryNoiseNframes/2).fill(255)))
-for (var p = 0; p < nPixels; p++) {
-	r.shuffle(singlePixel)
-	// ... allows for array copy
-	pixelArrays.push([...singlePixel])
-}
-const preRenderArgs = [binaryNoiseNframes, pixelArrays]
+
+const randomSeed = r.int()
+const preRenderArgs = [binaryNoiseNframes, randomSeed]
 
 // cell type assay
 let celltypeStimuli = []
@@ -90,7 +107,11 @@ const celltypeMeta = {group: r.uuid(), label: "celltype"}
 // let fixationPoint = {x: 0, y: 0}
 let fixationPoint = {x: windowWidth/2, y: windowHeight/2}
 for (var n = 0; n < binaryNoiseNframes; n++) {
-	celltypeStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint))
+	if (n==0) {
+		celltypeStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint, {"randomSeed": randomSeed}))
+	} else {
+		celltypeStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint))
+	}
 }
 
 
@@ -131,15 +152,9 @@ celltypeStimuli.push(new Wait(3, celltypeMeta))
 celltypeStimuli.push(new Solid(3, "blue", celltypeMeta))
 celltypeStimuli.push(new Wait(3, celltypeMeta))
 
-// binary dense noise OR white noise?
 // perfectly balanced random sequence at 5 Hz yielding a total running time of 5 min
 // TODO write binary dense noise stim
 // implement as pre-generated images??
-
-// let fixationPoint = {x: windowWidth/2, y: windowHeight/2}
-// for (var n = 0; n < binaryNoiseNframes; n++) {
-// 	celltypeStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint))
-// }
 
 // end cell type assay
 
@@ -178,10 +193,9 @@ for (let speed of speeds) {
 	}
 }
 
-// r.shuffle(stimuli)
-// stimuli = measureIntegrity(flatten(stimuli))
-// stimuli = celltypeStimuli.concat(stimuli)
-stimuli = celltypeStimuli
+r.shuffle(stimuli)
+stimuli = measureIntegrity(flatten(stimuli))
+stimuli = celltypeStimuli.concat(stimuli)
 
 function* stimulusGenerator(renderResults) {
     for (s of stimuli) {

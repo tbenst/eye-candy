@@ -10,7 +10,7 @@ class DeterministicRandom {
         let j
         let a
         for (var i = array.length - 1; i >= 1; i--) {
-            j = this.randint(0,i+1)
+            j = this.randi(0,i+1)
             a = array[i]
             array[i] = array[j]
             array[j] = a
@@ -23,10 +23,6 @@ class DeterministicRandom {
         return this.mt.random()
     }
 
-    randint(start, end) {
-        return Math.round((end-start) * this.mt.random() + start)
-    }
-
     // [start,end)
     randi(start,end) {
         const range = end - start
@@ -34,7 +30,6 @@ class DeterministicRandom {
         const maxint = 2147483647
         const max = maxint - (maxint%range)
         let r = this.mt.int()
-        // TODO this seems super inefficient
         while (r>max) {
             r = this.mt.int()
         }

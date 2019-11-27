@@ -26,12 +26,12 @@ console.log("DATADIR: " + DATADIR)
 const app = new Koa();
 app.use(logger())
 
+N_INIT_STIMULUS_QUEUE = 25
+
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
   // application specific logging, throwing an error, or other logic here
 });
-
-
 
 // VM2 ERROR HANDLING (per https://github.com/patriksimek/vm2/issues/87)
 // can remove after pull request is merged
@@ -159,7 +159,7 @@ function makeLabNotebook(labNotebook) {
 function initStimulusQueue(prog) {
     let stimulusQueue = []
     assert(prog!==undefined, "No program found")
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < N_INIT_STIMULUS_QUEUE; i++) {
         stimulusQueue.push(prog.next())
     }
     console.log(stimulusQueue)

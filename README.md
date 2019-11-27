@@ -51,7 +51,8 @@ Or by using Image type, can just define in EPL preRenderFunc! See eyechart-sacca
 replace koa-socket-session with something better supported (1.2.0 fails)
 update to koa-socket-2
 make sure I didn't break shuffle with new randint
-websockets are crapping out on sending random frames, so need to do MT client-side & pass seed..?
+- Chunk number of stimmuli returned
+
 
 ### video
 - Always save video
