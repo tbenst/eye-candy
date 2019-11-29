@@ -6,7 +6,7 @@ let meta = {}
 stimuli.push!(new Video(1000, "black", DATADIR+"videos/cropped.mp4", meta))
 
 
-function* stimulusGenerator(renderResults) {
+function* stimulusGenerator() {
     for (s of stimuli) {
         yield s
     }

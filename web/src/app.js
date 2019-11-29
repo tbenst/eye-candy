@@ -23,6 +23,11 @@ const {compileYAMLProgram, compileJSProgram} = require("./epl/eval")
 const {DATADIR} = require('./vars.js')
 
 console.log("DATADIR: " + DATADIR)
+
+GIT_SHA = fs.readFileSync(
+	'/www/git-sha',
+	"utf-8")
+
 const app = new Koa();
 app.use(logger())
 
@@ -151,6 +156,7 @@ function makeLabNotebook(labNotebook) {
     labNotebook.date = date
     labNotebook.version = 0.5
     labNotebook.flickerVersion = 0.3
+    labNotebook.gitSHA = GIT_SHA
 
     console.log("labNotebook", labNotebook)
     return "---\n" + yaml.safeDump(labNotebook)
@@ -297,7 +303,7 @@ app.context.render = co.wrap(app.context.render);
 
 app.use(async (ctx, next) => {
 
-    const programChoices = fs.readdirSync("/www/src/programs/").map(s => s.slice(0, -3))
+    const programChoices = fs.readdirSync("/www/programs/").map(s => s.slice(0, -3))
     let videoChoices = fs.readdirSync(DATADIR+"videos/")
     await ctx.render("index", {
         programChoices,
@@ -362,13 +368,13 @@ io.on("load", (ctx, data) => {
         const regex = /\$\{VID\_SRC\}/gi;
         const videoSrc = data.video
         epl = fs.readFileSync(
-            '/www/src/program-templates/single-video.js',
+            '/www/programs/templates/single-video.js',
             "utf-8").replace(regex, "videos/" + videoSrc)
     } else {
         // this is likely a security vulnerability but sure is convenient
         // convention over customization
         epl = fs.readFileSync(
-            '/www/src/programs/'+eplProgram+'.js',
+            '/www/programs/'+eplProgram+'.js',
             "utf-8")
     }
     console.log("socket 'load': compiling for sid", sid)
@@ -384,7 +390,7 @@ io.on("load", (ctx, data) => {
 io.on("renderResults", (ctx, data) => {
     console.log("socket 'renderResults'")
     const sid = data.sid
-    program[sid].initialize(data.renderResults)
+    program[sid].initialize()
     io.broadcast("enableSubmitButton")
 })
 

@@ -4,7 +4,20 @@ REDUX (GLOBAL STATE)
 
 const createStore = Redux.createStore
 const applyMiddleware = Redux.applyMiddleware
+SimpleIDB.initialize()
 
+// (function() {
+//   'use strict';
+//
+//   //check for support
+//   if (!('indexedDB' in window)) {
+//     console.log('This browser doesn\'t support IndexedDB');
+//     return;
+//   }
+//
+//   var dbPromise = idb.open('eye-candy-db', 1);
+//
+// })();
 
 /***********************************************
 MIDDLEWARE
@@ -120,23 +133,40 @@ fetch("/get-sid", {
 
 
 // console.log("COOKIE",document.cookie)
+async function loadPreRenderForStimuli(stimulusQueue) {
+    let stimulus
+    for (s in stimulusQueue) {
+        stimulus = stimulusQueue[s]
+        if (typeof(stimulus.value.image)==="number") {
+            // retrieve image from indexedDB
+            try {
 
+                stimulus.value.image = await SimpleIDB.get("render-"+stimulus.value.image)
+            } catch (err) {
+                console.warn("Failed to get preRender: " + err)
+            }
+        }
+    }
+    return stimulusQueue
+}
 
-socket.on("run", (stimulusQueue) => {
+socket.on("run", async (stimulusQueue) => {
+    // TODO load preRender images
     console.log("socket 'run'")
+    stimulusQueue = await loadPreRenderForStimuli(stimulusQueue)
     store.dispatch(setStimulusQueueAC(stimulusQueue))
     store.dispatch(setStatusAC(STATUS.STARTED))
 })
 
-socket.on("video", (stimulusQueue) => {
+socket.on("video", async (stimulusQueue) => {
+    // TODO load preRender images
     console.log("socket 'video'")
+    stimulusQueue = await loadPreRenderForStimuli(stimulusQueue)
     store.dispatch(setStimulusQueueAC(stimulusQueue))
     store.dispatch(setStatusAC(STATUS.VIDEO))
 })
 
-let renders
-
-socket.on("pre-render", (preRender) => {
+socket.on("pre-render", async (preRender) => {
     // TODO dangerous, insecure
     // but hey, it's science!
     // also, this is client side so not *so* bad..
@@ -146,12 +176,25 @@ socket.on("pre-render", (preRender) => {
     eval(preRender.func)
     console.log("finished preRender func eval, about to render...")
 
-    let renderResults = preRenderFunc(...preRender.args)
+    let renderGenerator = preRenderFunc(...preRender.args)
+    let renderItem = renderGenerator.next()
+    let render = renderItem.value
+    let n = 0
+    while ( renderItem.done===false) {
+        // note: assumes that render is a canvas
+        // localStorage.setItem("render-"+n, render.toDataURL())
+        try {
+            await SimpleIDB.set("render-"+n, render.toDataURL())
+        } catch (e) {
+            console.warn("SimpleIDB failed to set render-"+n)
+        }
+        // localStorage.setItem("render-"+n, JSON.stringify(render))
+        renderItem = renderGenerator.next()
+        render = renderItem.value
+        n++
+    }
     console.log("finished render")
-    renders = renderResults.renders
-
-    socket.emit("renderResults", {renderResults: renderResults.yield,
-                                  sid: localStorage.getItem('sid')})
+    socket.emit("renderResults", {sid: localStorage.getItem('sid')})
 
 })
 
@@ -159,8 +202,19 @@ socket.on("reset", () => {
     console.log("socket 'reset'")
     // TODO next line causes TypeError: document.querySelector(...) is null on reset
     store.dispatch(resetAC())
-    renders = undefined
 
+    // remove preRenders
+    SimpleIDB.clearAll()
+    // Object.entries(localStorage).map(
+    // Object.entries(localStorage).map(
+    //         x => x[0]
+    //     ).filter(
+    //         x => x.substring(0,7)=="render-"
+    //     ).map(
+    //         x => SimpleIDB.remove(x).catch(e => {
+    //             console.warn("SimpleIDB failed to delete " + x)
+    //         }))
+            // x => localStorage.removeItem(x))
 })
 
 socket.on("target", () => {

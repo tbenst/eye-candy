@@ -97,7 +97,7 @@ r.shuffle(stimuli)
 
 stimuli = measureIntegrity(flatten(stimuli))
 
-function* stimulusGenerator(renderResults) {
+function* stimulusGenerator() {
     for (s of stimuli) {
         yield s
     }

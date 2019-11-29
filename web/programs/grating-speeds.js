@@ -1,4 +1,4 @@
-const metadata = {name: "grating-sinusoidal-speeds", version: "0.1.2"}
+const metadata = {name: "grating-speeds", version: "0.1.2"}
 
 
 let repetitions = 50
@@ -60,16 +60,16 @@ for (let size of sizes) {
                     // use cohort to maintain balance in analysis
                     cohort = r.uuid()
                     before = new Wait(1, {group: id})
-
+                    
                     id = r.uuid()
-                    left = new SinusoidalGrating(duration,"black", speed, size, angle, "white",
+                    left = new Grating(duration,"black", speed, size, angle, "white",
                         {group: id, cohort: cohort, class: "FORWARD", block: true})
                     after = new Wait(r.randi(1,1.5), {group: id, block: true})
                     stimuli.push([before,left,after])
-
+                    
                     id = r.uuid()
                     meta = {group: id, block: true}
-                    right = new SinusoidalGrating(duration,"black", speed, size, inverseAngle(angle), "white",
+                    right = new Grating(duration,"black", speed, size, inverseAngle(angle), "white",
                         {group: id, cohort: cohort, class: "REVERSE", block: true})
                     after = new Wait(r.randi(1,1.5), {group: id, block: true})
                     stimuli.push([before,right,after])
@@ -83,7 +83,7 @@ r.shuffle(stimuli)
 
 stimuli = measureIntegrity(flatten(stimuli))
 
-function* stimulusGenerator(renderResults) {
+function* stimulusGenerator() {
     for (s of stimuli) {
         yield s
     }

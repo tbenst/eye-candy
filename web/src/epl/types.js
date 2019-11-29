@@ -121,7 +121,7 @@ class Image extends Stimulus {
                 fixationPoint, metadata) {
         super(lifespan, backgroundColor, metadata)
         this.stimulusType = STIMULUS.IMAGE
-        // image can be a number (index) for client-side `renders` object
+        // image can be a number (index) for client-side `renders` object that is stored in indexedDB
         this.image = image
         // e.g. {x: 0, y: 0}
         this.fixationPoint = fixationPoint

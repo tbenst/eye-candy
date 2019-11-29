@@ -123,29 +123,27 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
 
 function imageDispatcher(lifespan, backgroundColor, image,
                                 fixationPoint) {
-    let img
     let dont_dispatch = false
-    if (typeof(image)==="number") {
-        // renders is a special client-side object
-        img = renders[image]
-    } else if (typeof(image)==="string") {
-        // assume image src (get from server)
-        img = document.createElement("img")
-        img.onload = (event) => {
-            if (fixationPoint===undefined) {
-                fixationPoint = {x: img.width / 2, y: img.height / 2}
-            }
-            store.dispatch(setGraphicsAC([{
-                    graphicType: GRAPHIC.IMAGE,
-                    image: img,
-                    fixationPoint: fixationPoint,
-                    lifespan: lifespan,
-                    age: 0
-            }]))
+
+    let img = new Image()
+    img.onload = (event) => {
+        if (fixationPoint===undefined) {
+            fixationPoint = {x: img.width / 2, y: img.height / 2}
         }
+        store.dispatch(setGraphicsAC([{
+                graphicType: GRAPHIC.IMAGE,
+                image: img,
+                fixationPoint: fixationPoint,
+                lifespan: lifespan,
+                age: 0
+        }]))
+    }
+    if (typeof(image)==="string") {
+        // assume image src (get from server)
         img.src = image
         dont_dispatch = true
     } else {
+        // TODO can this be deleted? Or maybe used for older letter rendering?
         img = image
     }
 
@@ -395,5 +393,15 @@ function newStimulusDispatcher() {
 async function queueStimulusDispatcher() {
     const stimulus = await nextStimulus()
     const stimulusIndex = stimulus.stimulusIndex
+    let image
+    if (typeof(stimulus.value.image)==="number") {
+        // retrieve image from indexedDB
+        try {
+            image = await SimpleIDB.get("render-"+stimulus.value.image)
+            stimulus.value.image = image
+        } catch (err) {
+            console.warn("Failed to get preRender: " + err)
+        }
+    }
     store.dispatch(addStimulusAC(stimulus, stimulusIndex))
 }

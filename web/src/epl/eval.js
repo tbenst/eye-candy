@@ -17,14 +17,12 @@ let EPL = Object.assign({log: console.log, JSON: JSON, DATADIR: DATADIR}, {R: R}
 
 function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
     console.log('compiling EPL.')
-    let renderResults = {}
     // FOR VM2 (production)
     const vm = new VM({
         sandbox: Object.assign({
             windowHeight: windowHeight,
             windowWidth: windowWidth,
             seed: seed,
-            renderResults: renderResults
         }, EPL),
         console: 'inherit'
     })
@@ -35,7 +33,6 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
     //     windowHeight: windowHeight,
     //     windowWidth: windowWidth,
     //     seed: seed,
-    //     renderResults: renderResults
     // }, EPL)
     // const vm = VM.createContext(sandbox)
     // ---- FOR VM ----
@@ -50,8 +47,8 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
             "if (typeof preRenderFunc !== 'undefined') {" +
                 "preRenderFunc.toString()" +
                 "} else {" +
-                    "'function preRenderFunc() {" +
-                            "return {renders: undefined, yield: undefined}" +
+                    "'function* preRenderFunc() {" +
+                            "" +
                         "}'" +
                 "}")
     let preRenderArgs = vm.run(
@@ -62,22 +59,11 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
                 "}")
 
     console.log("eval preRenderFunc")
-    function initialize(clientResults) {
+
+    function initialize() {
         console.log("Initializing EPL stimulus generator")
-        // TODO warning: will this potentially break with multiple connections?
-        renderResults.yield = clientResults
-        // console.log("renderResults outside VM:", renderResults)
-        // let r
-        // if (renderResults===undefined) {
-        //     r = "undefined"
-        // } else {
-        //     r = renderResults.toString()
-        // }
-        // console.log("renderResults", renderResults.yield)
-        // we use stimulus index to ensure correct order and
-        // avoid race condition
-        // vm.run("log('renderResults inside VM:', renderResults.yield)")
-        vm.run("let generator = stimulusGenerator(renderResults.yield); " +
+
+        vm.run("let generator = stimulusGenerator(); " +
                 "let s='uninitialized'; let si = 0;");
     }
 

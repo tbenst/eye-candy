@@ -11,3 +11,6 @@ COPY web/package-lock.json /www
 RUN npm install --quiet
 COPY web/src /www/src
 COPY web/view /www/view
+COPY .git /tmp/
+RUN git -C /tmp rev-parse --verify HEAD > /www/git-sha
+RUN rm -rf /tmp/.git

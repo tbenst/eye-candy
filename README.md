@@ -50,9 +50,9 @@ Or by using Image type, can just define in EPL preRenderFunc! See eyechart-sacca
 ## TODOs
 replace koa-socket-session with something better supported (1.2.0 fails)
 update to koa-socket-2
-make sure I didn't break shuffle with new randint
-- Chunk number of stimmuli returned
-
+- Chunk number of stimmuli returned by server to lower number of requsets
+- make preRenderFunc a generator, store images in localStorage
+- render: read from localStorage
 
 ### video
 - Always save video

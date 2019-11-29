@@ -147,7 +147,7 @@ r.shuffle(stimuli)
 
 stimuli = insertBreaks(measureIntegrity(flatten(stimuli)))
 
-function* stimulusGenerator(renderResults) {
+function* stimulusGenerator() {
     for (s of stimuli) {
         yield s
     }

@@ -1,8 +1,10 @@
-const metadata = {name: "letters-tiled", version: "0.2.0", inverted: false}
+const metadata = {name: "eyechart", version: "0.2.0", inverted: false}
 
 let repetitions = 100
 
+// sizes.length == padding.length
 let sizes = [250,200,160,125]
+let padding = [250,200,160,125]
 
 let durations = [0.5]
 
@@ -41,17 +43,29 @@ let ncols
 let pad
 let totalSize
 
+function uniformLetterMatrix(nrows,ncols, letter) {
+    const col = [...Array(ncols).keys()].map(x => letter)
+    let toReturn = [...Array(nrows).keys()].map(x => col)
+    return toReturn
+}
+
 for (let duration of durations) {
-    for (let size of sizes) {
-        pad = size
+    for (let s = 0; s < sizes.length; s++) {
+        size = sizes[s]
+        pad = padding[s]
+        totalSize = size + pad
+        ncols = ceil(windowWidth/totalSize)
+        nrows = ceil(windowHeight/totalSize)        
 
         for (let i = 0; i < repetitions; i++) {
             cohort = r.uuid(i)
             for (let letter of letters) {
+                letterMatrix = uniformLetterMatrix(nrows, ncols, letter)
                 id = r.uuid(i)
                 // block means "do not insert a integrity check before me"
-                l = new TiledLetter(duration, "black", letter, size, pad,
-                    "white", 0, {group: id, cohort: cohort, block: true})
+                // backgroundColor, letter, x, y, size, color
+                l = new EyeChart(duration, "black", letterMatrix,size, pad,
+                    "white", {group: id, cohort: cohort, block: true})
                 before = new Wait(1, {group: id})
                 after = new Wait(r.randi(0.5,1), {group: id, block: true})
 
@@ -67,7 +81,7 @@ r.shuffle(stimuli)
 
 stimuli = measureIntegrity(flatten(stimuli))
 
-function* stimulusGenerator(renderResults) {
+function* stimulusGenerator() {
     for (s of stimuli) {
         yield s
     }

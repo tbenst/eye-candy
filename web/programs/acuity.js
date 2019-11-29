@@ -22,8 +22,18 @@ function* measureIntegrity(stimuli,every=5*60) {
 
 // special function for pre-rendering. This is passed as a string
 // and run client-side
-function preRenderFunc(binaryNoiseNframes, randomSeed) {
+function* preRenderFunc(binaryNoiseNframes, randomSeed) {
     console.log("In preRender...")
+
+    function renderFrame(flatPixelArray) {
+        var canvas = document.createElement("canvas");
+        var context = canvas.getContext("2d")
+        canvas.width = WIDTH
+        canvas.height = HEIGHT
+		imageData = new ImageData(flatPixelArray, WIDTH, HEIGHT)
+        context.putImageData(imageData, 0, 0)
+        return canvas
+    }
 
 	console.assert(binaryNoiseNframes % 2 == 0)
 	// client-side
@@ -38,59 +48,53 @@ function preRenderFunc(binaryNoiseNframes, randomSeed) {
 	// let binaryNoiseNframes =14
 	let pixelArrays = []
 	let singlePixel = Uint8ClampedArray.from(Array(binaryNoiseNframes/2).fill(0).concat(Array(binaryNoiseNframes/2).fill(255)))
-	for (var p = 0; p < nPixels; p++) {
-		// benchmark: 50% of time is from shuffle
-		r.shuffle(singlePixel)
-		// ... allows for array copy
-		pixelArrays.push([...singlePixel])
-		if (p % 10000 == 0) {
-			console.log("pushed array for pixel: ", p)
-		}
-	}
-
-
 	// RGBA array https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Pixel_manipulation_with_canvas
-	let allFrames = new Uint8ClampedArray(binaryNoiseNframes*nPixels*4)
-	// values of single pixel over time
-	// TODO why does making this nPixels/2 leave only ~1/4 of pixels with value??
-	for (var p = 0; p < nPixels; p++) {
-		singlePixel = pixelArrays[p]
-		for (var n = 0; n < binaryNoiseNframes; n++) {
-			// For example, to read the blue component's value from the pixel at column 200, row 50 in the image, you would do the following:
-			// blueComponent = imageData.data[(50 * (imageData.width * 4)) + (200 * 4) + 2]
-			allFrames[p*4 + n*nPixels*4] = singlePixel[n] // red
-			allFrames[1+p*4 + n*nPixels*4] = singlePixel[n] // green
-			allFrames[2+p*4 + n*nPixels*4] = singlePixel[n] // blue
-			allFrames[3+p*4 + n*nPixels*4] = 255 // alpha
+
+
+	// chunk N frame increments to avoid memory overflow
+	let chunkNframes = 100
+	let chunkFrames
+	for (var i = 0; i < binaryNoiseNframes; i = i + chunkNframes) {
+		// equal to chunkNframes except for final iteration
+		chunkNframes = Math.min(chunkNframes, binaryNoiseNframes-i)
+		chunkFrames = new Uint8ClampedArray(chunkNframes*nPixels*4)
+
+		// create balanced pixel assignments
+		pixelArrays = []
+		for (var p = 0; p < nPixels; p++) {
+			// benchmark: 50% of time is from shuffle
+			r.shuffle(singlePixel)
+			// ... allows for array copy
+			pixelArrays.push([...singlePixel])
+			if (p % 10000 == 0) {
+				console.log("pushed array for pixel: ", p)
+			}
 		}
-		if (p % 10000 == 0) {
-			console.log("pushed array for pixel: ", p)
+
+		// assign values of each pixel over time
+		for (var p = 0; p < nPixels; p++) {
+			singlePixel = pixelArrays[p]
+			for (var n = 0; n < chunkNframes; n++) {
+				// For example, to read the blue component's value from the pixel at column 200, row 50 in the image, you would do the following:
+				// blueComponent = imageData.data[(50 * (imageData.width * 4)) + (200 * 4) + 2]
+				chunkFrames[p*4 + n*nPixels*4] = singlePixel[n] // red
+				chunkFrames[1+p*4 + n*nPixels*4] = singlePixel[n] // green
+				chunkFrames[2+p*4 + n*nPixels*4] = singlePixel[n] // blue
+				chunkFrames[3+p*4 + n*nPixels*4] = 255 // alpha
+			}
+			if (p % 10000 == 0) {
+				console.log("pushed array for pixel: ", p)
+			}
 		}
-
+		// yield each frame from chunk
+		for (var n = 0; n < chunkNframes; n++) {
+			yield renderFrame(chunkFrames.slice(n*nPixels*4,(n+1)*nPixels*4))
+		}
 	}
-
-    function renderFrame(flatPixelArray) {
-        var canvas = document.createElement("canvas");
-        var context = canvas.getContext("2d")
-        canvas.width = WIDTH
-        canvas.height = HEIGHT
-		imageData = new ImageData(flatPixelArray, WIDTH, HEIGHT)
-        context.putImageData(imageData, 0, 0)
-        return canvas
-    }
-
-	let frames = []
-	for (var n = 0; n < binaryNoiseNframes; n++) {
-		frames.push(renderFrame(allFrames.slice(n*nPixels*4,(n+1)*nPixels*4)))
-	}
-	console.log("frames[0]", frames[0])
-
-    return {renders: frames,
-            yield: {}}
 }
 
 // special object for pre-rendering
-const binaryNoiseDuration = 0.1*60
+const binaryNoiseDuration = 5*60
 const frameRate = 60
 const hz = 5
 const binaryNoiseLifespan = 1 / hz
@@ -197,7 +201,7 @@ r.shuffle(stimuli)
 stimuli = measureIntegrity(flatten(stimuli))
 stimuli = celltypeStimuli.concat(stimuli)
 
-function* stimulusGenerator(renderResults) {
+function* stimulusGenerator() {
     for (s of stimuli) {
         yield s
     }

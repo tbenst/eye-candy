@@ -1,8 +1,9 @@
-const metadata = {name: "eyechart", version: "0.2.0", inverted: false}
+const metadata = {name: "eyechart-balanced", version: "0.2.0", inverted: false}
 
 let repetitions = 100
 
 // sizes.length == padding.length
+// let sizes = [200,160,125,100]
 let sizes = [250,200,160,125]
 let padding = [250,200,160,125]
 
@@ -24,7 +25,7 @@ function* measureIntegrity(stimuli,every=5*60) {
         } else {
             yield s
         }
-        elapsedTime=elapsedTime+s["lifespan"]
+        elapsedTime=elapsedTime+s["lifespan"]:
     }
 }
 
@@ -43,24 +44,50 @@ let ncols
 let pad
 let totalSize
 
-function uniformLetterMatrix(nrows,ncols, letter) {
-    const col = [...Array(ncols).keys()].map(x => letter)
-    let toReturn = [...Array(nrows).keys()].map(x => col)
-    return toReturn
+function repeatedLetterCohorts(letters, reps) {
+    // retain balance per cohort while random letters within
+    let newLetters = []
+    for (var i = 0; i < reps; i++) {
+        r.shuffle(letters)
+        newLetters = newLetters.concat(letters.slice())
+    }
+    return newLetters
 }
 
+function* balancedLetterMatrix(nrows,ncols, reps=repetitions) {
+    // 3d tensor
+    let toReturn = [...Array(nrows).keys()].map(x => Array(ncols))
+
+    for (var row = 0; row < nrows; row++) {
+        for (var column = 0; column < ncols; column++) {
+            toReturn[row][column] = repeatedLetterCohorts(letters, reps)
+        }
+        
+    }
+
+    for (var i = 0; i < reps; i++) {
+        // yield 2D tensor
+        yield toReturn.map(row =>
+            row.map(column => 
+                column[i]))
+    }
+}
+
+let lm
 for (let duration of durations) {
     for (let s = 0; s < sizes.length; s++) {
         size = sizes[s]
         pad = padding[s]
         totalSize = size + pad
         ncols = ceil(windowWidth/totalSize)
-        nrows = ceil(windowHeight/totalSize)        
+        nrows = ceil(windowHeight/totalSize)
+        
+        lm = balancedLetterMatrix(nrows, ncols, repetitions)
 
         for (let i = 0; i < repetitions; i++) {
             cohort = r.uuid(i)
-            for (let letter of letters) {
-                letterMatrix = uniformLetterMatrix(nrows, ncols, letter)
+            for (let j = 0; j < letters.length; j++) {
+                letterMatrix = lm.next().value
                 id = r.uuid(i)
                 // block means "do not insert a integrity check before me"
                 // backgroundColor, letter, x, y, size, color
@@ -81,7 +108,7 @@ r.shuffle(stimuli)
 
 stimuli = measureIntegrity(flatten(stimuli))
 
-function* stimulusGenerator(renderResults) {
+function* stimulusGenerator() {
     for (s of stimuli) {
         yield s
     }

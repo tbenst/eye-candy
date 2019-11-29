@@ -82,8 +82,7 @@ function preRenderFunc(sizes, letters, color) {
             renderedLetters[idx] = image
         }
     }
-    return {renders: renderedLetters,
-            yield: {}}
+    return {renders: renderedLetters}
 }
 
 // special object for pre-rendering
@@ -121,7 +120,7 @@ r.shuffle(stimuli)
 
 stimuli = measureIntegrity(flatten(stimuli))
 
-function* stimulusGenerator(renderResults) {
+function* stimulusGenerator() {
     for (let s of stimuli) {
         yield s
     }
