@@ -135,13 +135,15 @@ fetch("/get-sid", {
 // console.log("COOKIE",document.cookie)
 async function loadPreRenderForStimuli(stimulusQueue) {
     let stimulus
+    const preRenderHash = localStorage.getItem("preRenderHash")
     for (s in stimulusQueue) {
         stimulus = stimulusQueue[s]
-        if (typeof(stimulus.value.image)==="number") {
+        if (stimulus.value !== undefined &&
+            stimulus.value.image !== undefined &&
+            typeof(stimulus.value.image)==="number") {
             // retrieve image from indexedDB
             try {
-
-                stimulus.value.image = await SimpleIDB.get("render-"+stimulus.value.image)
+                stimulus.value.image = await SimpleIDB.get(preRenderHash+"-render-"+stimulus.value.image)
             } catch (err) {
                 console.warn("Failed to get preRender: " + err)
             }
@@ -166,6 +168,33 @@ socket.on("video", async (stimulusQueue) => {
     store.dispatch(setStatusAC(STATUS.VIDEO))
 })
 
+async function sha256(message) {
+    // encode as UTF-8
+    const msgBuffer = new TextEncoder('utf-8').encode(message);
+
+    // hash the message
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+    // convert ArrayBuffer to Array
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+    // convert bytes to hex string
+    const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+    return hashHex;
+}
+
+async function hashPreRenders(args) {
+    const height = store.getState()["windowHeight"]
+    const width = store.getState()["windowWidth"]
+    const hash = await sha256(height+"_"+width+"_"+args)
+    return hash
+}
+
+async function checkPreRenders(preRenderHash) {
+    const nframes = await SimpleIDB.get(preRenderHash)
+
+}
+
 socket.on("pre-render", async (preRender) => {
     // TODO dangerous, insecure
     // but hey, it's science!
@@ -173,27 +202,45 @@ socket.on("pre-render", async (preRender) => {
 
     console.log("socket 'pre-render' started")
     // console.log("socket 'pre-render':", preRender)
-    eval(preRender.func)
-    console.log("finished preRender func eval, about to render...")
 
-    let renderGenerator = preRenderFunc(...preRender.args)
-    let renderItem = renderGenerator.next()
-    let render = renderItem.value
-    let n = 0
-    while ( renderItem.done===false) {
-        // note: assumes that render is a canvas
-        // localStorage.setItem("render-"+n, render.toDataURL())
-        try {
-            await SimpleIDB.set("render-"+n, render.toDataURL())
-        } catch (e) {
-            console.warn("SimpleIDB failed to set render-"+n)
+    // TODO should be in store...
+    const preRenderHash = await hashPreRenders(preRender.args)
+    localStorage.setItem("preRenderHash", preRenderHash)
+    const nFrames = await SimpleIDB.get(preRenderHash + "-nframes")
+    const renderPrefix = preRenderHash + "-render-"
+    const keys = await SimpleIDB.getKeysWithPrefix(renderPrefix)
+    console.log("keys, value, nFrames", keys, nFrames)
+    let preRenderIsCached = keys.length == nFrames
+    if (!preRenderIsCached) {
+        eval(preRender.func)
+        console.log("finished preRender func eval, about to render...")
+        let renderGenerator = preRenderFunc(...preRender.args)
+        let renderItem = renderGenerator.next()
+        let render = renderItem.value
+        let n = 0
+        while ( renderItem.done===false) {
+            // note: assumes that render is a canvas
+            // localStorage.setItem("render-"+n, render.toDataURL())
+            try {
+                await SimpleIDB.set(renderPrefix+n, render.toDataURL())
+            } catch (e) {
+                console.warn("SimpleIDB failed to set render-"+n)
+            }
+            // localStorage.setItem("render-"+n, JSON.stringify(render))
+            renderItem = renderGenerator.next()
+            render = renderItem.value
+            n++
         }
-        // localStorage.setItem("render-"+n, JSON.stringify(render))
-        renderItem = renderGenerator.next()
-        render = renderItem.value
-        n++
+        try {
+            await SimpleIDB.set(preRenderHash + "-nframes", n)
+        } catch (e) {
+            console.warn("SimpleIDB failed to set nFrames")
+        }
+        console.log("finished render")
+    } else {
+        console.log("using preRender cache")
     }
-    console.log("finished render")
+
     socket.emit("renderResults", {sid: localStorage.getItem('sid')})
 
 })
@@ -204,7 +251,7 @@ socket.on("reset", () => {
     store.dispatch(resetAC())
 
     // remove preRenders
-    SimpleIDB.clearAll()
+    // SimpleIDB.clearAll()
     // Object.entries(localStorage).map(
     // Object.entries(localStorage).map(
     //         x => x[0]

@@ -42,6 +42,32 @@ SimpleIDB = {
 		})
 	},
 
+	getKeysWithPrefix(keyPrefix) {
+		return new Promise((resolve, reject) => {
+			const prefixLast = keyPrefix.length - 1
+			const lastChar = String.fromCharCode(keyPrefix.charCodeAt(prefixLast) + 1)
+			const upperBound = keyPrefix.slice(0,prefixLast)+lastChar
+			const keyRangeValue = IDBKeyRange.bound(keyPrefix, upperBound)
+
+			let openRequest = indexedDB.open('eyeCandyDB')
+			openRequest.onsuccess = function() {
+				let db = openRequest.result
+				let transaction = db.transaction('myStore', 'readonly')
+				let objectStore = transaction.objectStore('myStore')
+				let getRequest = objectStore.getAllKeys(keyRangeValue)
+				getRequest.onsuccess = function() {
+					resolve(getRequest.result)
+				}
+				getRequest.onerror = function() {
+					reject(getRequest.error)
+				}
+			}
+			openRequest.onerror = function() {
+				reject(openRequest.error)
+			}
+		})
+	},
+
 	clearAll() {
 		// delete all objects in store
 		return new Promise((resolve, reject) => {

@@ -51,8 +51,12 @@ Or by using Image type, can just define in EPL preRenderFunc! See eyechart-sacca
 replace koa-socket-session with something better supported (1.2.0 fails)
 update to koa-socket-2
 - Chunk number of stimmuli returned by server to lower number of requsets
-- make preRenderFunc a generator, store images in localStorage
-- render: read from localStorage
+- cache preRender frames + reuse (checkbox for reuse cache?) Can shuffle order of frames...
+- Can cache render based on "render-SEED-n"
+- show live load progress
+- fix black frame between binary static--possibly by getting rid of on-load? (can preload images from server to indexedDB if on-load is needed for these...).
+- Or can fix by buffering one frame & first swapping canvas on rAF and then rendering next frame to off-frame
+
 
 ### video
 - Always save video

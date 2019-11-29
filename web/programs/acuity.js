@@ -94,14 +94,16 @@ function* preRenderFunc(binaryNoiseNframes, randomSeed) {
 }
 
 // special object for pre-rendering
-const binaryNoiseDuration = 5*60
+const binaryNoiseDuration = 1*60
 const frameRate = 60
 const hz = 5
 const binaryNoiseLifespan = 1 / hz
 const binaryNoiseNframes = hz*binaryNoiseDuration
 
-const randomSeed = r.int()
-const preRenderArgs = [binaryNoiseNframes, randomSeed]
+// deterministic seed for caching
+const renderSeed = 242424
+// third argument, although unused, can be updated to invalidate cache
+const preRenderArgs = [binaryNoiseNframes, renderSeed, "binary_noise_v1"]
 
 // cell type assay
 let celltypeStimuli = []
@@ -112,12 +114,15 @@ const celltypeMeta = {group: r.uuid(), label: "celltype"}
 let fixationPoint = {x: windowWidth/2, y: windowHeight/2}
 for (var n = 0; n < binaryNoiseNframes; n++) {
 	if (n==0) {
-		celltypeStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint, {"randomSeed": randomSeed}))
+		celltypeStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint, {"randomSeed": renderSeed}))
 	} else {
 		celltypeStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint))
 	}
 }
 
+// shuffle binary frames that are cached instead of slow
+// pre-rendering each time
+r.shuffle(celltypeStimuli)
 
 celltypeStimuli.push(new Wait(3, celltypeMeta))
 celltypeStimuli.push(new Solid(3, "white", celltypeMeta))

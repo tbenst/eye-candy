@@ -393,11 +393,14 @@ function newStimulusDispatcher() {
 async function queueStimulusDispatcher() {
     const stimulus = await nextStimulus()
     const stimulusIndex = stimulus.stimulusIndex
+    const preRenderHash = localStorage.getItem("preRenderHash")
     let image
-    if (typeof(stimulus.value.image)==="number") {
+    if (stimulus.value !== undefined &&
+        stimulus.value.image !== undefined &&
+        typeof(stimulus.value.image)==="number") {
         // retrieve image from indexedDB
         try {
-            image = await SimpleIDB.get("render-"+stimulus.value.image)
+            image = await SimpleIDB.get(preRenderHash+"-render-"+stimulus.value.image)
             stimulus.value.image = image
         } catch (err) {
             console.warn("Failed to get preRender: " + err)
