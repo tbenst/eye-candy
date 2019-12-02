@@ -100,6 +100,8 @@ Rendering can often be computationally expensive, especially when generating mil
 
 Clearing the cache can be done in Developer Tools (ctrl-shift-c) -> Storage -> IndexedDB -> eyeCandyDB -> right click myStore -> Clear.
 
+## saving video of protocol
+Some analysis techniques require access to the pixel values for each frame during the experiment. This is supported by clicking `save-video` instead of start. `png` files are then saved to `/data/eye-candy/renders/<timestamp>` by default. Following the experiment, `ffmpeg` is used to create a `.mp4` file and the `png`s are deleted. If the experiment ends early, the `png`s are left for salvage purposes. Note that while every effort is made to ensure that the same pixel values are displayed at the same time between runs, slight variations in computer performance can impact frame rate and thus this is not guranteed.
 
 ## How to add new protocol
 Two options: for quick testing you can use the `custom` dropdown selection, or you can create `web/src/epl/programs/myProtocol.js`. You need to reload `index.html` for the dropdown to display `myProtocol.js`, but once it's there, any changes are hot-loaded by the server when you click `load`.
