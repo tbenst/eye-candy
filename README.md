@@ -44,6 +44,57 @@ A variety of stimulation types are included. These are all defined in https://gi
 ## Deterministic randomness
 Programs are initialized with a seed value for the Mersenne Twister, a deterministic pseudo-random number generator. Thus, each time an experiment is run random parameters can be randomly sampled, and by saving the seed we can re-run the exact same experiment.
 
+## Machine-readable lab notebooks
+yaml-format lab notebooks are automatically generated to ensure reproducible experiments. Here's an example:
+```
+---
+affiliation: University of Washington Medicine
+lab: Van Gelder Lab
+people: 'Tyler Benster, Darwin Babino'
+purpose: 'Testing eye-candy'
+mouseNumber: '1'
+species: mouse
+mouseType: 'wt'
+birthdate: '2018/01/01'
+orientation: '0 deg'
+dissectionTime: '9:30am'
+solution: 'AMES'
+retinaWeight: 'bent wire'
+meaType: 60MEA200/30iR-ITO
+
+displayMode: video
+experimentNumber: '1'
+filename: 'R1_E1_eyecandy_test'
+seed: '121658968'
+program: test
+epl: |
+  const metadata = {name: "test", version: "0.1.0"}
+
+  let stimuli = []
+  let meta = {}
+
+  stimuli.push(new Wait(1, meta))
+  stimuli.push(new Solid(2, "white", meta))
+  stimuli.push(new Wait(1, meta))
+
+
+  function* stimulusGenerator() {
+      for (s of stimuli) {
+          yield s
+      }
+  }
+windowHeight: '328'
+windowWidth: '500'
+date: 2019-12-02T22:24:41.549Z
+version: 0.5
+flickerVersion: 0.3
+gitSHA: 5c5dee7c891db64a58c8e2785fb6c2a3f71da061
+```
+Since we have the seed, windowHeight, windowWidth, and EPL progam, we can recreate the exact stimuli used during the experiment.
+
+## encoding stimulus timing with ephys data
+`flicker.html` denotes the timing of every single frame using a change in light intensity. Every frame it oscillates, and the mean amplitude of the oscillation changes according to modulo 3 of the stimulusIndex. In other words, by using a light detector we can decode the timing of each frame as well as the start of each stimulus--and if there is a dropped frame, we can impute missing stimulus start times thanks to the encoding of which stimulusIndex is associated with each frame.
+
 ## Pre-rendering
 Rendering can often be computationally expensive, especially when generating millions of random numbers is required. To allow for pre-rendering complex stimuli like random binary masks that are balanced over time such that each pixel sums to the same value, EPL supports two special objects: `preRenderFunc` and `preRenderArgs`. These objects are used on the client (the webbrowser) to render frames that are then cached in the browser using IndexedDB. Thus, EPL programs execute both on the server and on the client. Cached frames can be reused between sessions as `preRenderFunc` is memoized: two sessions with identical `preRenderArgs` as well as canvas height and width for `stimulus.html` will retrieve the previously computed pre-rendered frames from IndexedDB. See https://github.com/tbenst/eye-candy/blob/master/web/programs/eyechart-saccade.js or https://github.com/tbenst/eye-candy/blob/master/web/programs/celltyping.js for complex examples.
 
@@ -51,7 +102,7 @@ Clearing the cache can be done in Developer Tools (ctrl-shift-c) -> Storage -> I
 
 
 ## How to add new protocol
-Two options: for quick testing you can use the `custom` dropdown selection, or you can create `web/src/epl/programs/myProtocol.js`. You need to reload `index.html` for the dropdown to display `myProtocol.js`, but once it's there, any changes are hot-loaded by the server when you click `load`
+Two options: for quick testing you can use the `custom` dropdown selection, or you can create `web/src/epl/programs/myProtocol.js`. You need to reload `index.html` for the dropdown to display `myProtocol.js`, but once it's there, any changes are hot-loaded by the server when you click `load`.
 
 # Dev notes
 
