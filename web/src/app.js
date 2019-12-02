@@ -475,9 +475,23 @@ function sleep(ms){
 async function saveVideo(sid) {
     let vidname = program_vid_name[sid]
     let stream = program_log[sid]
-    // TODO add condition to wait for frames??
-    // horrible hack, race condition!!!
-    await sleep(10000)
+    console.log("Rendering your video. This might take a long time...")
+	let missingFrames = true
+	let nFrames = fs.readdirSync(vidname).length;
+	let newNFrames
+	while (missingFrames) {
+		await sleep(10000)
+		newNFrames = fs.readdirSync(vidname).length
+
+		if (newNFrames == nFrames) {
+			// if no new frames received in last 10 seconds, assume we have all frames
+			missingFrames = false
+		} else {
+			console.log("Received "+(newNFrames-nFrames)+" more frames. Sleeping for 10sec")
+		}
+		nFrames = newNFrames
+	}
+	console.log("Using ffmpeg to make "+vidname+'.mp4.')
     var ffmpeg = cp.spawn('ffmpeg', [
         '-framerate', '60',
         '-start_number', '0',
@@ -507,7 +521,6 @@ async function saveVideo(sid) {
 io.on("renderVideo", (ctx, data) => {
     // TODO: THIS IS A RACE CONDITION! stream write could come in slowly
     const sid = data.sid
-    console.log("Rendering your video. This might take a long time...")
     saveVideo(sid)
 })
 

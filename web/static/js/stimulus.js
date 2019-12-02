@@ -57,10 +57,10 @@ const storeInitialState = {
 
 
 // USE THIS FOR NO LOGGER
-// let store = createStore(eyeCandyApp, storeInitialState)
+let store = createStore(eyeCandyApp, storeInitialState)
 
 // USE THIS FOR LOGGER
-let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
+// let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
 
 // GET FROM SERVER (NOT OPERATIONAL)
 // let store = createStore(todoApp, window.STATE_FROM_SERVER)
@@ -199,13 +199,6 @@ const loadBarChannel = new BroadcastChannel('loadProgress');
 
 
 socket.on("pre-render", async (preRender) => {
-    // TODO dangerous, insecure
-    // but hey, it's science!
-    // also, this is client side so not *so* bad..
-
-    console.log("socket 'pre-render' started")
-    // console.log("socket 'pre-render':", preRender)
-
     // TODO should be in store...
     const preRenderHash = await hashPreRenders(preRender.args)
     localStorage.setItem("preRenderHash", preRenderHash)
@@ -218,11 +211,12 @@ socket.on("pre-render", async (preRender) => {
         eval(preRender.func)
         console.log("finished preRender func eval, about to render...")
         let nFrames = preRender.args[0] // by convention
+        // show 1% bar to indicate start of load
+        loadBarChannel.postMessage(1)
         let renderGenerator = preRenderFunc(...preRender.args)
         let renderItem = renderGenerator.next()
         let render = renderItem.value
         let n = 0
-        const bc = new BroadcastChannel('loadProgress');
 
         while ( renderItem.done===false) {
             // note: assumes that render is a canvas

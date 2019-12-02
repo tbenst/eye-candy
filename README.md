@@ -58,7 +58,6 @@ update to koa-socket-2
 - support client-side image specification
 
 ### BUGS
-- fix race condition on video save (wait for all frames to be received)
 - Stimulus should change on global timer (no increasing drift from estimate, make sure not adding frame on stim switch?)
 
 ## minified src:
