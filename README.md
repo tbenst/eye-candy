@@ -54,9 +54,8 @@ update to koa-socket-2
 - cache preRender frames + reuse (checkbox for reuse cache?) Can shuffle order of frames...
 - Can cache render based on "render-SEED-n"
 - show live load progress
-- fix black frame between binary static--possibly by getting rid of on-load? (can preload images from server to indexedDB if on-load is needed for these...).
-- Or can fix by buffering one frame & first swapping canvas on rAF and then rendering next frame to off-frame
-
+- fix black frame between binary static by buffering one frame & first swapping canvas on rAF and then rendering next frame to off-frame
+- fix preRenderFunc for eyechartSaccade and letters-saccade
 
 ### video
 - Always save video

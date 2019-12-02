@@ -5,10 +5,10 @@ SimpleIDB = {
 	initialize() {
 		return new Promise((resolve, reject) => {
 			// This first deletes any database of the same name
-			let deleteRequest = indexedDB.deleteDatabase('eyeCandyDB')
-			deleteRequest.onerror = function() {
-				reject(deleteRequest.error)
-			}
+			// let deleteRequest = indexedDB.deleteDatabase('eyeCandyDB')
+			// deleteRequest.onerror = function() {
+			// 	reject(deleteRequest.error)
+			// }
 			// Then creates a new one
 			let request = indexedDB.open('eyeCandyDB')
 			request.onupgradeneeded = function() {

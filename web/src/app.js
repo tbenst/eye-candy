@@ -199,6 +199,14 @@ router.post("/start-program", ctx => {
         let stimulusQueue = initStimulusQueue(program[sid])
         io.broadcast("video", stimulusQueue)
         ctx.body = makeLabNotebook(labNotebook)
+		// init folders / logs
+		let vidname, stream
+		vidname = DATADIR + "renders/" + (new Date().toISOString())
+		fs.mkdirSync(vidname, { recursive: true })
+		program_vid_name[sid] = vidname
+		stream = fs.createWriteStream(vidname+".txt", {flags:'a'})
+		program_log[sid] = stream
+		stream.write("frame_number,time,stimulus_index,error\n")
     } else if (submitButton==="estimate-duration") {
         let s = program[sid].next()
         let lifespan = 0
@@ -405,19 +413,10 @@ io.on("target", ctx => {
 
 io.on("addFrame", (ctx, data) => {
     const sid = data.sid
-    let vidname, stream
-    if (program_vid_name[sid]===undefined) {
-        vidname = DATADIR + "renders/" + (new Date().toISOString())
-        fs.mkdirSync(vidname, { recursive: true })
-        program_vid_name[sid] = vidname
-        stream = fs.createWriteStream(vidname+".txt", {flags:'a'})
-        program_log[sid] = stream
-        stream.write("frame_number,time,stimulus_index,error\n")
-    } else {
-        vidname = program_vid_name[sid]
-        stream = program_log[sid]
-    }
-    const png = data.png.replace(/^data:image\/png;base64,/, "")
+    let vidname = program_vid_name[sid]
+    let stream = program_log[sid]
+    const png = data.png
+		// data.png.replace(/^data:image\/png;base64,/, "")
     var filename = sprintf('image-%010d.png', data.frameNum);
     // const filename = "s="+data.stimulusIndex + ",t=" + data.time+'.png'
     fs.writeFile(vidname+"/"+filename, png, 'base64', (error) => {

@@ -6,8 +6,8 @@ DISPATCHERS
 function graphicsDispatcher() {
     const state = store.getState()
     const stimulus = state.stimulus
-    console.log("in graphicsDispatcher", stimulus)
-    console.log("stim type", stimulus.stimulusType)
+    // console.log("in graphicsDispatcher", stimulus)
+    // console.log("stim type", stimulus.stimulusType)
     switch (stimulus.stimulusType) {
         case STIMULUS.BAR:
             if (stimulus.age === 0) {
@@ -123,44 +123,40 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
 
 function imageDispatcher(lifespan, backgroundColor, image,
                                 fixationPoint) {
-    let dont_dispatch = false
-
     let img = new Image()
-    img.onload = (event) => {
-        if (fixationPoint===undefined) {
-            fixationPoint = {x: img.width / 2, y: img.height / 2}
-        }
-        store.dispatch(setGraphicsAC([{
-                graphicType: GRAPHIC.IMAGE,
-                image: img,
-                fixationPoint: fixationPoint,
-                lifespan: lifespan,
-                age: 0
-        }]))
-    }
+    // TODO test if deleting onload messes up image src on server
+    // img.onload = (event) => {
+    //     if (fixationPoint===undefined) {
+    //         fixationPoint = {x: img.width / 2, y: img.height / 2}
+    //     }
+    //     store.dispatch(setGraphicsAC([{
+    //             graphicType: GRAPHIC.IMAGE,
+    //             image: img,
+    //             fixationPoint: fixationPoint,
+    //             lifespan: lifespan,
+    //             age: 0
+    //     }]))
+    // }
     if (typeof(image)==="string") {
         // assume image src (get from server)
         img.src = image
-        dont_dispatch = true
     } else {
         // TODO can this be deleted? Or maybe used for older letter rendering?
         img = image
     }
 
-    if (!dont_dispatch) {
-        if (fixationPoint===undefined) {
-            // race condition?
-            fixationPoint = {x: img.width / 2, y: img.height / 2}
-        }
-
-        store.dispatch(setGraphicsAC([{
-                graphicType: GRAPHIC.IMAGE,
-                image: img,
-                fixationPoint: fixationPoint,
-                lifespan: lifespan,
-                age: 0
-        }]))
+    if (fixationPoint===undefined) {
+        // race condition?
+        fixationPoint = {x: img.width / 2, y: img.height / 2}
     }
+
+    store.dispatch(setGraphicsAC([{
+            graphicType: GRAPHIC.IMAGE,
+            image: img,
+            fixationPoint: fixationPoint,
+            lifespan: lifespan,
+            age: 0
+    }]))
 }
 
 function videoDispatcher(lifespan, backgroundColor, src, startTime) {

@@ -102,7 +102,8 @@ const binaryNoiseNframes = hz*binaryNoiseDuration
 
 // deterministic seed for caching
 const renderSeed = 242424
-// third argument, although unused, can be updated to invalidate cache
+// third argument, although unused in function, is memoized on client
+// can be updated to invalidate cache
 const preRenderArgs = [binaryNoiseNframes, renderSeed, "binary_noise_v1"]
 
 // cell type assay
