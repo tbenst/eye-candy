@@ -23,10 +23,10 @@ function* stimulusGenerator() {
 }
 ```
 
-More sophisticated example programs can be found in [src/epl/programs](https://github.com/tbenst/eye-candy/tree/master/web/src/programs).
+More sophisticated example programs can be found in [web/programs](https://github.com/tbenst/eye-candy/tree/master/web/programs).
 
 ## Supported stimuli
-A variety of stimulation types are included. These are all defined in https://github.com/tbenst/eye-candy/blob/master/web/src/epl/types.js. 
+A variety of stimulation types are included. These are all defined in [web/src/epl/types](https://github.com/tbenst/eye-candy/blob/master/web/src/epl/types.js). 
 - Wait (black screen)
 - Solid (full-field flash of any valid HTML color)
 - Bar (single moving square-bar)
@@ -39,7 +39,7 @@ A variety of stimulation types are included. These are all defined in https://gi
 - TiledLetter (repeated ETDRS optotype that files full-field)
 - EyeChart (mimics changing focus on an ETDRS eyechart)
 - Image (display arbitrary images, either pre-rendered or served from the server's `/data/eye-candy/images`)
-- Video (display video from mounted volume, by defualt this is in `/data/eye-candy/videos`, see https://github.com/tbenst/eye-candy/blob/master/docker-compose.yml)
+- Video (display video from mounted volume, by defualt this is in `/data/eye-candy/videos`, see [docker-compose](https://github.com/tbenst/eye-candy/blob/master/docker-compose.yml))
 
 ## Deterministic randomness
 Programs are initialized with a seed value for the Mersenne Twister, a deterministic pseudo-random number generator. Thus, each time an experiment is run random parameters can be randomly sampled, and by saving the seed we can re-run the exact same experiment.
@@ -96,7 +96,7 @@ Since we have the seed, windowHeight, windowWidth, and EPL progam, we can recrea
 `flicker.html` denotes the timing of every single frame using a change in light intensity. Every frame it oscillates, and the mean amplitude of the oscillation changes according to modulo 3 of the stimulusIndex. In other words, by using a light detector we can decode the timing of each frame as well as the start of each stimulus--and if there is a dropped frame, we can impute missing stimulus start times thanks to the encoding of which stimulusIndex is associated with each frame.
 
 ## Pre-rendering
-Rendering can often be computationally expensive, especially when generating millions of random numbers is required. To allow for pre-rendering complex stimuli like random binary masks that are balanced over time such that each pixel sums to the same value, EPL supports two special objects: `preRenderFunc` and `preRenderArgs`. These objects are used on the client (the webbrowser) to render frames that are then cached in the browser using IndexedDB. Thus, EPL programs execute both on the server and on the client. Cached frames can be reused between sessions as `preRenderFunc` is memoized: two sessions with identical `preRenderArgs` as well as canvas height and width for `stimulus.html` will retrieve the previously computed pre-rendered frames from IndexedDB. See https://github.com/tbenst/eye-candy/blob/master/web/programs/eyechart-saccade.js or https://github.com/tbenst/eye-candy/blob/master/web/programs/celltyping.js for complex examples.
+Rendering can often be computationally expensive, especially when generating millions of random numbers is required. To allow for pre-rendering complex stimuli like random binary masks that are balanced over time such that each pixel sums to the same value, EPL supports two special objects: `preRenderFunc` and `preRenderArgs`. These objects are used on the client (the webbrowser) to render frames that are then cached in the browser using IndexedDB. Thus, EPL programs execute both on the server and on the client. Cached frames can be reused between sessions as `preRenderFunc` is memoized: two sessions with identical `preRenderArgs` as well as canvas height and width for `stimulus.html` will retrieve the previously computed pre-rendered frames from IndexedDB. See [web/programs/eyechart-saccade.js](https://github.com/tbenst/eye-candy/blob/master/web/programs/eyechart-saccade.js) or (web/programs/celltyping.js)[https://github.com/tbenst/eye-candy/blob/master/web/programs/celltyping.js] for complex examples.
 
 Clearing the cache can be done in Developer Tools (ctrl-shift-c) -> Storage -> IndexedDB -> eyeCandyDB -> right click myStore -> Clear.
 
