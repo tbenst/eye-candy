@@ -29,6 +29,12 @@ function eyeCandyApp(state, action) {
             return Object.assign({}, state, {
                 stimulusQueue: newStimulusQueue
             })
+        case REMOVE_STIMULUS_VALUE:
+            var newStimulusQueue = state.stimulusQueue.slice()
+            newStimulusQueue[action.index] = "removed"
+            return Object.assign({}, state, {
+                stimulusQueue: newStimulusQueue
+            })
         case SET_GRAPHICS:
             return Object.assign({}, state, {
                 graphics: action.graphics
@@ -97,6 +103,8 @@ function tickGraphic(state, graphic, timeDelta) {
             return tickBar(state, graphic, timeDelta)
         case GRAPHIC.GRATING:
             return tickGrating(graphic, timeDelta)
+        case GRAPHIC.CHIRP:
+            return tickChirp(graphic, timeDelta)
         case GRAPHIC.SINUSOIDAL_GRATING:
             return tickGrating(graphic, timeDelta)
         default:
@@ -137,5 +145,27 @@ function tickGrating(grating, timeDelta) {
     return Object.assign({}, grating, {
         position: newPosition,
         age: grating.age + timeDelta,
+    })
+}
+
+function tickChirp(chirp, timeDelta) {
+    // python code:
+    // t = asarray(t)
+    // if method in ['linear', 'lin', 'li']:
+    //     beta = (f1 - f0) / t1
+    //     phase = 2 * pi * (f0 * t + 0.5 * beta * t * t)
+    const t = chirp.age + timeDelta
+    const beta = (chirp.f1 - chirp.f0) / chirp.t1
+    const phase = 2 * Math.PI * (chirp.f0 * t + 0.5 * beta * t * t)
+    const scale = Math.cos(chirp.phi + phase)
+    const timeFraction = Math.min(1, t/chirp.t1)
+    const amplitude = chirp.a0 * (1 - timeFraction) + chirp.a1 * timeFraction
+    const colorVal = Math.round(amplitude * scale + 127.5)
+    const newColor = {r: colorVal, g: colorVal, b: colorVal}
+
+    return Object.assign({}, chirp, {
+        color: rgbToHex(newColor),
+        age: t,
+        debug: {t: t, beta: beta, phase: phase, scale: scale, timeFraction: timeFraction, amplitude: amplitude, colorVal: colorVal}
     })
 }

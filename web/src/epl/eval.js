@@ -1,4 +1,5 @@
 // Compile and run EyeCandy Programming Language
+// const {VM} = require('vm'); // TODO security risk, only for debug
 const {VM} = require('vm2');
 const Types = require("./types")
 const Render = require("./render")
@@ -6,38 +7,48 @@ const Random = require("./random")
 const Misc = require("./misc")
 
 const math = require("./math")
+const {DATADIR} = require('../vars.js')
 const R = require("ramda")
 
 
 // this object has all values usable in EPL
-let EPL = Object.assign({log: console.log, JSON: JSON}, {R: R},
+let EPL = Object.assign({log: console.log, JSON: JSON, DATADIR: DATADIR}, {R: R},
                         Types,Render,Random,math,Misc)
 
 function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
     console.log('compiling EPL.')
-    let renderResults = {}
+    // FOR VM2 (production)
     const vm = new VM({
         sandbox: Object.assign({
             windowHeight: windowHeight,
             windowWidth: windowWidth,
             seed: seed,
-            renderResults: renderResults
         }, EPL),
         console: 'inherit'
-    });
+    })
+    // ---- FOR VM2 ----
+
+    // FOR VM (testing)
+    // const sandbox = Object.assign({
+    //     windowHeight: windowHeight,
+    //     windowWidth: windowWidth,
+    //     seed: seed,
+    // }, EPL)
+    // const vm = VM.createContext(sandbox)
+    // ---- FOR VM ----
 
     // initialize program
     vm.run("let r = new DeterministicRandom(seed);" + programJS)
 
+    console.log("reading program metadata")
     const metadata = vm.run("metadata")
-
     // this function will be passed as string and run on client
     let preRenderFunc = vm.run(
             "if (typeof preRenderFunc !== 'undefined') {" +
                 "preRenderFunc.toString()" +
                 "} else {" +
-                    "'function preRenderFunc() {" +
-                            "return {renders: undefined, yield: undefined}" +
+                    "'function* preRenderFunc() {" +
+                            "" +
                         "}'" +
                 "}")
     let preRenderArgs = vm.run(
@@ -48,22 +59,11 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
                 "}")
 
     console.log("eval preRenderFunc")
-    function initialize(clientResults) {
+
+    function initialize() {
         console.log("Initializing EPL stimulus generator")
-        // TODO warning: will this potentially break with multiple connections?
-        renderResults.yield = clientResults
-        // console.log("renderResults outside VM:", renderResults)
-        // let r
-        // if (renderResults===undefined) {
-        //     r = "undefined"
-        // } else {
-        //     r = renderResults.toString()
-        // }
-        // console.log("renderResults", renderResults.yield)
-        // we use stimulus index to ensure correct order and
-        // avoid race condition
-        // vm.run("log('renderResults inside VM:', renderResults.yield)")
-        vm.run("let generator = stimulusGenerator(renderResults.yield); " +
+
+        vm.run("let generator = stimulusGenerator(); " +
                 "let s='uninitialized'; let si = 0;");
     }
 
@@ -79,6 +79,7 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
             preRenderArgs: preRenderArgs,
             initialize: initialize,
             next: nextStimulus,
+            epl: programJS
         }
 }
 

@@ -7,6 +7,7 @@ function graphicsDispatcher() {
     const state = store.getState()
     const stimulus = state.stimulus
     // console.log("in graphicsDispatcher", stimulus)
+    // console.log("stim type", stimulus.stimulusType)
     switch (stimulus.stimulusType) {
         case STIMULUS.BAR:
             if (stimulus.age === 0) {
@@ -49,6 +50,13 @@ function graphicsDispatcher() {
                     stimulus.fixationPoint)
             }
             break
+        case STIMULUS.VIDEO:
+            if (stimulus.age === 0) {
+                videoDispatcher(stimulus.lifespan,
+                    stimulus.backgroundColor, stimulus.src,
+                    stimulus.startTime)
+            }
+            break
         case STIMULUS.GRATING:
             if (stimulus.age === 0) {
                 gratingDispatcher(stimulus.lifespan, stimulus.width, stimulus.barColor, stimulus.backgroundColor,
@@ -62,6 +70,13 @@ function graphicsDispatcher() {
                     stimulus.speed, stimulus.angle,
                     sinusoidal=true)
                 // increment count by 1 after bar is dispatched
+            }
+            break
+        case STIMULUS.CHIRP:
+            if (stimulus.age === 0) {
+                chirpDispatcher(stimulus.lifespan, stimulus.f0,
+                    stimulus.f1, stimulus.a0, stimulus.a1,
+                    stimulus.t1, stimulus.phi)
             }
             break
         case STIMULUS.CHECKERBOARD:
@@ -108,13 +123,67 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
 
 function imageDispatcher(lifespan, backgroundColor, image,
                                 fixationPoint) {
+    let img = new Image()
+    // TODO test if deleting onload messes up image src on server
+    // img.onload = (event) => {
+    //     if (fixationPoint===undefined) {
+    //         fixationPoint = {x: img.width / 2, y: img.height / 2}
+    //     }
+    //     store.dispatch(setGraphicsAC([{
+    //             graphicType: GRAPHIC.IMAGE,
+    //             image: img,
+    //             fixationPoint: fixationPoint,
+    //             lifespan: lifespan,
+    //             age: 0
+    //     }]))
+    // }
+    if (typeof(image)==="string") {
+        // assume image src (get from server)
+        img.src = image
+    } else {
+        // TODO can this be deleted? Or maybe used for older letter rendering?
+        img = image
+    }
+
+    if (fixationPoint===undefined) {
+        // race condition?
+        fixationPoint = {x: img.width / 2, y: img.height / 2}
+    }
+
     store.dispatch(setGraphicsAC([{
             graphicType: GRAPHIC.IMAGE,
-            image: image,
+            image: img,
             fixationPoint: fixationPoint,
             lifespan: lifespan,
             age: 0
     }]))
+}
+
+function videoDispatcher(lifespan, backgroundColor, src, startTime) {
+    let video = document.createElement("video")
+    // add extra 1s to endTime to avoid loop to begining if expiration of stimulus happens late
+    const endTime = startTime + lifespan + 1
+    // construct media fragment to stream only desired clip
+    const timeStr = "#t=" + startTime + "," + endTime
+    video.src = src + timeStr
+    video.preload = "auto" // this means yes
+    video.autoPlay = false
+    video.loop = false
+    video.muted = true
+    // TODO might not run if cached..?
+    video.addEventListener('durationchange', (event) => {
+        const scale = Math.min(
+                             WIDTH / video.videoWidth,
+                             HEIGHT / video.videoHeight);
+
+        store.dispatch(setGraphicsAC([{
+                graphicType: GRAPHIC.VIDEO,
+                video: video,
+                scale: scale,
+                lifespan: lifespan,
+                age: 0
+        }]))
+    })
 }
 
 function tiledLetterDispatcher(lifespan, letter, size, padding, color, backgroundColor, angle) {
@@ -224,6 +293,28 @@ function gratingDispatcher(lifespan, width, barColor, backgroundColor, speed, an
     }))
 }
 
+function chirpDispatcher(lifespan, f0, f1, a0, a1, t1, phi) {
+    const scale = Math.cos(phi)
+    // stay centered around gray
+    const colorVal = Math.round(a0 * scale + 127.5)
+    const initColor = {r: colorVal, g: colorVal, b: colorVal}
+
+    store.dispatch(addGraphicAC({
+        graphicType: GRAPHIC.CHIRP,
+        f0: f0,
+        f1: f1,
+        a0: a0,
+        a1: a1,
+        t1: t1,
+        phi: phi,
+        color: rgbToHex(initColor),
+        // TODO remove
+        debug: "updated",
+        lifespan: lifespan,
+        age: 0
+    }))
+}
+
 function removeGraphicDispatcher(index) {
     store.dispatch(removeGraphicAC(index))
 }
@@ -269,6 +360,7 @@ function tickDispatcher(timeDelta) {
     // graphicsDispatcher will initialize graphics
     graphicsDispatcher()
     // graphicsTickAC will initialize correct position
+    // TODO should this really dispatch with non-zero timeDelta..?
     store.dispatch(graphicsTickAC(timeDelta))
     cleanupGraphicsDispatcher()
 }
@@ -288,6 +380,8 @@ function newStimulusDispatcher() {
         store.dispatch(incrementStimulusIndexAC())
         store.dispatch(setStimulusAC(nextStimulus.value))
         store.dispatch(setGraphicsAC([]))
+        // For debugging, may be useful to remove this such that stimulusQueue is not removed after being shown
+        store.dispatch(removeStimulusValueAC(stimulusIndex))
     }
 
 }
@@ -295,5 +389,18 @@ function newStimulusDispatcher() {
 async function queueStimulusDispatcher() {
     const stimulus = await nextStimulus()
     const stimulusIndex = stimulus.stimulusIndex
+    const preRenderHash = localStorage.getItem("preRenderHash")
+    let image
+    if (stimulus.value !== undefined &&
+        stimulus.value.image !== undefined &&
+        typeof(stimulus.value.image)==="number") {
+        // retrieve image from indexedDB
+        try {
+            image = await SimpleIDB.get(preRenderHash+"-render-"+stimulus.value.image)
+            stimulus.value.image = image
+        } catch (err) {
+            console.warn("Failed to get preRender: " + err)
+        }
+    }
     store.dispatch(addStimulusAC(stimulus, stimulusIndex))
 }

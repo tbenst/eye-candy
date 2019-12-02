@@ -65,6 +65,11 @@ function renderGrating(context, pattern, width, angle, position) {
 
 }
 
+function renderChirp(context, color) {
+    context.fillStyle = color
+    context.fillRect(0,0,WIDTH,HEIGHT)
+}
+
 
 function renderLetter(context, letter, size, color, x, y) {
     context.fillStyle = color
@@ -79,8 +84,23 @@ function renderImage(context, image, fixationPoint) {
     // console.log("renderImage image, fixationPoint:", image, fixationPoint)
     const deltaX = centerX - fixationPoint.x
     const deltaY = centerY - fixationPoint.y
-    // renders is a special client-side object
-    context.drawImage(renders[image], deltaX, deltaY)
+    context.drawImage(image, deltaX, deltaY)
+}
+
+function renderVideo(context, video, scale) {
+    if(video.paused){
+          video.play();
+    }
+    const centerX = WIDTH/2
+    const centerY = HEIGHT/2
+    var vidH = video.videoHeight/2;
+    var vidW = video.videoWidth/2;
+    // console.log("renderImage image, fixationPoint:", image, fixationPoint)
+    const left = centerX - vidW * scale
+    const top = centerY - vidH * scale
+    const width = 2*vidW * scale
+    const height = 2*vidH * scale
+    context.drawImage(video, left, top, width, height)
 }
 
 function renderBackground(color) {
@@ -90,6 +110,7 @@ function renderBackground(color) {
 }
 
 function render(state) {
+    console.log("started render")
     context.clearRect(0, 0, WIDTH, HEIGHT)
 
     context.save()
@@ -114,15 +135,23 @@ function render(state) {
             case GRAPHIC.SINUSOIDAL_GRATING:
                 renderGrating(context, graphic.pattern, graphic.width, graphic.angle, graphic.position)
                 break
+            case GRAPHIC.CHIRP:
+                renderChirp(context, graphic.color)
+                break
             case GRAPHIC.LETTER:
                 renderLetter(context, graphic.letter, graphic.size,
                              graphic.color, graphic.x, graphic.y)
                 break
             case GRAPHIC.IMAGE:
                 renderImage(context, graphic.image, graphic.fixationPoint)
+                    break
+            case GRAPHIC.VIDEO:
+                renderVideo(context, graphic.video, graphic.scale)
+                break
         }
         context.restore()
     })
+    console.log("finished render")
 }
 
 var lastTime

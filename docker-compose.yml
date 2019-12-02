@@ -1,13 +1,22 @@
 web:
   restart: always
   build: .
-  command: node --harmony src/app.js
-  ports:
-   - "3000:3000"
+  command: node --max-old-space-size=8192 --harmony src/app.js
   volumes:
    - /data/eye-candy:/data
-  #  - .:/web
+   - ./web/programs:/www/programs
   links:
    - redis
 redis:
   image: redis
+nginx:
+  image: nginx
+  ports:
+    - "3000:80"
+  volumes:
+    - ./nginx-conf:/etc/nginx/conf.d
+    - ./web/static:/www
+    - /data/eye-candy/videos:/www/videos
+    - /data/eye-candy/images:/www/images
+  links:
+    - web

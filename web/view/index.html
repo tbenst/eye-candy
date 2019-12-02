@@ -2,11 +2,11 @@
 <html>
 <head>
   <title>Eye Candy</title>
+  <link rel="stylesheet" type="text/css" href="css/index.css">
   <script src="js/socket.io.js"></script>
 </head>
 <body>
 
-<!-- <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> -->
 <h1>Eye Candy</h1>
 <a href="/stimulus.html">Open Stimulus in new window first</a><br>
 <a href="/flicker.html">Open Flicker in new window first</a><br>
@@ -99,52 +99,45 @@ Toggle Required
     <!-- <input type="radio" name="programType" value="javascript"> Javascript<br> -->
 
     Seed: <input type="number" name="seed" min="0" class="required"
-                  value="<%- Math.floor(Math.random() * 2147483647) %>"><br>
+                 value="<%- Math.floor(Math.random() * 2147483647) %>"><br>
 
     Program:
-    <select name="program">
-      <option value="acuity">Acuity</option>
-      <option value="acuity-with-flashes">Acuity with Flashes</option>
-      <option value="checkerboard">Checkerboard</option>
-      <option value="checkerboard-contrast">Checkerboard-contrast</option>
-      <option value="checkerboard-durations">Checkerboard-durations</option>
-      <option value="checkerboard-flicker">Checkerboard-flicker</option>
-      <!-- <option value="eyechart-balanced">Eyechart - Balanced</option> -->
-      <option value="eyechart-saccade">Eyechart - Saccade</option>
-      <option value="grating">Grating</option>
-      <option value="grating-durations">Grating-durations</option>
-      <option value="grating-sinusoidal-durations">Grating-sinusoidal-durations</option>
-      <option value="grating-sinusoidal">Grating-sinusoidal</option>
-      <option value="grating-speeds">Grating-speeds</option>
-      <option value="grating-sinusoidal-speeds">Grating-sinusoidal-speeds</option>
-      <option value="grating-contrast">Grating-contrast</option>
-      <option value="grating-sinusoidal-contrast">Grating-sinusoidal-contrast</option>
-      <option value="grating-vs-gray">Grating-vs-gray</option>
-      <option value="kinetics">Kinetics</option>
-      <option value="letters">Letters</option>
-      <option value="letters-inverted">Letters-inverted</option>
-      <option value="letters-tiled">Letters - Tiled</option>
-      <option value="letters-saccade">Letters - Saccade</option>
-      <option value="wedge">Wedge</option>
-      <option value="custom">Custom</option>
+    <select name="program" onchange="programSelection()">
+      <% for (let file of programChoices) {%>
+        <option value=<%= file %> > <%= file %> </option>
+      <% } %>
+      <option value="video">video</option>
+      <option value="custom">custom</option>
+    </select>
+
+    <select name=video hidden>
+      <% for (let file of videoChoices) {%>
+        <option value=<%= file %> > <%= file %> </option>
+      <% } %>
     </select>
   <input type="submit" name="submitButton" value="view source code"><br>
-
+  <div id="customBox" hidden>
     Custom program:<br>
     <textarea name="epl" cols="60" rows="20"></textarea><br>
+  </div>
   <button type="button" id="load" onclick="JavaScript: loadButton()">
   Load
   </button>
   <input type="submit" name="submitButton" value="start", disabled="">
   <input type="submit" name="submitButton" value="preview", disabled="">
   <input type="submit" name="submitButton" value="estimate-duration", disabled="">
-  <input type="submit" name="submitButton" value="video", disabled="">
+  <input type="submit" name="submitButton" value="save-video", disabled="">
 </form>
 <button type="button" onclick="JavaScript: resetButton()">
 Reset
 </button>
 
 <a href="/examples.html">Examples</a><br>
+
+<div id="loadProgress">
+  <div id="loadBar"></div>
+</div>
+
 <!-- <button type="button" onclick="JavaScript: targetButton()">
 Target
 </button>

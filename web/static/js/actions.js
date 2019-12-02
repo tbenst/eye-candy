@@ -9,6 +9,7 @@ const SET_STATUS = "SET_STATUS"
 const SET_STIMULUS = "SET_STIMULUS"
 const SET_STIMULUS_QUEUE = "SET_STIMULUS_QUEUE"
 const ADD_STIMULUS = "ADD_STIMULUS"
+const REMOVE_STIMULUS_VALUE = "REMOVE_STIMULUS_VALUE"
 const INCREMENT_STIMULUS_INDEX = "INCREMENT_STIMULUS_INDEX"
 const SET_GRAPHICS = "SET_GRAPHICS"
 const ADD_GRAPHIC = "ADD_GRAPHIC"
@@ -23,6 +24,7 @@ const STATUS = {
     STOPPED: "STOPPED",
     FINISHED: "FINISHED",
     DEBUG: "DEBUG",
+    // TODO: change name of VIDEO to something like STARTED_SAVEVID
     VIDEO: "VIDEO"
 }
 
@@ -32,9 +34,11 @@ const SIGNAL_LIGHT = {
     STOPPED: "STOPPED"
 }
 
+// warning: must edit epl types, too
 const STIMULUS = {
     BAR: "BAR",
     SOLID: "SOLID",
+    CHIRP: "CHIRP",
     WAIT: "WAIT",
     TARGET: "TARGET",
     GRATING: "GRATING",
@@ -43,6 +47,7 @@ const STIMULUS = {
     LETTER: "LETTER",
     TILED_LETTER: "TILED_LETTER",
     IMAGE: "IMAGE",
+    VIDEO: "VIDEO",
     EYECHART: "EYECHART"
 }
 
@@ -61,11 +66,13 @@ const LETTER = {
 
 const GRAPHIC = {
     BAR: "BAR",
+    CHIRP: "CHIRP",
     PATTERN: "PATTERN",
     GRATING: "GRATING",
     TARGET: "TARGET",
     LETTER: "LETTER",
-    IMAGE: "IMAGE"
+    IMAGE: "IMAGE",
+    VIDEO: "VIDEO"
 }
 
 /***********************************************
@@ -111,6 +118,10 @@ function removeGraphicAC(index) {
 
 function addStimulusAC(stimulus, index) {
     return { type: ADD_STIMULUS, stimulus: stimulus, index: index }
+}
+
+function removeStimulusValueAC(index) {
+    return { type: REMOVE_STIMULUS_VALUE, index: index }
 }
 
 function graphicsTickAC(timeDelta) {

@@ -1,4 +1,4 @@
-const MT = require("mersennetwister")
+const MT = MersenneTwister
 
 class DeterministicRandom {
     constructor(seed) {
@@ -48,5 +48,3 @@ class DeterministicRandom {
         return u
     }
 }
-
-exports.DeterministicRandom = DeterministicRandom

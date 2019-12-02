@@ -7,7 +7,6 @@ var assert = require('assert');
 const path = require("path")
 const co = require("co");
 const render = require("koa-ejs");
-const serve = require("koa-static");
 const convert = require("koa-convert");
 const IO = require( "koa-socket" )
 const koaSocketSession = require("koa-socket-session")
@@ -21,16 +20,61 @@ var cp = require('child_process');
 
 const random = require("./epl/random")
 const {compileYAMLProgram, compileJSProgram} = require("./epl/eval")
+const {DATADIR} = require('./vars.js')
 
-const DATADIR = "/data/"
+console.log("DATADIR: " + DATADIR)
+
+GIT_SHA = fs.readFileSync(
+	'/www/git-sha',
+	"utf-8").replace(/\n$/, '')
 
 const app = new Koa();
 app.use(logger())
+
+N_INIT_STIMULUS_QUEUE = 25
 
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
   // application specific logging, throwing an error, or other logic here
 });
+
+// VM2 ERROR HANDLING (per https://github.com/patriksimek/vm2/issues/87)
+// can remove after pull request is merged
+const StackTracey = require ('stacktracey');
+const sourceCode = `function f() {
+	throw Exception('e');
+}
+f();`;
+const scriptName = "epl.js";
+
+process.on("uncaughtException",  e => {
+	if (!e.stack.includes("/node_modules/vm2/")) {
+		// This is not a vm2 error, so print it normally
+		console.log(e);
+		return;
+	}
+	const oldStack = new StackTracey(e);
+	const newStack = [];
+	for (const line of oldStack) {
+		// Discard internal code
+		if (line.file.includes("/cjs"))
+			continue;
+		if (line.thirdParty && line.file.includes("/node_modules/vm2/"))
+			continue;
+		if (line.callee == "Script.runInContext")
+			continue;
+		// Replace the default filename with the user-provided one
+		if (line.fileName == "vm.js")
+			line.fileRelative = line.fileShort = line.fileName = scriptName;
+		newStack.push(line);
+	}
+	console.log("[vm2] A clean stack trace follows:");
+	console.log(new StackTracey(newStack).pretty);
+});
+
+// END ERROR HANDLING
+
+
 
 const io = new IO()
 const store = new redisStore({host: "redis"})
@@ -112,6 +156,7 @@ function makeLabNotebook(labNotebook) {
     labNotebook.date = date
     labNotebook.version = 0.5
     labNotebook.flickerVersion = 0.3
+    labNotebook.gitSHA = GIT_SHA
 
     console.log("labNotebook", labNotebook)
     return "---\n" + yaml.safeDump(labNotebook)
@@ -120,7 +165,7 @@ function makeLabNotebook(labNotebook) {
 function initStimulusQueue(prog) {
     let stimulusQueue = []
     assert(prog!==undefined, "No program found")
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < N_INIT_STIMULUS_QUEUE; i++) {
         stimulusQueue.push(prog.next())
     }
     console.log(stimulusQueue)
@@ -135,17 +180,7 @@ router.post("/start-program", ctx => {
     console.log('start program sid:', sid)
     assert(sid!==undefined, "assert sid is not undefined")
 
-    if (labNotebook.program==="custom") {
-        // program already loaded in labNotebook.epl
-    } else {
-        // this is likely a security vulnerability but sure is convenient
-        // convention over customization
-        labNotebook.epl = fs.readFileSync(
-            '/www/src/programs/'+labNotebook.program+'.js',
-            "utf-8")
-    }
-    // program[sid] = compileJSProgram(labNotebook.epl, labNotebook.seed, session.windowHeight,
-    //     session.windowWidth)
+    labNotebook.epl = program[sid].epl
 
     if (submitButton==="start") {
         console.log("start program")
@@ -159,11 +194,19 @@ router.post("/start-program", ctx => {
             ctx.body=ctx.body+JSON.stringify(s.value)+"\n"
             s = program[sid].next()
         }
-    } else if (submitButton==="video") {
+    } else if (submitButton==="save-video") {
         console.log("start video")
         let stimulusQueue = initStimulusQueue(program[sid])
         io.broadcast("video", stimulusQueue)
         ctx.body = makeLabNotebook(labNotebook)
+		// init folders / logs
+		let vidname, stream
+		vidname = DATADIR + "renders/" + (new Date().toISOString())
+		fs.mkdirSync(vidname, { recursive: true })
+		program_vid_name[sid] = vidname
+		stream = fs.createWriteStream(vidname+".txt", {flags:'a'})
+		program_log[sid] = stream
+		stream.write("frame_number,time,stimulus_index,error\n")
     } else if (submitButton==="estimate-duration") {
         let s = program[sid].next()
         let lifespan = 0
@@ -252,9 +295,7 @@ router.get("/analysis/run/:sid", ctx => {
     ctx.status = 200
 })
 
-
 app
-    .use(serve("static"))
     .use(router.routes())
     .use(router.allowedMethods());
 
@@ -263,13 +304,19 @@ render(app, {
     layout: false,
     viewExt: "html",
     cache: false,
-    debug: true
+    debug: false
 });
 
 app.context.render = co.wrap(app.context.render);
 
 app.use(async (ctx, next) => {
-    await ctx.render("index");
+
+    const programChoices = fs.readdirSync("/www/programs/").map(s => s.slice(0, -3))
+    let videoChoices = fs.readdirSync(DATADIR+"videos/")
+    await ctx.render("index", {
+        programChoices,
+        videoChoices
+    });
 });
 
 // IO
@@ -309,6 +356,7 @@ io.on("reset", (ctx, data) => {
     const sid = data.sid
     io.broadcast("reset")
     delete program[sid]
+    cleanupRender(sid, deleteDir=false)
 })
 
 io.on("load", (ctx, data) => {
@@ -323,11 +371,18 @@ io.on("load", (ctx, data) => {
     console.log(windowHeight, windowWidth)
     if (eplProgram==="custom") {
         // program already loaded in epl
+    } else if (eplProgram=="video") {
+        // TODO create basic EPL program
+        const regex = /\$\{VID\_SRC\}/gi;
+        const videoSrc = data.video
+        epl = fs.readFileSync(
+            '/www/programs/templates/single-video.js',
+            "utf-8").replace(regex, "videos/" + videoSrc)
     } else {
         // this is likely a security vulnerability but sure is convenient
         // convention over customization
         epl = fs.readFileSync(
-            '/www/src/programs/'+eplProgram+'.js',
+            '/www/programs/'+eplProgram+'.js',
             "utf-8")
     }
     console.log("socket 'load': compiling for sid", sid)
@@ -343,7 +398,7 @@ io.on("load", (ctx, data) => {
 io.on("renderResults", (ctx, data) => {
     console.log("socket 'renderResults'")
     const sid = data.sid
-    program[sid].initialize(data.renderResults)
+    program[sid].initialize()
     io.broadcast("enableSubmitButton")
 })
 
@@ -351,35 +406,32 @@ io.on("target", ctx => {
     console.log("socket 'target'")
     io.broadcast("target")
 })
+
 // ctx.session.on("error", function (err) {
 //     console.log("Redis error " + err);
 // });
 
 io.on("addFrame", (ctx, data) => {
     const sid = data.sid
-    let vidname, stream
-    if (program_vid_name[sid]===undefined) {
-        vidname = DATADIR + (new Date().toISOString())
-        fs.mkdirSync(vidname)
-        program_vid_name[sid] = vidname
-        stream = fs.createWriteStream(vidname+".txt", {flags:'a'})
-        program_log[sid] = stream
-        stream.write("frame_number,time,stimulus_index\n")
-    } else {
-        vidname = program_vid_name[sid]
-        stream = program_log[sid]
-    }
-    const png = data.png.replace(/^data:image\/png;base64,/, "")
+    let vidname = program_vid_name[sid]
+    let stream = program_log[sid]
+    const png = data.png
+		// data.png.replace(/^data:image\/png;base64,/, "")
     var filename = sprintf('image-%010d.png', data.frameNum);
     // const filename = "s="+data.stimulusIndex + ",t=" + data.time+'.png'
-    stream.write(data.frameNum+","+data.time+","+data.stimulusIndex+"\n")
-    fs.writeFileSync(vidname+"/"+filename, png, 'base64', (error) => {
+    fs.writeFile(vidname+"/"+filename, png, 'base64', (error) => {
         if (error) {
             console.error('Error saving frame:', error.message)
+            stream.write(data.frameNum+","+data.time+","+data.stimulusIndex+",1\n")
             throw(error)
+        } else {
+            stream.write(data.frameNum+","+data.time+","+data.stimulusIndex+",0\n")
+
         }
     })
 })
+
+io.broadcast("play-video", {})
 
 var deleteFolderRecursive = function(path) {
     // https://stackoverflow.com/questions/18052762/remove-directory-which-is-not-empty
@@ -397,45 +449,66 @@ var deleteFolderRecursive = function(path) {
 };
 
 function cleanupRender(sid, deleteDir=true) {
+    if (sid in program_vid_name) {
+        let vidname = program_vid_name[sid]
+        delete program_vid_name[sid]
+        if (deleteDir) {deleteFolderRecursive(vidname)}
+    } else {
+        console.log("Warning: asked to delete sid:", sid, "but this is not found in program_vid_name");
+    }
+    if (sid in program_log) {
+        program_log[sid].end()
+        delete program_log[sid]
+    } else {
+        console.log("Warning: asked to delete sid:", sid, "but this is not found in program_log");
+
+    }
+
+}
+
+function sleep(ms){
+    return new Promise(resolve=>{
+        setTimeout(resolve,ms)
+    })
+}
+
+async function saveVideo(sid) {
     let vidname = program_vid_name[sid]
     let stream = program_log[sid]
-    if (deleteDir) {deleteFolderRecursive(vidname)}
-    program_log[sid].end()
-    delete program_log[sid]
-    delete program_vid_name[sid]
-
+    // TODO add condition to wait for frames??
+    // horrible hack, race condition!!!
+    await sleep(10000)
+    var ffmpeg = cp.spawn('ffmpeg', [
+        '-framerate', '60',
+        '-start_number', '0',
+        '-i', vidname+'/image-%010d.png',
+        '-refs', '6',
+        '-c:v', 'libx264',
+        '-pix_fmt', 'yuv444p',
+        '-preset', 'veryslow',
+        '-crf', '18',
+        vidname + '.mp4'
+    ])
+    ffmpeg.on('error', function(error) {
+        console.error('Error starting FFmpeg:', error.message);
+        cleanupRender(sid, deleteDir=false)
+    });
+    ffmpeg.on('close', function(code) {
+        if (code !== 0) {
+            console.log('FFmpeg process closed with code', code);
+            cleanupRender(sid, deleteDir=false)
+        } else {
+            console.log('Finished rendering video. You can find it at ' + vidname + '.mp4')
+            cleanupRender(sid)
+        }
+    })
 }
 
 io.on("renderVideo", (ctx, data) => {
     // TODO: THIS IS A RACE CONDITION! stream write could come in slowly
     const sid = data.sid
-    let vidname = program_vid_name[sid]
-    let stream = program_log[sid]
     console.log("Rendering your video. This might take a long time...")
-    var ffmpeg = cp.spawn('ffmpeg', [
-      '-framerate', '60',
-      '-start_number', '0',
-      '-i', vidname+'/image-%010d.png',
-      '-refs', '6',
-      '-c:v', 'libx264',
-      '-pix_fmt', 'yuv444p',
-      '-preset', 'veryslow',
-      '-crf', '18',
-      vidname + '.mp4'
-    ])
-    ffmpeg.on('error', function(error) {
-      console.error('Error starting FFmpeg:', error.message);
-      cleanupRender(sid, deleteDir=false)
-    });
-    ffmpeg.on('close', function(code) {
-      if (code !== 0) {
-        console.log('FFmpeg process closed with code', code);
-        cleanupRender(sid, deleteDir=false)
-      } else {
-        console.log('Finished rendering video. You can find it at ' + vidname + '.mp4')
-        cleanupRender(sid)
-      }
-    })
+    saveVideo(sid)
 })
 
 

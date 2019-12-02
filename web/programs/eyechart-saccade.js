@@ -65,7 +65,7 @@ function twoLetterMatrices(nrows) {
         for (var j = 0; j < ncols; j++) {
             firstLetterMatrix[i][j] = newLetters[j]
             secondLetterMatrix[i][j] = newLetters[j+5]
-            
+
             cohortMatrix[i][j] = cohortID
         }
     }
@@ -93,7 +93,7 @@ function calcFixationPoints(sizes, ncols) {
     let rowWidth
     for (var i = 0; i < nrows; i++) {
         size = sizes[i]
-        y = y + 2*size 
+        y = y + 2*size
 
         rowWidth = (2*ncols+1) * size
         if (i==0) {
@@ -135,7 +135,7 @@ for (var rep = 0; rep < repetitions; rep++) {
 
 // special function for pre-rendering. This is passed as a string
 // and run client-side
-function preRenderFunc(sizes, reps, ncols, color, letterTensor,
+function* preRenderFunc(nFrames, sizes, reps, ncols, color, letterTensor,
         fixationPoints) {
 
 
@@ -186,18 +186,16 @@ function preRenderFunc(sizes, reps, ncols, color, letterTensor,
 
     let nrows = sizes.length
     let eyecharts = []
-    
+
     for (var i = 0; i < letterTensor.length; i++) {
         // console.log("letterTensor[i]", letterTensor[i])
         let image = renderEyechart(sizes, ncols, letterTensor[i], color)
-        eyecharts.push(image)
+        yield image
     }
-    return {renders: eyecharts,
-            yield: {}}
 }
 
 // special object for pre-rendering
-const preRenderArgs = [sizes, repetitions, ncols, color, letterTensor, fixationPoints]
+const preRenderArgs = [letterTensor.length, sizes, repetitions, ncols, color, letterTensor, fixationPoints]
 
 function* gen() {
     let letterMatrix, cohort, id, letter
@@ -221,7 +219,7 @@ function* gen() {
 }
 
 // TODO add integrity
-function* stimulusGenerator(renderResults) {
+function* stimulusGenerator() {
     for (let s of measureIntegrity(gen())) {
         yield s
     }

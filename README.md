@@ -15,16 +15,21 @@ Programs are written in the Eyecandy programming language (EPL), a domain specif
 Example programs can be found in [src/epl/programs](https://github.com/tbenst/eye-candy/tree/master/web/src/programs).
 
 
-# Dev notes:
+# Handshake overview:
 Client stimulus.html POST '/hello'
-    gets SID & stores in localStorage b/c cookies get HTTPOnly flag set for no apparent reason
+    gets SID & stores in localStorage b/c cookies get HTTPOnly flag set for no apparent reason and we need to use SID in socket connection, too.
 Client stimulus.html POST '/window'
-    sets `windows[sid]`
+    sets `windows[sid]` (keeps track of height and width)
 Client index.html socket 'load'
     compiles js to `program[sid]` in vm
 Server socket emit 'pre-render'
+    The server cannot render, so asks the client to pre-render
 Client socket emit 'renderResults'
+    client returns pre-render results
 Client index.html POST '/start-program'
+    client informs server of start program button press
+Server socket emit 'run'
+stimulus.js renderLoop does its thing
 
 
 # How to add a new stimulus
@@ -45,6 +50,16 @@ Or by using Image type, can just define in EPL preRenderFunc! See eyechart-sacca
 ## TODOs
 replace koa-socket-session with something better supported (1.2.0 fails)
 update to koa-socket-2
+- Chunk number of stimmuli returned by server to lower number of requsets
+- fix black frame between binary static by buffering one frame & first swapping canvas on rAF and then rendering next frame to off-frame
+
+### video
+- Always save video
+- support client-side image specification
+
+### BUGS
+- fix race condition on video save (wait for all frames to be received)
+- Stimulus should change on global timer (no increasing drift from estimate, make sure not adding frame on stim switch?)
 
 ## minified src:
 https://github.com/ramda/ramda/blob/master/dist/ramda.min.js
