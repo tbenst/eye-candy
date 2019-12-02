@@ -57,10 +57,10 @@ const storeInitialState = {
 
 
 // USE THIS FOR NO LOGGER
-let store = createStore(eyeCandyApp, storeInitialState)
+// let store = createStore(eyeCandyApp, storeInitialState)
 
 // USE THIS FOR LOGGER
-// let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
+let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
 
 // GET FROM SERVER (NOT OPERATIONAL)
 // let store = createStore(todoApp, window.STATE_FROM_SERVER)
@@ -195,6 +195,9 @@ async function checkPreRenders(preRenderHash) {
 
 }
 
+const loadBarChannel = new BroadcastChannel('loadProgress');
+
+
 socket.on("pre-render", async (preRender) => {
     // TODO dangerous, insecure
     // but hey, it's science!
@@ -206,18 +209,21 @@ socket.on("pre-render", async (preRender) => {
     // TODO should be in store...
     const preRenderHash = await hashPreRenders(preRender.args)
     localStorage.setItem("preRenderHash", preRenderHash)
-    const nFrames = await SimpleIDB.get(preRenderHash + "-nframes")
+    const cachedNframes = await SimpleIDB.get(preRenderHash + "-nframes")
     const renderPrefix = preRenderHash + "-render-"
     const keys = await SimpleIDB.getKeysWithPrefix(renderPrefix)
-    console.log("keys, value, nFrames", keys, nFrames)
-    let preRenderIsCached = keys.length == nFrames
+    console.log("keys, value, cachedNframes", keys, cachedNframes)
+    let preRenderIsCached = keys.length == cachedNframes
     if (!preRenderIsCached) {
         eval(preRender.func)
         console.log("finished preRender func eval, about to render...")
+        let nFrames = preRender.args[0] // by convention
         let renderGenerator = preRenderFunc(...preRender.args)
         let renderItem = renderGenerator.next()
         let render = renderItem.value
         let n = 0
+        const bc = new BroadcastChannel('loadProgress');
+
         while ( renderItem.done===false) {
             // note: assumes that render is a canvas
             // localStorage.setItem("render-"+n, render.toDataURL())
@@ -230,6 +236,8 @@ socket.on("pre-render", async (preRender) => {
             renderItem = renderGenerator.next()
             render = renderItem.value
             n++
+            console.log("loadProgress (stim)", n/nFrames)
+            loadBarChannel.postMessage(100*n/nFrames)
         }
         try {
             await SimpleIDB.set(preRenderHash + "-nframes", n)
@@ -239,6 +247,7 @@ socket.on("pre-render", async (preRender) => {
         console.log("finished render")
     } else {
         console.log("using preRender cache")
+        loadBarChannel.postMessage(100)
     }
 
     socket.emit("renderResults", {sid: localStorage.getItem('sid')})
@@ -249,6 +258,7 @@ socket.on("reset", () => {
     console.log("socket 'reset'")
     // TODO next line causes TypeError: document.querySelector(...) is null on reset
     store.dispatch(resetAC())
+    loadBarChannel.postMessage(0)
 
     // remove preRenders
     // SimpleIDB.clearAll()

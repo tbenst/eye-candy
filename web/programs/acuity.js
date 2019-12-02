@@ -94,7 +94,7 @@ function* preRenderFunc(binaryNoiseNframes, randomSeed) {
 }
 
 // special object for pre-rendering
-const binaryNoiseDuration = 1*60
+const binaryNoiseDuration = 5*60
 const frameRate = 60
 const hz = 5
 const binaryNoiseLifespan = 1 / hz

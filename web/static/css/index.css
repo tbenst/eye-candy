@@ -1,0 +1,10 @@
+#loadProgress {
+  width: 30em;
+  background-color: grey;
+}
+
+#loadBar {
+  width: 0%;
+  height: 30px;
+  background-color: green;
+}

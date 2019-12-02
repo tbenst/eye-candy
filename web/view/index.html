@@ -2,11 +2,11 @@
 <html>
 <head>
   <title>Eye Candy</title>
+  <link rel="stylesheet" type="text/css" href="css/index.css">
   <script src="js/socket.io.js"></script>
 </head>
 <body>
 
-<!-- <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> -->
 <h1>Eye Candy</h1>
 <a href="/stimulus.html">Open Stimulus in new window first</a><br>
 <a href="/flicker.html">Open Flicker in new window first</a><br>
@@ -133,6 +133,11 @@ Reset
 </button>
 
 <a href="/examples.html">Examples</a><br>
+
+<div id="loadProgress">
+  <div id="loadBar"></div>
+</div>
+
 <!-- <button type="button" onclick="JavaScript: targetButton()">
 Target
 </button>

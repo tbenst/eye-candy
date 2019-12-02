@@ -110,6 +110,7 @@ function renderBackground(color) {
 }
 
 function render(state) {
+    console.log("started render")
     context.clearRect(0, 0, WIDTH, HEIGHT)
 
     context.save()
@@ -150,6 +151,7 @@ function render(state) {
         }
         context.restore()
     })
+    console.log("finished render")
 }
 
 var lastTime

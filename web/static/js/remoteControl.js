@@ -11,7 +11,7 @@ function resetButton() {
     document.querySelector(
         "input[name=submitButton][value=estimate-duration]").disabled = true
     document.querySelector(
-        "input[name=submitButton][value=video]").disabled = true
+        "input[name=submitButton][value=save-video]").disabled = true
     document.querySelector(
         "#load").disabled = false
 
@@ -47,7 +47,7 @@ function loadButton() {
     document.querySelector(
         "input[name=submitButton][value=estimate-duration]").disabled = true
     document.querySelector(
-        "input[name=submitButton][value=video]").disabled = true
+        "input[name=submitButton][value=save-video]").disabled = true
 
     document.querySelector(
         "#load").disabled = true
@@ -96,7 +96,7 @@ function programSelection() {
     }
     document.querySelector(
         "button#load").disabled = false
-    document.querySelector("select[name=save-video]").hidden = true
+    document.querySelector("select[name=video]").hidden = true
     if (showSource) {
         document.querySelector("input[value='view source code']").hidden = false
     }
@@ -115,3 +115,10 @@ socket.on("enableSubmitButton", () => {
     document.querySelector(
         "#load").disabled = false
 })
+
+const bc = new BroadcastChannel('loadProgress');
+bc.onmessage = msg => {
+    const x = msg.data
+    const loadBar = document.getElementById("loadBar");
+    loadBar.style.width = x + "%"
+}

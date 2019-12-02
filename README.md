@@ -51,11 +51,7 @@ Or by using Image type, can just define in EPL preRenderFunc! See eyechart-sacca
 replace koa-socket-session with something better supported (1.2.0 fails)
 update to koa-socket-2
 - Chunk number of stimmuli returned by server to lower number of requsets
-- cache preRender frames + reuse (checkbox for reuse cache?) Can shuffle order of frames...
-- Can cache render based on "render-SEED-n"
-- show live load progress
 - fix black frame between binary static by buffering one frame & first swapping canvas on rAF and then rendering next frame to off-frame
-- fix preRenderFunc for eyechartSaccade and letters-saccade
 
 ### video
 - Always save video

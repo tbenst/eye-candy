@@ -360,6 +360,7 @@ function tickDispatcher(timeDelta) {
     // graphicsDispatcher will initialize graphics
     graphicsDispatcher()
     // graphicsTickAC will initialize correct position
+    // TODO should this really dispatch with non-zero timeDelta..?
     store.dispatch(graphicsTickAC(timeDelta))
     cleanupGraphicsDispatcher()
 }

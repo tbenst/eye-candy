@@ -26,7 +26,7 @@ console.log("DATADIR: " + DATADIR)
 
 GIT_SHA = fs.readFileSync(
 	'/www/git-sha',
-	"utf-8")
+	"utf-8").replace(/\n$/, '')
 
 const app = new Koa();
 app.use(logger())

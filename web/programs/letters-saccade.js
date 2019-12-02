@@ -50,7 +50,7 @@ let letters = ["C", "D", "H", "K", "N", "O", "R", "S", "V", "Z"]
 
 // special function for pre-rendering. This is passed as a string
 // and run client-side
-function preRenderFunc(sizes, letters, color) {
+function* preRenderFunc(nFrames, sizes, letters, color) {
     console.log("In preRender...")
     function renderLetter(size, letter, color) {
         var canvas = document.createElement("canvas");
@@ -78,15 +78,19 @@ function preRenderFunc(sizes, letters, color) {
             // console.log(i, j)
             s = sizes[j]
             image = renderLetter(s, l, color)
-            idx = i*nsizes + j
-            renderedLetters[idx] = image
+            // commented out for switch to
+            // generator function
+            // I think still correct as row-major
+            // idx = i*nsizes + j
+            // renderedLetters[idx] = image
+            yield image
         }
     }
-    return {renders: renderedLetters}
 }
 
 // special object for pre-rendering
-const preRenderArgs = [sizes, letters, color]
+const nFrames = letters.length * sizes.length
+const preRenderArgs = [nFrames, sizes, letters, color]
 
 let size, letter, idx, fixationPoint, id, cohort, before, after, l, group, x, y
 let stimuli = []
