@@ -49,6 +49,10 @@ function loadButton() {
     document.querySelector(
         "input[name=submitButton][value=save-video]").disabled = true
 
+    // reset doesn't work during pre-render
+    document.querySelector(
+        "#reset").disabled = true
+
     document.querySelector(
         "#load").disabled = true
 
@@ -112,6 +116,8 @@ socket.on("enableSubmitButton", () => {
         "input[name=submitButton][value=estimate-duration]").disabled = false
     document.querySelector(
         "input[name=submitButton][value=save-video]").disabled = false
+    document.querySelector(
+        "#reset").disabled = false
     document.querySelector(
         "#load").disabled = false
 })

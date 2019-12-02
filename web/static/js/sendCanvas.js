@@ -7,11 +7,9 @@ function canvasToBlob(canvas) {
 }
 
 function sendFrame(canvas, frameNum, time, stimulusIndex) {
+    // toDataURL takes 14-65ms!!! hence this version
     canvasToBlob(canvas).then(blob => {
         socket.emit('addFrame',
-            // TODO: toDataURL is taking 14-65ms!!!
-            // {sid: localStorage.getItem('sid'), png: canvas.toDataURL(), frameNum: frameNum, time: time, stimulusIndex: stimulusIndex})
-            // {sid: localStorage.getItem('sid'), png: canvas.toDataURL(), frameNum: frameNum, time: time, stimulusIndex: stimulusIndex})
             {sid: localStorage.getItem('sid'), png: blob, frameNum: frameNum, time: time, stimulusIndex: stimulusIndex})
     })
 }
