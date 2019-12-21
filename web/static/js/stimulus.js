@@ -168,25 +168,23 @@ socket.on("video", async (stimulusQueue) => {
     store.dispatch(setStatusAC(STATUS.VIDEO))
 })
 
-async function sha256(message) {
-    // encode as UTF-8
-    const msgBuffer = new TextEncoder('utf-8').encode(message);
-
-    // hash the message
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-
-    // convert ArrayBuffer to Array
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-
-    // convert bytes to hex string
-    const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
-    return hashHex;
+function hashCode(string) {
+    var hash = 0;
+    if (string.length == 0) {
+        return hash;
+    }
+    for (var i = 0; i < string.length; i++) {
+        var char = string.charCodeAt(i);
+        hash = ((hash<<5)-hash)+char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
 }
 
-async function hashPreRenders(args) {
+function hashPreRenders(args) {
     const height = store.getState()["windowHeight"]
     const width = store.getState()["windowWidth"]
-    const hash = await sha256(height+"_"+width+"_"+args)
+    const hash = hashCode(height+"_"+width+"_"+args)
     return hash
 }
 
@@ -200,7 +198,7 @@ const loadBarChannel = new BroadcastChannel('loadProgress');
 
 socket.on("pre-render", async (preRender) => {
     // TODO should be in store...
-    const preRenderHash = await hashPreRenders(preRender.args)
+    const preRenderHash = hashPreRenders(preRender.args)
     localStorage.setItem("preRenderHash", preRenderHash)
     const cachedNframes = await SimpleIDB.get(preRenderHash + "-nframes")
     const renderPrefix = preRenderHash + "-render-"
