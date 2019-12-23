@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Eye Candy</title>
+  <link rel="stylesheet" type="text/css" href="css/index.css">
+  <script src="js/socket.io.js"></script>
+</head>
+<body>
+
+<h1>Eye Candy</h1>
+<a href="/stimulus.html">Open Stimulus in new window first</a><br>
+<a href="/flicker.html">Open Flicker in new window first</a><br>
+
+<button type="button" onclick="JavaScript: toggleRequired()">
+Toggle Required
+</button>
+
+<form action="/start-program" method="post" id="stimulus">
+  <h2>Study</h2>
+    Affiliation:
+    <input type="text" name="affiliation" value="University of Washington Medicine" class="required"><br>
+    Lab:
+    <input type="text" name="lab" value="Van Gelder Lab" class="required"><br>
+    People:
+    <input type="text" name="people" value="Tyler Benster, Darwin Babino" class="required"><br>
+    Purpose:
+    <input type="text" name="purpose"><br>
+
+  <h2>Animal</h2>
+
+    Animal Number:
+    <input type="number" name="mouseNumber" min="1" value="1" class="required"><br>
+
+    Species:
+    <input type="text" name="species" value="mouse" class="required"><br>
+
+    Type (mel, melrd, black6, black6rd, gnat1gnat2mel):<br>
+    <input type="text" name="mouseType" class="required"><br>
+
+    Date of birth (YYYY/MM/DD):<br>
+    <input type="date" name="birthdate"><br>
+
+    Gender:
+    <input type="radio" name="gender" value="male"> Male
+    <input type="radio" name="gender" value="female"> Female<br>
+
+  <h2>Retina</h2>
+
+    Eye:
+    <input type="radio" name="eye" value="left"> Left
+    <input type="radio" name="eye" value="right"> Right
+    <input type="radio" name="eye" value="1" checked> 1
+    <input type="radio" name="eye" value="2"> 2<br>
+
+    Location (center or periphery):
+    <input type="radio" name="location" value="center"> Center
+    <input type="radio" name="location" value="periphery"> Periphery<br>
+
+    Orientation (in degrees counterclockwise if known):
+    <input type="number" name="orientation" min="-359" max="359">
+
+    Time of dissection:
+    <input type="time" name="dissectionTime" class="required"><br>
+
+
+    Solution (comma separated, e.g. "AMES,DAD":
+    <input type="text" name="solution" value="AMES"><br>
+
+    Retina weight:
+    <input type="text" name="retinaWeight" value="AMES"><br>
+
+  <h2>Physical Parameters</h2>
+
+    MEA type:
+    <input type="text" name="meaType" value="60MEA200/30iR-ITO"><br>
+
+    MEA temperature:
+    <input type="text" name="meaTemperature"><br>
+
+    Perfusion temperature:
+    <input type="text" name="perfusionTemperature"><br>
+
+    Perfusion flow rate:
+    <input type="text" name="perfusionFlowRate"><br>
+
+    Pinhole (between 0 and 1, if applicable):
+    <input type="text" name="pinhole"><br>
+
+  <h2>Digital Parameters</h2>
+
+    Display mode:
+    <input type="radio" name="displayMode" value="video" checked class="required"> Video
+    <input type="radio" name="displayMode" value="pattern"> Pattern<br>
+
+  <h2>Experiment</h2>
+    Experiment Number: <input type="number" name="experimentNumber" min="1" class="required"><br>
+    Filename: <input type="text" name="filename" class="required"><br>
+    <!-- <input type="radio" name="programType" value="select" checked> Select -->
+    <!-- <input type="radio" name="programType" value="javascript"> Javascript<br> -->
+
+    Seed: <input type="number" name="seed" min="0" class="required"
+                 value="<%- Math.floor(Math.random() * 2147483647) %>"><br>
+
+    Program:
+    <select name="program" onchange="programSelection()">
+      <% for (let file of programChoices) {%>
+        <option value=<%= file %> > <%= file %> </option>
+      <% } %>
+      <option value="video">video</option>
+      <option value="custom">custom</option>
+    </select>
+
+    <select name=video hidden>
+      <% for (let file of videoChoices) {%>
+        <option value=<%= file %> > <%= file %> </option>
+      <% } %>
+    </select>
+  <input type="submit" name="submitButton" value="view source code"><br>
+  <div id="customBox" hidden>
+    Custom program:<br>
+    <textarea name="epl" cols="60" rows="20"></textarea><br>
+  </div>
+  <button type="button" id="load" onclick="JavaScript: loadButton()">
+  Load
+  </button>
+  <input type="submit" name="submitButton" value="start", disabled="">
+  <input type="submit" name="submitButton" value="preview", disabled="">
+  <input type="submit" name="submitButton" value="estimate-duration", disabled="">
+  <input type="submit" name="submitButton" value="save-video", disabled="">
+</form>
+<button type="button" id="reset" onclick="JavaScript: resetButton()">
+Reset
+</button>
+
+<a href="/examples.html">Examples</a><br>
+
+<div id="loadProgress">
+  <div id="loadBar"></div>
+</div>
+
+<!-- <button type="button" onclick="JavaScript: targetButton()">
+Target
+</button>
+ -->
+    <script src="js/remoteControl.js"></script>
+</body>
+</html>

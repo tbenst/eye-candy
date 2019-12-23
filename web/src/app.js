@@ -309,6 +309,7 @@ render(app, {
 
 app.context.render = co.wrap(app.context.render);
 
+// for any other route, serve index.html
 app.use(async (ctx, next) => {
 
     const programChoices = fs.readdirSync("/www/programs/").map(s => s.slice(0, -3))

@@ -1,16 +1,44 @@
-web:
-  restart: always
-  build: .
-  # command: ls /www
-  command: node --max-old-space-size=8192 --harmony src/app.js
-  dockerfile: Dockerfile-dev
-  ports:
-   - "3000:3000"
-  volumes:
-   - ./web/src:/www/src
-   - ./web/static:/www/static
-   - ./web/view:/www/view
-  links:
-   - redis
-redis:
-  image: redis
+version: "3.0"
+services:
+  web:
+    restart: always
+    build:
+      context: .
+      dockerfile: "Dockerfile-dev"
+    command: node --max-old-space-size=8192 --harmony src/app.js
+    volumes:
+    - /data/eye-candy:/data
+    - ./web/programs:/www/programs
+    links:
+    - redis
+  redis:
+    image: redis
+  spago:
+    build:
+      context: .
+      dockerfile: "Dockerfile-dev"
+    command: yarn spago bundle-app --watch --main EyeCandy.Main --to /www/dist/app.js
+    volumes:
+    - ./web/purescript:/www/src
+    - ./web/dist:/www/dist
+    - .spago:/www/.spago
+  parcel:
+    build:
+      context: .
+      dockerfile: "Dockerfile-dev"
+    command: yarn parcel watch /www/view/index.html
+    volumes:
+    - ./web/view:/www/view
+    - ./web/dist:/www/dist
+  nginx:
+    image: nginx
+    ports:
+      - "3000:80"
+    volumes:
+      - ./nginx-conf:/etc/nginx/conf.d
+      - ./web/static:/www
+      - ./web/dist:/www
+      - /data/eye-candy/videos:/www/videos
+      - /data/eye-candy/images:/www/images
+    links:
+      - web

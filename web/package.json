@@ -3,9 +3,6 @@
   "version": "0.2.0",
   "description": "stimulus generator ",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tbenst/eye-candy.git"
@@ -17,13 +14,22 @@
   },
   "homepage": "https://github.com/tbenst/eye-candy#readme",
   "devDependencies": {
-    "koa-logger": "3.2.0"
+    "koa-logger": "3.2.0",
+    "parcel-bundler": "^1.12.4",
+    "purescript": "^0.13.5",
+    "spago": "^0.13.0"
+  },
+  "scripts": {
+    "watch": "spago bundle-app --watch --main EyeCandy.Main --to dist/app.js",
+    "dev": "yarn parcel view/index.html",
+    "bundle": "spago bundle-app --main EyeCandy.Main --to dist/app.js && parcel build view/index.html",
+    "test": "spago test"
   },
   "dependencies": {
     "co": "4.6.0",
     "co-body": "6.0.0",
     "ejs": "2.6.1",
-    "js-yaml": "3.12.0",
+    "js-yaml": "^3.13.1",
     "koa": "2.6.2",
     "koa-bodyparser": "4.2.1",
     "koa-ejs": "4.1.2",
@@ -38,7 +44,7 @@
     "mersennetwister": "0.2.3",
     "ramda": "0.26.0",
     "redux": "4.0.1",
-    "sprintf-js": "^1.1.1",
+    "sprintf-js": "^1.1.2",
     "stacktracey": "^1.2.122",
     "uuid": "3.3.2",
     "vm": "^0.1.0",
