@@ -34,20 +34,21 @@ function* preRenderFunc(binaryNoiseNframes, randomSeed) {
 
 
 	// chunk N frame increments to avoid memory overflow
-	let chunkNframes = 100
+	let chunkNframes = 50
 	let chunkFrames
 	for (var i = 0; i < binaryNoiseNframes; i = i + chunkNframes) {
 		// equal to chunkNframes except for final iteration
 		chunkNframes = Math.min(chunkNframes, binaryNoiseNframes-i)
+		console.log("chunkNframes", chunkNframes)
 		chunkFrames = new Uint8ClampedArray(chunkNframes*nPixels*4)
-
+		console.log("chunkFrames len", chunkFrames.length)
 		// create balanced pixel assignments
 		pixelArrays = []
 		for (var p = 0; p < nPixels; p++) {
 			// benchmark: 50% of time is from shuffle
 			r.shuffle(singlePixel)
-			// ... allows for array copy
-			pixelArrays.push([...singlePixel])
+			// array copy
+			pixelArrays.push(singlePixel.slice(0))
 			if (p % 10000 == 0) {
 				console.log("pushed array for pixel: ", p)
 			}
