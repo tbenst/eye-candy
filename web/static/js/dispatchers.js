@@ -123,42 +123,43 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
 
 function imageDispatcher(lifespan, backgroundColor, image,
                          fixationPoint, scale) {
-    let img = new Image()
+    // let img = new Image()
     // deleting onload messes up image src on server if the path is not
     // available for example or if image simply hasn't loaded yet
-    img.onload = (event) => {
-        if (fixationPoint===undefined) {
-            fixationPoint = {x: img.width / 2, y: img.height / 2}
-        }
-        store.dispatch(setGraphicsAC([{
-                graphicType: GRAPHIC.IMAGE,
-                image: img,
-                fixationPoint: fixationPoint,
-                scale: scale,
-                lifespan: lifespan,
-                age: 0
-        }]))
-    }
-    if (typeof(image)==="string") {
-        // assume image src (get from server)
-        img.src = image
-    } else {
-        // TODO can this be deleted? Or maybe used for older letter rendering?
-        img = image
-    }
-
-    // if (fixationPoint===undefined) {
-    //     // race condition?
-    //     fixationPoint = {x: img.width / 2, y: img.height / 2}
+    // img.onload = (event) => {
+    //     if (fixationPoint===undefined) {
+    //         fixationPoint = {x: img.width / 2, y: img.height / 2}
+    //     }
+    //     store.dispatch(setGraphicsAC([{
+    //             graphicType: GRAPHIC.IMAGE,
+    //             image: img,
+    //             fixationPoint: fixationPoint,
+    //             scale: scale,
+    //             lifespan: lifespan,
+    //             age: 0
+    //     }]))
+    // }
+    // if (typeof(image)==="string") {
+    //     // assume image src (get from server)
+    //     img.src = image
+    // } else {
+    //     // TODO can this be deleted? Or maybe used for older letter rendering?
+    //     img = image
     // }
 
-    // store.dispatch(setGraphicsAC([{
-    //         graphicType: GRAPHIC.IMAGE,
-    //         image: img,
-    //         fixationPoint: fixationPoint,
-    //         lifespan: lifespan,
-    //         age: 0
-    // }]))
+    if (fixationPoint===undefined) {
+        // race condition?
+        fixationPoint = {x: img.width / 2, y: img.height / 2}
+    }
+
+    store.dispatch(setGraphicsAC([{
+            graphicType: GRAPHIC.IMAGE,
+            image: image,
+            fixationPoint: fixationPoint,
+            scale: scale,
+            lifespan: lifespan,
+            age: 0
+    }]))
 }
 
 function videoDispatcher(lifespan, backgroundColor, src, startTime) {
@@ -390,20 +391,10 @@ function newStimulusDispatcher() {
 }
 
 async function queueStimulusDispatcher() {
-    const stimulus = await nextStimulus()
+    let stimulus = await nextStimulus()
     const stimulusIndex = stimulus.stimulusIndex
     const preRenderHash = localStorage.getItem("preRenderHash")
-    let image
-    if (stimulus.value !== undefined &&
-        stimulus.value.image !== undefined &&
-        typeof(stimulus.value.image)==="number") {
-        // retrieve image from indexedDB
-        try {
-            image = await SimpleIDB.get(preRenderHash+"-render-"+stimulus.value.image)
-            stimulus.value.image = image
-        } catch (err) {
-            console.warn("Failed to get preRender: " + err)
-        }
-    }
+    stimulus = await loadImageForStimulus(stimulus)
+
     store.dispatch(addStimulusAC(stimulus, stimulusIndex))
 }

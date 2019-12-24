@@ -130,7 +130,31 @@ fetch("/get-sid", {
     })
 })
 
-
+async function loadImageForStimulus(stimulus, preRenderHash) {
+    let imageSrc
+    let image = new Image()
+    if (stimulus.value !== undefined &&
+        stimulus.value.image !== undefined &&
+        typeof(stimulus.value.image)==="number") {
+        // retrieve image from indexedDB
+        try {
+            imageSrc = await SimpleIDB.get(preRenderHash+"-render-"+stimulus.value.image)
+            image.src = imageSrc
+            stimulus.value.image = image
+        } catch (err) {
+            console.warn("Failed to get preRender: " + err)
+        }
+    } else if (stimulus.value !== undefined &&
+        stimulus.value.image !== undefined &&
+        typeof(stimulus.value.image)==="string") {
+            console.log("queueStim inside elif", stimulus)
+            image.src = stimulus.value.image
+            stimulus.value.image = image
+        }
+    console.log("queueStim post if", stimulus)
+    // if stimulus.value.image already an image, do nothing
+    return stimulus
+}
 
 // console.log("COOKIE",document.cookie)
 async function loadPreRenderForStimuli(stimulusQueue) {
@@ -138,16 +162,7 @@ async function loadPreRenderForStimuli(stimulusQueue) {
     const preRenderHash = localStorage.getItem("preRenderHash")
     for (s in stimulusQueue) {
         stimulus = stimulusQueue[s]
-        if (stimulus.value !== undefined &&
-            stimulus.value.image !== undefined &&
-            typeof(stimulus.value.image)==="number") {
-            // retrieve image from indexedDB
-            try {
-                stimulus.value.image = await SimpleIDB.get(preRenderHash+"-render-"+stimulus.value.image)
-            } catch (err) {
-                console.warn("Failed to get preRender: " + err)
-            }
-        }
+        stimulus = await loadImageForStimulus(stimulus, preRenderHash)
     }
     return stimulusQueue
 }

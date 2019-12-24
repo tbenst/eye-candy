@@ -86,9 +86,6 @@ function renderImage(context, image, fixationPoint, scale) {
     // console.log("renderImage image, fixationPoint:", image, fixationPoint)
     const deltaX = centerX - fixationPoint.x
     const deltaY = centerY - fixationPoint.y
-    console.log("height",image.height)
-    console.log("width",image.width)
-    console.log(image)
     let X,Y
     if (typeof(scale)=="number") {
         X = image.width*scale
