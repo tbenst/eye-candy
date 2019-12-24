@@ -78,13 +78,27 @@ function renderLetter(context, letter, size, color, x, y) {
 }
 
 
-function renderImage(context, image, fixationPoint) {
+function renderImage(context, image, fixationPoint, scale) {
+    // TODO: should change so auto fixate at middle of image?
+    // would be breaking and require rewriting protocols
     const centerX = WIDTH/2
     const centerY = HEIGHT/2
     // console.log("renderImage image, fixationPoint:", image, fixationPoint)
     const deltaX = centerX - fixationPoint.x
     const deltaY = centerY - fixationPoint.y
-    context.drawImage(image, deltaX, deltaY)
+    console.log("height",image.height)
+    console.log("width",image.width)
+    console.log(image)
+    let X,Y
+    if (typeof(scale)=="number") {
+        X = image.width*scale
+        Y = image.height*scale
+    } else {
+        // 2-dim array
+        X = image.width*scale[0]
+        Y = image.height*scale[1]
+    }
+    context.drawImage(image, deltaX, deltaY, X, Y)
 }
 
 function renderVideo(context, video, scale) {
@@ -142,7 +156,8 @@ function render(state) {
                              graphic.color, graphic.x, graphic.y)
                 break
             case GRAPHIC.IMAGE:
-                renderImage(context, graphic.image, graphic.fixationPoint)
+                renderImage(context, graphic.image, graphic.fixationPoint,
+                    graphic.scale)
                     break
             case GRAPHIC.VIDEO:
                 renderVideo(context, graphic.video, graphic.scale)

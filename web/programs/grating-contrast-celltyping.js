@@ -261,9 +261,9 @@ metaWithSeed.randomSeed = renderSeed
 let fixationPoint = {x: windowWidth/2, y: windowHeight/2}
 for (var n = 0; n < binaryNoiseNframes; n++) {
 	if (n==0) {
-		noiseStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint, metaWithSeed))
+		noiseStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint, 1, metaWithSeed))
 	} else {
-		noiseStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint, celltypeMeta))
+		noiseStimuli.push(new Image(binaryNoiseLifespan, 'black', n, fixationPoint, 1, celltypeMeta))
 	}
 }
 

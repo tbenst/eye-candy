@@ -11,7 +11,7 @@ let repetitions = 10
 for (var i = 0; i < repetitions; i++) {
     // Video(lifespan, backgroundColor, src, startTime, metadata)
     stimuli.push(new Video(5, "black", "videos/godfather_michael_4min.mp4", 5*i, meta))
-    stimuli.push(new Image(5, "black", "images/scary_hawk.jpg", undefined, meta))
+    stimuli.push(new Image(5, "black", "images/scary_hawk.jpg", undefined, 1, meta))
 }
 
 

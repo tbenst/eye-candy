@@ -108,7 +108,7 @@ for (let n = 0; n < repetitions; n++) {
                 x = r.randi(-saccadeSize,saccadeSize) + size/2 - letterX
                 y = r.randi(-saccadeSize,saccadeSize) + size/2 - letterY
                 fixationPoint = {x: x, y: y}
-                l = new Image(saccadeDuration, 'black', idx, fixationPoint,
+                l = new Image(saccadeDuration, 'black', idx, fixationPoint, 1,
                     {target: letter, cohort: cohort, group: id,
                     block: true, parameter: size, parameterType: "size"})
                 group.push(l)

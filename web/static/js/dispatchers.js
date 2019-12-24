@@ -47,7 +47,7 @@ function graphicsDispatcher() {
             if (stimulus.age === 0) {
                 imageDispatcher(stimulus.lifespan,
                     stimulus.backgroundColor, stimulus.image,
-                    stimulus.fixationPoint)
+                    stimulus.fixationPoint, stimulus.scale)
             }
             break
         case STIMULUS.VIDEO:
@@ -122,21 +122,23 @@ function eyeChartDispatcher(lifespan, letterMatrix, size, padding, color) {
 
 
 function imageDispatcher(lifespan, backgroundColor, image,
-                                fixationPoint) {
+                         fixationPoint, scale) {
     let img = new Image()
-    // TODO test if deleting onload messes up image src on server
-    // img.onload = (event) => {
-    //     if (fixationPoint===undefined) {
-    //         fixationPoint = {x: img.width / 2, y: img.height / 2}
-    //     }
-    //     store.dispatch(setGraphicsAC([{
-    //             graphicType: GRAPHIC.IMAGE,
-    //             image: img,
-    //             fixationPoint: fixationPoint,
-    //             lifespan: lifespan,
-    //             age: 0
-    //     }]))
-    // }
+    // deleting onload messes up image src on server if the path is not
+    // available for example or if image simply hasn't loaded yet
+    img.onload = (event) => {
+        if (fixationPoint===undefined) {
+            fixationPoint = {x: img.width / 2, y: img.height / 2}
+        }
+        store.dispatch(setGraphicsAC([{
+                graphicType: GRAPHIC.IMAGE,
+                image: img,
+                fixationPoint: fixationPoint,
+                scale: scale,
+                lifespan: lifespan,
+                age: 0
+        }]))
+    }
     if (typeof(image)==="string") {
         // assume image src (get from server)
         img.src = image
@@ -145,18 +147,18 @@ function imageDispatcher(lifespan, backgroundColor, image,
         img = image
     }
 
-    if (fixationPoint===undefined) {
-        // race condition?
-        fixationPoint = {x: img.width / 2, y: img.height / 2}
-    }
+    // if (fixationPoint===undefined) {
+    //     // race condition?
+    //     fixationPoint = {x: img.width / 2, y: img.height / 2}
+    // }
 
-    store.dispatch(setGraphicsAC([{
-            graphicType: GRAPHIC.IMAGE,
-            image: img,
-            fixationPoint: fixationPoint,
-            lifespan: lifespan,
-            age: 0
-    }]))
+    // store.dispatch(setGraphicsAC([{
+    //         graphicType: GRAPHIC.IMAGE,
+    //         image: img,
+    //         fixationPoint: fixationPoint,
+    //         lifespan: lifespan,
+    //         age: 0
+    // }]))
 }
 
 function videoDispatcher(lifespan, backgroundColor, src, startTime) {
@@ -379,6 +381,7 @@ function newStimulusDispatcher() {
     } else {
         store.dispatch(incrementStimulusIndexAC())
         store.dispatch(setStimulusAC(nextStimulus.value))
+        console.log("STIMULUS", nextStimulus.value)
         store.dispatch(setGraphicsAC([]))
         // For debugging, may be useful to remove this such that stimulusQueue is not removed after being shown
         store.dispatch(removeStimulusValueAC(stimulusIndex))

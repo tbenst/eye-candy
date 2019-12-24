@@ -209,7 +209,7 @@ function* gen() {
                 fixationPoint = fixationPoints[i][j]
                 letter = letterMatrix[i][j]
                 yield new Wait(duration, {group: id})
-                yield new Image(duration, 'black', i, fixationPoint,
+                yield new Image(duration, 'black', i, fixationPoint, 1, 
                     {target: letter, cohort: cohortMatrix[i][j], group: id,
                         block: true, parameter: size, parameterType: "size"})
                 yield new Wait(r.randi(0.5,1), {group: id, block: true})
