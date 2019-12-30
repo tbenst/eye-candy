@@ -131,5 +131,8 @@ bc.onmessage = msg => {
         // totalProgress accumulates work done to date
         totalProgress = totalProgress + payload.deltaProgress
     }
-    loadBar.style.width = 100 * totalProgress / nJobs + '%'
+    // by convention, each Job gets two units of progess:
+    // 1) one unit for within preRenderFunc
+    // 2) one unit for within preRender.js (saving to indexedDB)
+    loadBar.style.width = 100 * totalProgress / (2*nJobs) + '%'
 }

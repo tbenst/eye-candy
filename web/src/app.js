@@ -312,7 +312,9 @@ app.context.render = co.wrap(app.context.render);
 
 app.use(async (ctx, next) => {
 
-    const programChoices = fs.readdirSync("/www/programs/").map(s => s.slice(0, -3))
+    const programChoices = fs.readdirSync("/www/programs/").filter(
+            p => p.slice(-3)===".js"
+        ).map(s => s.slice(0, -3))
     let videoChoices = fs.readdirSync(DATADIR+"videos/")
     await ctx.render("index", {
         programChoices,

@@ -113,7 +113,7 @@ for (let n = 0; n < repetitions; n++) {
                     block: true, parameter: size, parameterType: "size"})
                 group.push(l)
             }
-            group.push(new Wait(r.randi(0.5,1), {group: id, block: true}))
+            group.push(new Wait(r.randi(30,45)/60, {group: id, block: true}))
 
             stimuli.push(group)
         }

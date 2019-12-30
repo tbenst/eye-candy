@@ -1,5 +1,7 @@
-import { store, nextStimulus, loadImageForStimulus } from '/js/store.js'
+import { store, context, nextStimulus, loadImageForStimulus } from '/js/store.js'
 import { serverRender } from '/js/sendCanvas.js'
+import { rgbToHex, colorToRGB, getDiagonalLength, cos,
+    sin, PI } from '/js/logic.js'
 
 function graphicsDispatcher() {
     const state = store.getState()

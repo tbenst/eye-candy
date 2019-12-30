@@ -161,6 +161,7 @@ function* preRenderFunc(nFrames, sizes, reps, ncols, color, letterTensor,
         // console.log(letterMatrix)
         // console.log(sizes)
         // pre-render eyechart
+        // TODO need to update to OffscreenCanvas
         var canvas = document.createElement("canvas");
         var context = canvas.getContext("2d")
         canvas.width = width
@@ -212,7 +213,7 @@ function* gen() {
                 yield new Image(duration, 'black', i, fixationPoint, 1, 
                     {target: letter, cohort: cohortMatrix[i][j], group: id,
                         block: true, parameter: size, parameterType: "size"})
-                yield new Wait(r.randi(0.5,1), {group: id, block: true})
+                yield new Wait(r.randi(30,45)/60, {group: id, block: true})
             }
         }
     }

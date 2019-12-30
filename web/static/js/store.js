@@ -73,7 +73,7 @@ export let store = createStore(eyeCandyApp, storeInitialState)
 CANVAS
 ************************************************/
 
-const canvas=document.getElementById("eyecandy")
+export const canvas=document.getElementById("eyecandy")
 export var context = canvas.getContext("2d")
 export const WIDTH = store.getState()["windowWidth"]
 export const HEIGHT = store.getState()["windowHeight"]
@@ -205,7 +205,7 @@ function hashCode(string) {
 function hashPreRenders(args) {
     const height = store.getState()["windowHeight"]
     const width = store.getState()["windowWidth"]
-    const hash = hashCode(height+"_"+width+"_"+args)
+    const hash = hashCode(height+"_"+width+"_"+JSON.stringify(args))
     return hash
 }
 
@@ -236,9 +236,9 @@ function wwSendMsg(worker, payload){
   }
 // Handle incoming calculation result
 function handleMsg(msg) {
-    console.log("msg from WW", msg)
+    // console.log("msg from WW", msg)
     const {wwMsgId, err, payload} = msg.data
-    console.log("wwMsgId", wwMsgId)
+    // console.log("wwMsgId", wwMsgId)
     if (err) {
         console.warn("WW error:", err);
         // error condition
@@ -248,7 +248,7 @@ function handleMsg(msg) {
         }
     }
     else  {
-        console.log("wwResolves", wwResolves)
+        // console.log("wwResolves", wwResolves)
         const resolve = wwResolves[wwMsgId]
         if (resolve) {
             if (payload) {
@@ -283,7 +283,7 @@ async function preRenderWebWorkers(preRender, preRenderHash, renderPrefix) {
     const preRenderFuncStr = preRender.func
     const preRenderFunc = (new Function('return ' + preRenderFuncStr))()
     console.log("about to render...")
-    console.log("preRenderFuncStr", preRenderFuncStr)
+    // console.log("preRenderFuncStr", preRenderFuncStr)
     const args = preRender.args
     const nJobs = args.nJobs
 
@@ -293,14 +293,14 @@ async function preRenderWebWorkers(preRender, preRenderHash, renderPrefix) {
         loadBarChannel.postMessage({nJobs: nJobs})
         let workerIdx
         let promises = []
-        for (n=0; n<nJobs; n++) {
+        for (let n=0; n<nJobs; n++) {
             workerIdx = n % nProcs
             // browser will queue
-            console.log("pushing to WW")
+            // console.log("pushing to WW. startIdx", args.startIdx[n])
             promises.push(wwSendMsg(webWorkers[workerIdx],
                 {preRenderFuncStr: preRenderFuncStr, preRenderHash: preRenderHash,
                  windowWidth: WIDTH, windowHeight: HEIGHT, args: args[n],
-                renderPrefix: renderPrefix}
+                renderPrefix: renderPrefix, startIdx: args.startIdx[n]}
             ))
         }
         console.log("awaiting web workers...");
@@ -313,7 +313,7 @@ async function preRenderWebWorkers(preRender, preRenderHash, renderPrefix) {
         await wwSendMsg(webWorkers[0],
             {preRenderFuncStr: preRenderFuncStr, preRenderHash: preRenderHash,
              windowWidth: WIDTH, windowHeight: HEIGHT, args: args.args,
-            renderPrefix: renderPrefix}
+            renderPrefix: renderPrefix, startIdx: 0}
         )
         console.log("web worker finished")
     }
@@ -340,16 +340,18 @@ function resetWebWorkers() {
 
 
 socket.on("pre-render", async (preRender) => {
-    console.log("socket got pre-render", preRender)
+    // console.log("socket got pre-render", preRender)
     const preRenderHash = hashPreRenders(preRender.args)
     // TODO should be in store...
     localStorage.setItem("preRenderHash", preRenderHash)
     const cachedNframes = await SimpleIDB.get(preRenderHash + "-nframes")
     const renderPrefix = preRenderHash + "-render-"
     const keys = await SimpleIDB.getKeysWithPrefix(renderPrefix)
-    console.log("keys, value, cachedNframes", keys, cachedNframes)
+    // console.log("keys, value, cachedNframes", keys, cachedNframes)
     let preRenderIsCached = keys.length == cachedNframes
     if (!preRenderIsCached) {
+        console.log(`preRendering as see ${keys.length} keys but ${cachedNframes} cachedNframes`);
+        
         await preRenderWebWorkers(preRender, preRenderHash, renderPrefix)
     } else {
         console.log("using preRender cache")
@@ -366,6 +368,12 @@ socket.on("reset", () => {
     store.dispatch(resetAC())
     loadBarChannel.postMessage(0)
     resetWebWorkers()
+    // for good measure, reload stimuli page
+    // causes problems with "load" as this trigger reset
+    // but doesn't wait for page to be ready
+    // TODO load should wait for stimulus.html to be ready
+    // location.reload() 
+    
     // remove preRenders
     // SimpleIDB.clearAll()
     // Object.entries(localStorage).map(

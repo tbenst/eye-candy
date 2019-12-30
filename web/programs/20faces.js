@@ -35,7 +35,7 @@ for (let rep = 0; rep < repetitions; rep++) {
       {class: imageClass, classLabels: classLabels,
         group: id, cohort: cohort, block: id})
       before = new Wait(duration, {group: id, block: true})
-      after = new Wait(r.randi(0.5,1), {group: id})
+      after = new Wait(r.randi(30,45)/60, {group: id})
       stimuli.push([before, im, after])
     }
   }

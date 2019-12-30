@@ -42,6 +42,46 @@ export let SimpleIDB = {
 		})
 	},
 
+
+	getAndSet(key, func, value) {
+		// attempt to update current value using `func`
+		// `func` should take one arg and return a new value e.g. `(x) => x+1`
+		// if the key is not yet set, instead initialize to `value`
+		return new Promise((resolve, reject) => {
+			let openRequest = indexedDB.open('eyeCandyDB')
+			openRequest.onsuccess = function() {
+				let db = openRequest.result
+				let transaction = db.transaction('myStore', 'readwrite')
+				let objectStore = transaction.objectStore('myStore')
+				let getRequest = objectStore.get(key)
+				let newValue
+				getRequest.onsuccess = function() {
+					if (getRequest.result) {
+						// found value for key
+						newValue = func(getRequest.result)
+					} else {
+						// no value for key
+						newValue = value
+					}
+					let putRequest = objectStore.put(newValue, key)
+					putRequest.onsuccess = function() {
+						resolve(newValue)
+					}
+					putRequest.onerror = function() {
+						reject(putRequest.error)
+					}
+				}
+				getRequest.onerror = function() {
+					reject(getRequest.error)
+				}
+			}
+			openRequest.onerror = function() {
+				reject(openRequest.error)
+			}
+		})
+	},
+
+
 	getKeysWithPrefix(keyPrefix) {
 		return new Promise((resolve, reject) => {
 			const prefixLast = keyPrefix.length - 1

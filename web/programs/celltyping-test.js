@@ -5,7 +5,6 @@ const metadata = {name: "celltyping", version: "0.1.0"}
 // special function for pre-rendering. This is passed as a string
 // and run client-side
 function* preRenderFunc(binaryNoiseNframes, randomSeed) {
-    console.log("In preRender...")
 
     function renderFrame(flatPixelArray) {
         // var canvas = document.createElement("canvas");
@@ -35,46 +34,38 @@ function* preRenderFunc(binaryNoiseNframes, randomSeed) {
 
 
 	// chunk N frame increments to avoid memory overflow
-	let chunkNframes = 50
-	let chunkFrames
-	for (var i = 0; i < binaryNoiseNframes; i = i + chunkNframes) {
-		// equal to chunkNframes except for final iteration
-		chunkNframes = Math.min(chunkNframes, binaryNoiseNframes-i)
-		console.log("chunkNframes", chunkNframes)
-		chunkFrames = new Uint8ClampedArray(chunkNframes*nPixels*4)
-		console.log("chunkFrames len", chunkFrames.length)
-		// create balanced pixel assignments
-		pixelArrays = []
-		for (var p = 0; p < nPixels; p++) {
-			// benchmark: 50% of time is from shuffle
-			r.shuffle(singlePixel)
-			// array copy
-			pixelArrays.push(singlePixel.slice(0))
-			if (p % 10000 == 0) {
-				console.log("pushed array for pixel: ", p)
-			}
-		}
+  frames = new Uint8ClampedArray(binaryNoiseNframes*nPixels*4)
+  // create balanced pixel assignments
+  pixelArrays = []
+  for (var p = 0; p < nPixels; p++) {
+    // benchmark: 50% of time is from shuffle
+    r.shuffle(singlePixel)
+    // array copy
+    pixelArrays.push(singlePixel.slice(0))
+    if (p % 10000 == 0) {
+      loadBarChannel.postMessage({deltaProgress: 10000/(2*nPixels)})
+    }
+  }
 
-		// assign values of each pixel over time
-		for (var p = 0; p < nPixels; p++) {
-			singlePixel = pixelArrays[p]
-			for (var n = 0; n < chunkNframes; n++) {
-				// For example, to read the blue component's value from the pixel at column 200, row 50 in the image, you would do the following:
-				// blueComponent = imageData.data[(50 * (imageData.width * 4)) + (200 * 4) + 2]
-				chunkFrames[p*4 + n*nPixels*4] = singlePixel[n] // red
-				chunkFrames[1+p*4 + n*nPixels*4] = singlePixel[n] // green
-				chunkFrames[2+p*4 + n*nPixels*4] = singlePixel[n] // blue
-				chunkFrames[3+p*4 + n*nPixels*4] = 255 // alpha
-			}
-			if (p % 10000 == 0) {
-				console.log("pushed array for pixel: ", p)
-			}
-		}
-		// yield each frame from chunk
-		for (var n = 0; n < chunkNframes; n++) {
-			yield renderFrame(chunkFrames.slice(n*nPixels*4,(n+1)*nPixels*4))
-		}
-	}
+  // assign values of each pixel over time
+  for (var p = 0; p < nPixels; p++) {
+    singlePixel = pixelArrays[p]
+    for (var n = 0; n < binaryNoiseNframes; n++) {
+      // For example, to read the blue component's value from the pixel at column 200, row 50 in the image, you would do the following:
+      // blueComponent = imageData.data[(50 * (imageData.width * 4)) + (200 * 4) + 2]
+      frames[p*4 + n*nPixels*4] = singlePixel[n] // red
+      frames[1+p*4 + n*nPixels*4] = singlePixel[n] // green
+      frames[2+p*4 + n*nPixels*4] = singlePixel[n] // blue
+      frames[3+p*4 + n*nPixels*4] = 255 // alpha
+    }
+    if (p % 10000 == 0) {
+      loadBarChannel.postMessage({deltaProgress: 10000/(2*nPixels)})
+    }
+  }
+  // yield each frame
+  for (var n = 0; n < binaryNoiseNframes; n++) {
+    yield renderFrame(frames.slice(n*nPixels*4,(n+1)*nPixels*4))
+  }
 }
 
 const binaryNoiseDuration = 20
@@ -82,13 +73,27 @@ const frameRate = 60
 const hz = 5
 const binaryNoiseLifespan = 1 / hz
 const binaryNoiseNframes = hz*binaryNoiseDuration
+const chunkSize = 50
+const nJobs = ceil(binaryNoiseNframes / chunkSize)
+const remainder = ceil(binaryNoiseNframes % chunkSize)
 
 // deterministic seed for caching
 const renderSeed = 242424
-// third argument, although unused in function, is memoized on client
-// can be updated to invalidate cache
+// can update version to invalidate cache
 // special object for pre-rendering
-const preRenderArgs = {args: [binaryNoiseNframes, renderSeed, "binary_noise_v1"]}
+// const preRenderArgs = {args: [binaryNoiseNframes, renderSeed, "binary_noise_v1"]}
+
+let preRenderArgs = { nJobs: nJobs, startIdx: [], version: "binary_noise_v2"}
+let startIdx = 0
+for (let i = 0; i < nJobs; i++) {
+  if (i === (nJobs - 1) && remainder !== 0) {
+    preRenderArgs[i] = [remainder, renderSeed+i]
+  } else {
+    preRenderArgs[i] = [chunkSize, renderSeed+i]
+  }
+  preRenderArgs["startIdx"].push(startIdx)
+  startIdx = startIdx + chunkSize
+}
 
 const celltypeMeta = {group: r.uuid(), label: "celltype"}
 

@@ -1,7 +1,7 @@
-import { store, context, WIDTH, HEIGHT } from '/js/store.js'
+import { store, canvas, context, WIDTH, HEIGHT } from '/js/store.js'
 import { tickDispatcher } from '/js/dispatchers.js'
 import { sendFrame } from '/js/sendCanvas.js'
-
+import { getDiagonalLength } from '/js/logic.js'
 
 export function renderBar(context, graphic) {
     // might need to translate first if rotation
