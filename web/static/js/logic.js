@@ -1,31 +1,29 @@
-const PI = Math.PI
-const pow = Math.pow
-const sqrt = Math.sqrt
-const sin = Math.sin
-const cos = Math.cos
+import { store } from '/js/store.js'
+
+export const PI = Math.PI
+export const pow = Math.pow
+export const sqrt = Math.sqrt
+export const sin = Math.sin
+export const cos = Math.cos
+export const sum = arr => arr.reduce((a,b) => a + b, 0)
+
 
 // ensure bar always spans window regardless of angle
-function getDiagonalLength() {
+export function getDiagonalLength() {
     return sqrt(pow(store.getState()["windowWidth"], 2) +
         pow(store.getState()["windowHeight"], 2))
 }
 
-function calcBarLifespan(speed, width, startR=getDiagonalLength()/2) {
-    // in the case of a single bar, startR==getDiagonalLength()/2
-    // separating is useful for gratings
-    return (startR + getDiagonalLength()/2 + width ) / speed
-}
-
-function colorToRGB(color) {
+export function colorToRGB(color) {
     color = colorNameToHex(color)
     return hexToRgb(color)
 }
 
-function rgbToHex(rgb) {
+export function rgbToHex(rgb) {
     return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
 }
 
-function hexToRgb(hex) {
+export function hexToRgb(hex) {
     // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
     var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
     hex = hex.replace(shorthandRegex, function(m, r, g, b) {

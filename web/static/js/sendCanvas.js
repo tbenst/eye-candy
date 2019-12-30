@@ -1,4 +1,4 @@
-function canvasToBlob(canvas) {
+export function canvasToBlob(canvas) {
   return new Promise(function(resolve, reject) {
     canvas.toBlob(function(blob) {
       resolve(blob)
@@ -6,7 +6,7 @@ function canvasToBlob(canvas) {
   })
 }
 
-function sendFrame(canvas, frameNum, time, stimulusIndex) {
+export function sendFrame(canvas, frameNum, time, stimulusIndex) {
     // toDataURL takes 14-65ms!!! hence this version
     canvasToBlob(canvas).then(blob => {
         socket.emit('addFrame',
@@ -14,7 +14,7 @@ function sendFrame(canvas, frameNum, time, stimulusIndex) {
     })
 }
 
-function serverRender() {
+export function serverRender() {
     socket.emit('renderVideo',
     {sid: localStorage.getItem('sid')})
 }

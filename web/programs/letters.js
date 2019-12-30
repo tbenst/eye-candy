@@ -47,7 +47,7 @@ for (let i = 0; i < repetitions; i++) {
                 l = new Letter(duration, "black", letter,x,y,size, 
                     "white", {group: id, cohort: cohort, block: true})
                 before = new Wait(duration, {group: id})
-                after = new Wait(r.randi(0.5,1), {group: id, block: true})
+                after = new Wait(r.randi(30,45)/60, {group: id, block: true})
 
                 // before + lit + after = lifespan
                 // this pads the white flash

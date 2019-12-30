@@ -66,14 +66,14 @@ for (let size of sizes) {
                     id = r.uuid()
                     positive = new Grating(duration,gratingColor[0], speed, size, angle, gratingColor[1],
                         {group: id, cohort: cohort, class: "POSITIVE", block: true})
-                    after = new Wait(r.randi(1,1.5), {group: id, block: true})
+                    after = new Wait(r.randi(60,75)/60, {group: id, block: true})
                     stimuli.push([before,positive,after])
 
                     id = r.uuid()
                     meta = {group: id, block: true}
                     negative = new Solid(duration,solidColor,
                         {group: id, cohort: cohort, class: "NEGATIVE", block: true})
-                    after = new Wait(r.randi(1,1.5), {group: id, block: true})
+                    after = new Wait(r.randi(60,75)/60, {group: id, block: true})
                     stimuli.push([before,negative,after])
                 }
             }

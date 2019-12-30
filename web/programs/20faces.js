@@ -35,7 +35,7 @@ for (let rep = 0; rep < repetitions; rep++) {
       {class: imageClass, classLabels: classLabels,
         group: id, cohort: cohort, block: id})
       before = new Wait(duration, {group: id, block: true})
-      after = new Wait(r.randi(0.5,1), {group: id})
+      after = new Wait(r.randi(30,45)/60, {group: id})
       stimuli.push([before, im, after])
     }
   }
@@ -50,18 +50,19 @@ function* stimulusGenerator() {
     }
 }
 
-const preRenderArgs = [imageSrcs, "10faces.js_v1"]
+// should be unecessary with new async queue of new images
+// const preRenderArgs = {args: [imageSrcs, "10faces.js_v1"]}
 
-function* preRenderFunc(imageSrcs) {
-  function preloadImage(url) {
-    var img=new Image();
-    img.src=url;
-  }
-  console.log(imageSrcs)
-  for (const imageSrc of Object.keys(imageSrcs)) {
-    console.log("loading", imageSrc)
-    preloadImage(imageSrc)
-  }
-  // we don't yield as nothing to store in IndexedDB (browser will cache image)
-  return "finished"
-}
+// function* preRenderFunc(imageSrcs) {
+//   function preloadImage(url) {
+//     var img=new Image();
+//     img.src=url;
+//   }
+//   console.log(imageSrcs)
+//   for (const imageSrc of Object.keys(imageSrcs)) {
+//     console.log("loading", imageSrc)
+//     preloadImage(imageSrc)
+//   }
+//   // we don't yield as nothing to store in IndexedDB (browser will cache image)
+//   return "finished"
+// }

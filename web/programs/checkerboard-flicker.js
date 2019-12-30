@@ -95,7 +95,7 @@ function checkerboard_group(class1, target, duration, flickerDuration, size, coh
         time = time + flickerDuration
     }
 
-    group.push(new Wait(r.randi(1,1.5), {group: id, block: true}))
+    group.push(new Wait(r.randi(60,75)/60, {group: id, block: true}))
     return group
 }
 
