@@ -90,7 +90,7 @@ function* preRenderFunc(nFrames, sizes, letters, color) {
 
 // special object for pre-rendering
 const nFrames = letters.length * sizes.length
-const preRenderArgs = [nFrames, sizes, letters, color, "letters-saccade-v1"]
+const preRenderArgs = {args: [nFrames, sizes, letters, color, "letters-saccade-v1"]}
 
 let size, letter, idx, fixationPoint, id, cohort, before, after, l, group, x, y
 let stimuli = []

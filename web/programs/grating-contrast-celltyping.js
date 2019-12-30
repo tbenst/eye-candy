@@ -212,7 +212,7 @@ const renderSeed = 242424
 // third argument, although unused in function, is memoized on client
 // can be updated to invalidate cache
 // special object for pre-rendering
-const preRenderArgs = [binaryNoiseNframes, renderSeed, "binary_noise_v1"]
+const preRenderArgs = {args: [binaryNoiseNframes, renderSeed, "binary_noise_v1"]}
 
 const celltypeMeta = {group: r.uuid(), label: "celltype"}
 

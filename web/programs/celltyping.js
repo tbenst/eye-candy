@@ -10,9 +10,9 @@ function* preRenderFunc(binaryNoiseNframes, randomSeed) {
     function renderFrame(flatPixelArray) {
         var canvas = document.createElement("canvas");
         var context = canvas.getContext("2d")
-        canvas.width = WIDTH
-        canvas.height = HEIGHT
-		imageData = new ImageData(flatPixelArray, WIDTH, HEIGHT)
+        canvas.width = windowWidth
+        canvas.height = windowHeight
+		imageData = new ImageData(flatPixelArray, windowWidth, windowHeight)
         context.putImageData(imageData, 0, 0)
         return canvas
     }
@@ -24,7 +24,7 @@ function* preRenderFunc(binaryNoiseNframes, randomSeed) {
 	// render random binary frames that are balanced
 	// so average intensity per pixel over time is 0.5
 	// nframes must be even!
-	let nPixels = HEIGHT * WIDTH
+	let nPixels = windowHeight * windowWidth
 // TODO delete / benchmark
 	// let r = new DeterministicRandom(10)
 	// let binaryNoiseNframes =14
@@ -87,7 +87,8 @@ const renderSeed = 242424
 // third argument, although unused in function, is memoized on client
 // can be updated to invalidate cache
 // special object for pre-rendering
-const preRenderArgs = [binaryNoiseNframes, renderSeed, "binary_noise_v1"]
+
+let preRenderArgs = {args: [binaryNoiseNframes, renderSeed, "binary_noise_v1"], njobs: 5}
 
 const celltypeMeta = {group: r.uuid(), label: "celltype"}
 

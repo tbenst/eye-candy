@@ -287,6 +287,7 @@ router.get("/analysis/metadata/:sid", ctx => {
 
 // give the next value for a given program (id)
 router.get("/analysis/run/:sid", ctx => {
+    // TODO this should auto-log into a .stim file
     const sid = ctx.params.sid
     ctx.body = program[sid].next()
     if (ctx.body.done===true) {
@@ -372,7 +373,6 @@ io.on("load", (ctx, data) => {
     if (eplProgram==="custom") {
         // program already loaded in epl
     } else if (eplProgram=="video") {
-        // TODO create basic EPL program
         const regex = /\$\{VID\_SRC\}/gi;
         const videoSrc = data.video
         epl = fs.readFileSync(
@@ -391,6 +391,11 @@ io.on("load", (ctx, data) => {
     // let f = "() => {console.log(" + program[sid].preRender()+")}"
     // io.broadcast("pre-render", {preRender: f})
     console.log("finished loading, triggering pre-render")
+    // console.log("program: ", program[sid])
+    // console.log("func: ", program[sid].preRenderFunc)
+    console.log("about to send", {func: program[sid].preRenderFunc,
+        args: program[sid].preRenderArgs})
+    console.log("preRenderFunc is type", typeof(program[sid].preRenderFunc))
     io.broadcast("pre-render", {func: program[sid].preRenderFunc,
         args: program[sid].preRenderArgs})
 })

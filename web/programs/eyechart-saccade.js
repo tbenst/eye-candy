@@ -195,7 +195,7 @@ function* preRenderFunc(nFrames, sizes, reps, ncols, color, letterTensor,
 }
 
 // special object for pre-rendering
-const preRenderArgs = [letterTensor.length, sizes, repetitions, ncols, color, letterTensor, fixationPoints, "eyechart-saccade-v1"]
+const preRenderArgs = {args: [letterTensor.length, sizes, repetitions, ncols, color, letterTensor, fixationPoints, "eyechart-saccade-v1"]}
 
 function* gen() {
     let letterMatrix, cohort, id, letter

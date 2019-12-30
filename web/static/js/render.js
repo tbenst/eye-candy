@@ -1,4 +1,9 @@
-function renderBar(context, graphic) {
+import { store, context, WIDTH, HEIGHT } from '/js/store.js'
+import { tickDispatcher } from '/js/dispatchers.js'
+import { sendFrame } from '/js/sendCanvas.js'
+
+
+export function renderBar(context, graphic) {
     // might need to translate first if rotation
     context.translate(graphic.origin.x,
         graphic.origin.y)
@@ -10,7 +15,7 @@ function renderBar(context, graphic) {
         graphic.size.width, graphic.size.height)
 }
 
-function renderTarget(context, graphic) {
+export function renderTarget(context, graphic) {
     context.strokeStyle = "#ff0000"
 
     context.beginPath()
@@ -37,7 +42,7 @@ function renderTarget(context, graphic) {
     context.stroke()
 }
 
-function renderPattern(context, pattern,angle) {
+export function renderPattern(context, pattern,angle) {
     context.fillStyle = pattern;
     const diag = getDiagonalLength()
     if (angle===0) {
@@ -51,7 +56,7 @@ function renderPattern(context, pattern,angle) {
 
 }
 
-function renderGrating(context, pattern, width, angle, position) {
+export function renderGrating(context, pattern, width, angle, position) {
     // console.log("render GRATING")
     context.fillStyle = pattern;
     // move to the center of the canvas
@@ -65,20 +70,20 @@ function renderGrating(context, pattern, width, angle, position) {
 
 }
 
-function renderChirp(context, color) {
+export function renderChirp(context, color) {
     context.fillStyle = color
     context.fillRect(0,0,WIDTH,HEIGHT)
 }
 
 
-function renderLetter(context, letter, size, color, x, y) {
+export function renderLetter(context, letter, size, color, x, y) {
     context.fillStyle = color
     context.font = size+'px Sloan'
     context.fillText(letter, x, y)
 }
 
 
-function renderImage(context, image, fixationPoint, scale) {
+export function renderImage(context, image, fixationPoint, scale) {
     // TODO: should change so auto fixate at middle of image?
     // would be breaking and require rewriting protocols
     const centerX = WIDTH/2
@@ -95,10 +100,11 @@ function renderImage(context, image, fixationPoint, scale) {
         X = image.width*scale[0]
         Y = image.height*scale[1]
     }
+    // console.log("renderImage", image)
     context.drawImage(image, deltaX, deltaY, X, Y)
 }
 
-function renderVideo(context, video, scale) {
+export function renderVideo(context, video, scale) {
     if(video.paused){
           video.play();
     }
@@ -114,13 +120,13 @@ function renderVideo(context, video, scale) {
     context.drawImage(video, left, top, width, height)
 }
 
-function renderBackground(color) {
+export function renderBackground(color) {
     context.fillStyle = color
     context.fillRect(0,0,WIDTH,HEIGHT)
 
 }
 
-function render(state) {
+export function render(context, state) {
     context.clearRect(0, 0, WIDTH, HEIGHT)
 
     context.save()
@@ -165,7 +171,7 @@ function render(state) {
 }
 
 var lastTime
-function renderLoop(time) {
+export function renderLoop(time) {
     if (!lastTime) lastTime = time;
 
     // seconds
@@ -186,12 +192,12 @@ function renderLoop(time) {
             break
         case STATUS.STARTED:
             tickDispatcher(timeDelta)
-            render(store.getState())
+            render(context, store.getState())
             break
         case STATUS.VIDEO:
             tickDispatcher(timeDelta)
             let state = store.getState()
-            render(state)
+            render(context, state)
             sendFrame(canvas,state.frameNum, time, state.stimulusIndex)
             break
         case STATUS.DEBUG:

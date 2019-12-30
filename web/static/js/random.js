@@ -1,6 +1,7 @@
+import {MersenneTwister} from '/js/mersenneTwister.js';
 const MT = MersenneTwister
 
-class DeterministicRandom {
+export class DeterministicRandom {
     constructor(seed) {
         this.mt = new MT(seed)
     }

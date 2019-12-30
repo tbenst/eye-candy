@@ -1,7 +1,7 @@
 // https://medium.com/@xon5/replacing-localstorage-with-indexeddb-2e11a759ff0c
 
 /** SimpleIDB **/
-SimpleIDB = {
+export let SimpleIDB = {
 	initialize() {
 		return new Promise((resolve, reject) => {
 			// This first deletes any database of the same name
@@ -132,41 +132,3 @@ SimpleIDB = {
 		})
 	}
 }
-
-
-
-
-// The rest is just Vue and UI things vvv
-//
-// new Vue({
-//   el: '#app',
-//   vuetify: new Vuetify(),
-//   data: () => ({
-//     initialized: false,
-//     key1: '',
-//     val1: '',
-//     error1: null,
-//     key2: '',
-//     error2: null,
-//     databaseOutput: null
-//   }),
-//   methods: {
-//     initialize () {
-//       this.initialized = true
-//       SimpleIDB.initialize()
-//     },
-//     insertObject () {
-//       this.error1 = null
-//       try {
-//         let jsonVal = (this.val1.includes('{')) ? JSON.parse(this.val1) : this.val1
-//         SimpleIDB.set(this.key1, jsonVal)
-//       } catch(e) { this.error1 = e.message }
-//     },
-//     removeObject () {
-//       this.error2 = null
-//       try {
-//         SimpleIDB.remove(this.key2)
-//       } catch(e) { this.error2 = e.message }
-//     }
-//   }
-// })

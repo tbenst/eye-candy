@@ -12,12 +12,14 @@ const R = require("ramda")
 
 
 // this object has all values usable in EPL
+// TODO: should this also be available for preRenderFuncWrapper?
 let EPL = Object.assign({log: console.log, JSON: JSON, DATADIR: DATADIR}, {R: R},
                         Types,Render,Random,math,Misc)
 
 function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
     console.log('compiling EPL.')
     // FOR VM2 (production)
+    // note: if changing this, also must change preRenderFuncWrapper
     const vm = new VM({
         sandbox: Object.assign({
             windowHeight: windowHeight,
@@ -42,23 +44,30 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
 
     console.log("reading program metadata")
     const metadata = vm.run("metadata")
-    // this function will be passed as string and run on client
+    // this function will be passed as string and run on client. websocket cannot send a function
     let preRenderFunc = vm.run(
-            "if (typeof preRenderFunc !== 'undefined') {" +
-                "preRenderFunc.toString()" +
-                "} else {" +
-                    "'function* preRenderFunc() {" +
-                            "" +
-                        "}'" +
-                "}")
-    let preRenderArgs = vm.run(
-            "if (typeof preRenderArgs !== 'undefined') {" +
-                "preRenderArgs" +
-                "} else {" +
-                    "[undefined]" +
-                "}")
+        "if (typeof preRenderFunc !== 'undefined') {" +
+            "preRenderFunc.toString()" +
+            "} else {" +
+                "'function* preRenderFunc() {" +
+                        "" +
+                    "}'" +
+            "}")
+    // preRenderArgs is an object that has either args (an array)
+    // or keys njobs (int value) and indices (0..njobs-1) with array values
 
-    console.log("eval preRenderFunc")
+// amazingly, without binding {} to preRenderDefault means object is ignored
+// #javascriptquirk
+
+    console.log("eval preRenderArgs")
+    let preRenderArgs = vm.run(
+        "let preRenderDefault = {args: [undefined]};" +
+        "if (typeof preRenderArgs !== 'undefined') {" +
+            "preRenderArgs" +
+            "} else {" +
+                "preRenderDefault" +
+            "}")
+    console.log("eval preRenderArgs success")
 
     function initialize() {
         console.log("Initializing EPL stimulus generator")
@@ -73,7 +82,7 @@ function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
         's.stimulusIndex=si; si++;'+
         's;')
     }
-
+    console.log("preRenderArgs", preRenderArgs)
     return {vm: vm, metadata: metadata,
             preRenderFunc: preRenderFunc,
             preRenderArgs: preRenderArgs,

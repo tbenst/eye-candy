@@ -3,23 +3,23 @@
 /***********************************************
 ACTIONS
 ************************************************/
-const TIME_TICK = "TIME_TICK"
-const STIMULUS_TICK = "STIMULUS_TICK"
-const SET_STATUS = "SET_STATUS"
-const SET_STIMULUS = "SET_STIMULUS"
-const SET_STIMULUS_QUEUE = "SET_STIMULUS_QUEUE"
-const ADD_STIMULUS = "ADD_STIMULUS"
-const REMOVE_STIMULUS_VALUE = "REMOVE_STIMULUS_VALUE"
-const INCREMENT_STIMULUS_INDEX = "INCREMENT_STIMULUS_INDEX"
-const SET_GRAPHICS = "SET_GRAPHICS"
-const ADD_GRAPHIC = "ADD_GRAPHIC"
-const REMOVE_GRAPHIC = "REMOVE_GRAPHIC"
-const GRAPHICS_TICK = "GRAPHICS_TICK"
-const SET_SIGNAL_LIGHT = "SET_SIGNAL_LIGHT"
-const RESET = "RESET"
+export const TIME_TICK = "TIME_TICK"
+export const STIMULUS_TICK = "STIMULUS_TICK"
+export const SET_STATUS = "SET_STATUS"
+export const SET_STIMULUS = "SET_STIMULUS"
+export const SET_STIMULUS_QUEUE = "SET_STIMULUS_QUEUE"
+export const ADD_STIMULUS = "ADD_STIMULUS"
+export const REMOVE_STIMULUS_VALUE = "REMOVE_STIMULUS_VALUE"
+export const INCREMENT_STIMULUS_INDEX = "INCREMENT_STIMULUS_INDEX"
+export const SET_GRAPHICS = "SET_GRAPHICS"
+export const ADD_GRAPHIC = "ADD_GRAPHIC"
+export const REMOVE_GRAPHIC = "REMOVE_GRAPHIC"
+export const GRAPHICS_TICK = "GRAPHICS_TICK"
+export const SET_SIGNAL_LIGHT = "SET_SIGNAL_LIGHT"
+export const RESET = "RESET"
 
 // Define states for readability
-const STATUS = {
+export const STATUS = {
     STARTED: "STARTED",
     STOPPED: "STOPPED",
     FINISHED: "FINISHED",
@@ -28,14 +28,14 @@ const STATUS = {
     VIDEO: "VIDEO"
 }
 
-const SIGNAL_LIGHT = {
+export const SIGNAL_LIGHT = {
     FRAME_A: "FRAME_A",
     FRAME_B: "FRAME_B",
     STOPPED: "STOPPED"
 }
 
 // warning: must edit epl types, too
-const STIMULUS = {
+export const STIMULUS = {
     BAR: "BAR",
     SOLID: "SOLID",
     CHIRP: "CHIRP",
@@ -51,7 +51,7 @@ const STIMULUS = {
     EYECHART: "EYECHART"
 }
 
-const LETTER = {
+export const LETTER = {
      C: "C",
      D: "D",
      H: "H",
@@ -64,7 +64,7 @@ const LETTER = {
      Z: "Z"
 }
 
-const GRAPHIC = {
+export const GRAPHIC = {
     BAR: "BAR",
     CHIRP: "CHIRP",
     PATTERN: "PATTERN",
@@ -79,60 +79,60 @@ const GRAPHIC = {
 EXAMPLE STIMULUS
 ************************************************/
 
-const exampleBar = {stimulusType: STIMULUS.BAR, lifespan: 300,
+export const exampleBar = {stimulusType: STIMULUS.BAR, lifespan: 300,
         backgroundColor: "black", width: 50, barColor: "white",
-        speed: 15, angle: PI, age: 0}
-const exampleCheckerboard = {stimulusType: STIMULUS.CHECKERBOARD, lifespan: 300,
+        speed: 15, angle: Math.PI, age: 0}
+export const exampleCheckerboard = {stimulusType: STIMULUS.CHECKERBOARD, lifespan: 300,
         alternateColor: "black", size: 50, color: "white", age: 0}
-const exampleSolid = {stimulusType: STIMULUS.SOLID,
+export const exampleSolid = {stimulusType: STIMULUS.SOLID,
             lifespan: 5,
             backgroundColor: "black"
         }
-const exampleWait = {stimulusType: STIMULUS.WAIT,
+export const exampleWait = {stimulusType: STIMULUS.WAIT,
             lifespan: 5,
             backgroundColor: "black"
         }
-const exampleGrating = {stimulusType: STIMULUS.GRATING, lifespan: 300,
+export const exampleGrating = {stimulusType: STIMULUS.GRATING, lifespan: 300,
         backgroundColor: "black", width: 50, barColor: "white",
-        speed: 15, angle: PI, wavelength: 500, age: 0, count: 0}
+        speed: 15, angle: Math.PI, wavelength: 500, age: 0, count: 0}
 
 /***********************************************
 ACTION CREATORS
 ************************************************/
 
-function stimulusTickAC(timeDelta) {
+export function stimulusTickAC(timeDelta) {
     return {type: STIMULUS_TICK, timeDelta: timeDelta}
 }
 
-function timetickAC(timeDelta) {
+export function timetickAC(timeDelta) {
     return { type: TIME_TICK, timeDelta: timeDelta}
 }
 
-function addGraphicAC(graphic) {
+export function addGraphicAC(graphic) {
     return { type: ADD_GRAPHIC, graphic: graphic }
 }
 
-function removeGraphicAC(index) {
+export function removeGraphicAC(index) {
     return { type: REMOVE_GRAPHIC, index: index }
 }
 
-function addStimulusAC(stimulus, index) {
+export function addStimulusAC(stimulus, index) {
     return { type: ADD_STIMULUS, stimulus: stimulus, index: index }
 }
 
-function removeStimulusValueAC(index) {
+export function removeStimulusValueAC(index) {
     return { type: REMOVE_STIMULUS_VALUE, index: index }
 }
 
-function graphicsTickAC(timeDelta) {
+export function graphicsTickAC(timeDelta) {
     return  { type: GRAPHICS_TICK, timeDelta: timeDelta}
 }
 
-function incrementStimulusIndexAC() {
+export function incrementStimulusIndexAC() {
     return  { type: INCREMENT_STIMULUS_INDEX}
 }
 
-function makeAccessorAC(type, ...argNames) {
+export function makeAccessorAC(type, ...argNames) {
     return function(...args) {
         let action = { type }
         argNames.forEach((arg, index) => {
@@ -142,12 +142,12 @@ function makeAccessorAC(type, ...argNames) {
     }
 }
 
-function resetAC() {
+export function resetAC() {
     return {type: RESET}
 }
 
-const setStatusAC = makeAccessorAC(SET_STATUS, "status")
-const setStimulusQueueAC = makeAccessorAC(SET_STIMULUS_QUEUE, "stimulusQueue")
-const setStimulusAC = makeAccessorAC(SET_STIMULUS, "stimulus")
-const setGraphicsAC = makeAccessorAC(SET_GRAPHICS, "graphics")
-const setSignalLightAC = makeAccessorAC(SET_SIGNAL_LIGHT, "signalLight")
+export const setStatusAC = makeAccessorAC(SET_STATUS, "status")
+export const setStimulusQueueAC = makeAccessorAC(SET_STIMULUS_QUEUE, "stimulusQueue")
+export const setStimulusAC = makeAccessorAC(SET_STIMULUS, "stimulus")
+export const setGraphicsAC = makeAccessorAC(SET_GRAPHICS, "graphics")
+export const setSignalLightAC = makeAccessorAC(SET_SIGNAL_LIGHT, "signalLight")

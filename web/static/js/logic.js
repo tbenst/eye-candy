@@ -4,6 +4,7 @@ const sqrt = Math.sqrt
 const sin = Math.sin
 const cos = Math.cos
 
+
 // ensure bar always spans window regardless of angle
 function getDiagonalLength() {
     return sqrt(pow(store.getState()["windowWidth"], 2) +

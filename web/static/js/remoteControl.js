@@ -1,5 +1,8 @@
 var socket = io();
 socket.heartbeatTimeout = 6000000;
+const bc = new BroadcastChannel('loadProgress');
+let nJobs = 1
+let totalProgress = 0
 
 function resetButton() {
     const sid = localStorage.getItem("sid")
@@ -14,7 +17,8 @@ function resetButton() {
         "input[name=submitButton][value=save-video]").disabled = true
     document.querySelector(
         "#load").disabled = false
-
+    nJobs = 1
+    totalProgress = 0
 }
 
 function targetButton() {
@@ -48,10 +52,6 @@ function loadButton() {
         "input[name=submitButton][value=estimate-duration]").disabled = true
     document.querySelector(
         "input[name=submitButton][value=save-video]").disabled = true
-
-    // reset doesn't work during pre-render
-    document.querySelector(
-        "#reset").disabled = true
 
     document.querySelector(
         "#load").disabled = true
@@ -117,14 +117,19 @@ socket.on("enableSubmitButton", () => {
     document.querySelector(
         "input[name=submitButton][value=save-video]").disabled = false
     document.querySelector(
-        "#reset").disabled = false
-    document.querySelector(
         "#load").disabled = false
 })
 
-const bc = new BroadcastChannel('loadProgress');
 bc.onmessage = msg => {
-    const x = msg.data
+    const payload = msg.data
+    if (payload.nJobs) {
+        nJobs = payload.nJobs
+    }
     const loadBar = document.getElementById("loadBar");
-    loadBar.style.width = x + "%"
+    // deltaProgress represents fraction of one job completed
+    if (payload.deltaProgress) {
+        // totalProgress accumulates work done to date
+        totalProgress = totalProgress + payload.deltaProgress
+    }
+    loadBar.style.width = 100 * totalProgress / nJobs + '%'
 }
