@@ -110,9 +110,9 @@ const testBar = {
 PROGRAM / server communication
 ************************************************/
 
-var socket = io();
+export var socket = io();
 socket.heartbeatTimeout = 6000000; // long render workaround
-let sid
+export let sid
 
 fetch("/get-sid", {
     method: "GET"

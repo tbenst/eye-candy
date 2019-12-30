@@ -43,6 +43,7 @@ for (var p = 0; p < nPixels; p++) {
 	// array copy
 	pixelArrays.push(singlePixel.slice(0))
 	if (p % 10000 == 0) {
+		console.log("shuffled pixel ", p)
 		loadBarChannel.postMessage({deltaProgress: 10000/(2*nPixels)})
 	}
 }
@@ -59,6 +60,7 @@ for (var p = 0; p < nPixels; p++) {
 		frames[3+p*4 + n*nPixels*4] = 255 // alpha
 	}
 	if (p % 10000 == 0) {
+		console.log("pushed pixel ", p)
 		loadBarChannel.postMessage({deltaProgress: 10000/(2*nPixels)})
 	}
 }

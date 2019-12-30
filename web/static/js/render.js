@@ -172,6 +172,10 @@ export function render(context, state) {
 
 var lastTime
 export function renderLoop(time) {
+    // TODO: do all rendering to OffscreenCanvas
+    // then use canvas.getContext("bitmaprenderer") for fast swap
+    // https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas
+    // https://developers.google.com/web/updates/2018/08/offscreen-canvas
     if (!lastTime) lastTime = time;
 
     // seconds

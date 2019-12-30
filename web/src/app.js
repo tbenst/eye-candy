@@ -121,6 +121,27 @@ router.post("/window", (ctx) => {
     ctx.body = session;
 });
 
+router.post("/addFrame", (ctx) => {
+    // console.log(ctx.request)
+    // note that headers are all lowercase
+    const {png, sid, framenum, time, stimulusindex} = ctx.request.header;
+    console.log("addFrame", {sid, framenum, time, stimulusindex})
+    let vidname = program_vid_name[sid]
+    let stream = program_log[sid]
+    // let png = ctx.request.body;
+    var filename = sprintf('image-%010d.png', framenum);
+    fs.writeFile(vidname+"/"+filename, png, 'base64', (error) => {
+        if (error) {
+            console.error('Error saving frame:', error.message)
+            stream.write(framenum+","+time+","+stimulusindex+",1\n")
+            throw(error)
+        } else {
+            stream.write(framenum+","+time+","+stimulusindex+",0\n")
+
+        }
+    })
+});
+
 router.post("/next-stimulus",  (ctx) => {
     // console.log("next-stimulus", ctx.session)
     const sid = ctx.request.header.sid
