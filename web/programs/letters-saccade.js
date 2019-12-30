@@ -90,7 +90,7 @@ function* preRenderFunc(nFrames, sizes, letters, color) {
 
 // special object for pre-rendering
 const nFrames = letters.length * sizes.length
-const preRenderArgs = [nFrames, sizes, letters, color, "letters-saccade-v1"]
+const preRenderArgs = {args: [nFrames, sizes, letters, color, "letters-saccade-v1"]}
 
 let size, letter, idx, fixationPoint, id, cohort, before, after, l, group, x, y
 let stimuli = []
@@ -113,7 +113,7 @@ for (let n = 0; n < repetitions; n++) {
                     block: true, parameter: size, parameterType: "size"})
                 group.push(l)
             }
-            group.push(new Wait(r.randi(0.5,1), {group: id, block: true}))
+            group.push(new Wait(r.randi(30,45)/60, {group: id, block: true}))
 
             stimuli.push(group)
         }

@@ -8,3 +8,17 @@
   height: 30px;
   background-color: green;
 }
+
+#logo {
+  overflow: auto;
+}
+
+#logo img {
+  width: 10vh;
+  float: left;
+  vertical-align: middle;
+}
+
+#logo h1 {
+  display: inline;
+}

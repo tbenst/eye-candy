@@ -1,7 +1,7 @@
-
-/***********************************************
-DISPATCHERS
-************************************************/
+import { store, context, nextStimulus, loadImageForStimulus } from '/js/store.js'
+import { serverRender } from '/js/sendCanvas.js'
+import { rgbToHex, colorToRGB, getDiagonalLength, cos,
+    sin, PI } from '/js/logic.js'
 
 function graphicsDispatcher() {
     const state = store.getState()
@@ -334,7 +334,7 @@ function cleanupGraphicsDispatcher() {
 
 // The mother of all dispatchers: the render loop affects the world
 // by dispatching a time tick
-function tickDispatcher(timeDelta) {
+export function tickDispatcher(timeDelta) {
     const state = store.getState()
 
     // initialize for time=0
@@ -382,7 +382,7 @@ function newStimulusDispatcher() {
     } else {
         store.dispatch(incrementStimulusIndexAC())
         store.dispatch(setStimulusAC(nextStimulus.value))
-        console.log("STIMULUS", nextStimulus.value)
+        console.log("STIMULUS", nextStimulus.value, "INDEX", stimulusIndex)
         store.dispatch(setGraphicsAC([]))
         // For debugging, may be useful to remove this such that stimulusQueue is not removed after being shown
         store.dispatch(removeStimulusValueAC(stimulusIndex))
@@ -394,7 +394,7 @@ async function queueStimulusDispatcher() {
     let stimulus = await nextStimulus()
     const stimulusIndex = stimulus.stimulusIndex
     const preRenderHash = localStorage.getItem("preRenderHash")
-    stimulus = await loadImageForStimulus(stimulus)
+    stimulus = await loadImageForStimulus(stimulus, preRenderHash)
 
     store.dispatch(addStimulusAC(stimulus, stimulusIndex))
 }

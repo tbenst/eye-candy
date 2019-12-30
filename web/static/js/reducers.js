@@ -1,9 +1,7 @@
+import {storeInitialState} from '/js/store.js'
+import { rgbToHex, cos, sin,  } from '/js/logic.js'
 
-/***********************************************
-REDUCERS
-************************************************/
-
-function eyeCandyApp(state, action) {
+export function eyeCandyApp(state, action) {
     switch (action.type) {
         case SET_STATUS:
             return Object.assign({}, state, {

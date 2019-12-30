@@ -67,7 +67,7 @@ function checkerboard_group(class1, class2, duration, size, cohort) {
     const second = new Checkerboard(duration, color2[0], color2[1], size, angle,
         {group: id, cohort: cohort, block: true, class: class2,
                    target: target})
-    const after = new Wait(r.randi(1,1.5), {group: id, block: true})
+    const after = new Wait(r.randi(60,75)/60, {group: id, block: true})
     return [before, first, second, after]
 }
 
