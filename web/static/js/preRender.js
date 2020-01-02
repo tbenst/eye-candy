@@ -52,7 +52,7 @@ async function doCalculation(preRenderFuncStr, args, preRenderHash,
   try {
     returnPayload =  returnPayload + ";set frame " + n
     let retN = await SimpleIDB.getAndSet(preRenderHash + "-nframes", (x) => x+n-startIdx, n-startIdx)
-    // TODO remove line, hack to always preRender for easy dev
+    // TODO next line is hack to always preRender for easy dev
     // let retN = await SimpleIDB.getAndSet(preRenderHash + "-nframes", (x) => x+n, n)
     returnPayload =  returnPayload + ";(success) set nFrame to " + retN
   } catch (e) {
