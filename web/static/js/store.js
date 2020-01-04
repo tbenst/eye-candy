@@ -396,10 +396,6 @@ socket.on("target", () => {
     store.dispatch(setStatusAC(STATUS.STARTED))
 })
 
-socket.on("play-video", vidSrc => {
-    document.querySelector("#video").src = vidSrc
-})
-
 socket.on('stream',function(image){
             $('#play').attr('src',image);
             $('#logger').text(image);

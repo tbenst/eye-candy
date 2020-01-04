@@ -121,26 +121,6 @@ router.post("/window", (ctx) => {
     ctx.body = session;
 });
 
-router.post("/addFrame", (ctx) => {
-    // console.log(ctx.request)
-    // note that headers are all lowercase
-    const {png, sid, framenum, time, stimulusindex} = ctx.request.header;
-    console.log("addFrame", {sid, framenum, time, stimulusindex})
-    let vidname = program_vid_name[sid]
-    let stream = program_log[sid]
-    // let png = ctx.request.body;
-    var filename = sprintf('image-%010d.png', framenum);
-    fs.writeFile(vidname+"/"+filename, png, 'base64', (error) => {
-        if (error) {
-            console.error('Error saving frame:', error.message)
-            stream.write(framenum+","+time+","+stimulusindex+",1\n")
-            throw(error)
-        } else {
-            stream.write(framenum+","+time+","+stimulusindex+",0\n")
-
-        }
-    })
-});
 
 router.post("/next-stimulus",  (ctx) => {
     // console.log("next-stimulus", ctx.session)
@@ -224,9 +204,7 @@ router.post("/start-program", ctx => {
 		let vidname, stream
 		vidname = DATADIR + "renders/" + (new Date().toISOString())
 		fs.mkdirSync(vidname, { recursive: true })
-		program_vid_name[sid] = vidname
 		stream = fs.createWriteStream(vidname+".txt", {flags:'a'})
-		program_log[sid] = stream
 		stream.write("frame_number,time,stimulus_index,error\n")
     } else if (submitButton==="estimate-duration") {
         let s = program[sid].next()
@@ -247,8 +225,6 @@ router.post("/start-program", ctx => {
 
 // store all vms here
 let program = {}
-let program_vid_name = {}
-let program_log = {}
 let windows = {}
 let notebooks = {}
 
@@ -439,118 +415,10 @@ io.on("target", ctx => {
 //     console.log("Redis error " + err);
 // });
 
-io.on("addFrame", (ctx, data) => {
-    const sid = data.sid
-    let vidname = program_vid_name[sid]
-    let stream = program_log[sid]
-    const png = data.png
-		// data.png.replace(/^data:image\/png;base64,/, "")
-    var filename = sprintf('image-%010d.png', data.frameNum);
-    // const filename = "s="+data.stimulusIndex + ",t=" + data.time+'.png'
-    fs.writeFile(vidname+"/"+filename, png, 'base64', (error) => {
-        if (error) {
-            console.error('Error saving frame:', error.message)
-            stream.write(data.frameNum+","+data.time+","+data.stimulusIndex+",1\n")
-            throw(error)
-        } else {
-            stream.write(data.frameNum+","+data.time+","+data.stimulusIndex+",0\n")
-
-        }
-    })
-})
-
-io.broadcast("play-video", {})
-
-var deleteFolderRecursive = function(path) {
-    // https://stackoverflow.com/questions/18052762/remove-directory-which-is-not-empty
-  if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(function(file, index){
-      var curPath = path + "/" + file;
-      if (fs.lstatSync(curPath).isDirectory()) { // recurse
-        deleteFolderRecursive(curPath);
-      } else { // delete file
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
-};
-
-function cleanupRender(sid, deleteDir=true) {
-    if (sid in program_vid_name) {
-        let vidname = program_vid_name[sid]
-        delete program_vid_name[sid]
-        if (deleteDir) {deleteFolderRecursive(vidname)}
-    } else {
-        console.log("Warning: asked to delete sid:", sid, "but this is not found in program_vid_name");
-    }
-    if (sid in program_log) {
-        program_log[sid].end()
-        delete program_log[sid]
-    } else {
-        console.log("Warning: asked to delete sid:", sid, "but this is not found in program_log");
-
-    }
-
-}
-
 function sleep(ms){
     return new Promise(resolve=>{
         setTimeout(resolve,ms)
     })
 }
-
-async function saveVideo(sid) {
-    let vidname = program_vid_name[sid]
-    let stream = program_log[sid]
-    console.log("Rendering your video. This might take a long time...")
-	let missingFrames = true
-	let nFrames = fs.readdirSync(vidname).length;
-	let newNFrames
-	while (missingFrames) {
-		await sleep(10000)
-		newNFrames = fs.readdirSync(vidname).length
-
-		if (newNFrames == nFrames) {
-			// if no new frames received in last 10 seconds, assume we have all frames
-			missingFrames = false
-		} else {
-			console.log("Received "+(newNFrames-nFrames)+" more frames. Sleeping for 10sec")
-		}
-		nFrames = newNFrames
-	}
-	console.log("Using ffmpeg to make "+vidname+'.mp4.')
-    var ffmpeg = cp.spawn('ffmpeg', [
-        '-framerate', '60',
-        '-start_number', '0',
-        '-i', vidname+'/image-%010d.png',
-        '-refs', '6',
-        '-c:v', 'libx264',
-        '-pix_fmt', 'yuv444p',
-        '-preset', 'veryslow',
-        '-crf', '18',
-        vidname + '.mp4'
-    ])
-    ffmpeg.on('error', function(error) {
-        console.error('Error starting FFmpeg:', error.message);
-        cleanupRender(sid, deleteDir=false)
-    });
-    ffmpeg.on('close', function(code) {
-        if (code !== 0) {
-            console.log('FFmpeg process closed with code', code);
-            cleanupRender(sid, deleteDir=false)
-        } else {
-            console.log('Finished rendering video. You can find it at ' + vidname + '.mp4')
-            cleanupRender(sid)
-        }
-    })
-}
-
-io.on("renderVideo", (ctx, data) => {
-    // TODO: THIS IS A RACE CONDITION! stream write could come in slowly
-    const sid = data.sid
-    saveVideo(sid)
-})
-
 
 app.listen(3000);

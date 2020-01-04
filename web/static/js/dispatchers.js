@@ -1,6 +1,5 @@
 import { store, context, nextStimulus, loadImageForStimulus,
     WIDTH, HEIGHT } from '/js/store.js'
-import { serverRender } from '/js/sendCanvas.js'
 import { rgbToHex, colorToRGB, getDiagonalLength, cos,
     sin, PI } from '/js/logic.js'
 
@@ -377,9 +376,6 @@ function newStimulusDispatcher() {
 
     if (nextStimulus.done===true) {
         store.dispatch(setStatusAC(STATUS.FINISHED))
-        if (state.status==STATUS.VIDEO) {
-            serverRender()
-        }
     } else {
         store.dispatch(incrementStimulusIndexAC())
         store.dispatch(setStimulusAC(nextStimulus.value))
