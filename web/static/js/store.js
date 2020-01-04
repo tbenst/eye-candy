@@ -80,7 +80,6 @@ export const HEIGHT = store.getState()["windowHeight"]
 context.canvas.width  = WIDTH
 context.canvas.height = HEIGHT
 
-
 /************************************************
 TESTS
 ************************************************/
@@ -110,7 +109,7 @@ const testBar = {
 PROGRAM / server communication
 ************************************************/
 
-export var socket = io();
+export let socket = io();
 socket.heartbeatTimeout = 6000000; // long render workaround
 export let sid
 
@@ -344,6 +343,7 @@ socket.on("pre-render", async (preRender) => {
     const preRenderHash = hashPreRenders(preRender.args)
     // TODO should be in store...
     localStorage.setItem("preRenderHash", preRenderHash)
+    // TODO allow reset to kill these SimpleIDB gets--perhaps by doing in webworker?
     const cachedNframes = await SimpleIDB.get(preRenderHash + "-nframes")
     const renderPrefix = preRenderHash + "-render-"
     const keys = await SimpleIDB.getKeysWithPrefix(renderPrefix)

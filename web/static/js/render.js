@@ -1,6 +1,7 @@
-import { store, canvas, context, WIDTH, HEIGHT } from '/js/store.js'
+import { store, canvas, context, WIDTH, HEIGHT} from '/js/store.js'
+import { canvasRecorder, registerFrame,
+         stopRecorder, startRecorder } from "/js/captureCanvas.js";
 import { tickDispatcher } from '/js/dispatchers.js'
-import { sendFrame } from '/js/sendCanvas.js'
 import { getDiagonalLength } from '/js/logic.js'
 
 export function renderBar(context, graphic) {
@@ -185,11 +186,13 @@ export function renderLoop(time) {
 
     switch (store.getState().status) {
         case STATUS.STOPPED:
+            stopRecorder()
             context.clearRect(0, 0, WIDTH, HEIGHT)
             document.body.style.backgroundColor = "black"
             store.dispatch(setSignalLightAC(SIGNAL_LIGHT.STOPPED))
             break
         case STATUS.FINISHED:
+            stopRecorder()
             context.clearRect(0, 0, WIDTH, HEIGHT)
             document.body.style.backgroundColor = "black"
             store.dispatch(setSignalLightAC(SIGNAL_LIGHT.STOPPED))
@@ -201,8 +204,9 @@ export function renderLoop(time) {
         case STATUS.VIDEO:
             tickDispatcher(timeDelta)
             let state = store.getState()
+            startRecorder()
             render(context, state)
-            sendFrame(canvas,state.frameNum, time, state.stimulusIndex)
+            registerFrame(state.frameNum, time, state.stimulusIndex)
             break
         case STATUS.DEBUG:
             break

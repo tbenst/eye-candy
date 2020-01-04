@@ -1,0 +1,96 @@
+const useRequestFrame = true
+
+var canvas = document.querySelector("canvas");
+let stream, streamTrack
+if (useRequestFrame) {
+  console.log("using requestFrame")
+  stream = canvas.captureStream(0);
+  streamTrack = stream.getTracks()[0]
+} else {
+  stream = canvas.captureStream(60);
+}
+var recordedChunks = [];
+
+console.log(stream);
+var options = { mimeType: "video/webm; codecs=vp9" };
+var mediaRecorder = new MediaRecorder(stream, options);
+
+mediaRecorder.ondataavailable = handleDataAvailable;
+
+function handleDataAvailable(event) {
+  console.log("data-available");
+  if (event.data.size > 0) {
+    recordedChunks.push(event.data);
+    console.log(recordedChunks);
+    download();
+  } else {
+    // ...
+  }
+}
+function download() {
+  var blob = new Blob(recordedChunks, {
+    type: "video/webm"
+  });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  document.body.appendChild(a);
+  a.style = "display: none";
+  a.href = url;
+  a.download = "test.webm";
+  a.click();
+  window.URL.revokeObjectURL(url);
+  recordedChunks = []
+  a.remove()
+}
+
+
+var canvas=document.getElementById("my-canvas")
+var context = canvas.getContext("2d")
+
+canvas.width  = window.innerWidth
+canvas.height = window.innerHeight
+
+var initTime
+function renderLoop(time) {
+  if (!initTime) initTime = time;
+  
+  // first 5 seconds is black, last 5 seconds is white
+  if ((time - initTime) % 10000 > 5000) {
+    context.fillStyle = "white"
+  } else {
+    context.fillStyle = "black"
+  }
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  setTimeout(() => {
+    // mimic expense rendering
+    if (useRequestFrame) {
+      streamTrack.requestFrame()       
+    }
+  }, 5)
+  requestAnimationFrame(renderLoop)
+}
+
+renderLoop()
+
+setInterval(time => {
+  console.log("state:", mediaRecorder.state)
+}, 100)
+
+// record first 2 seconds (black)
+// sleep 4 seconds (black -> white)
+// record next 2 seconds (white)
+console.log("start")
+mediaRecorder.start();
+setTimeout(event => {
+  console.log("stop")
+  mediaRecorder.stop();
+  setTimeout(event => {
+    console.log("start")
+    mediaRecorder.start();
+    setTimeout(event => {
+      console.log("stop")
+      mediaRecorder.stop();
+    }, 2000)
+  }, 4000)
+}, 2000)
