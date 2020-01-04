@@ -19,9 +19,11 @@
 <div id="logo">
   <h1><img src="/assets/EC_Logo_DS_black_backg.png" id="logo"/> Eye Candy </h1>
 </div>
-
+Requires Google Chrome<br>
 <a href="/stimulus.html">Open Stimulus in new window first</a><br>
 <a href="/flicker.html">Open Flicker in new window first</a><br>
+enable experimental web platform features by opening: chrome://flags/#enable-experimental-web-platform-features<br>
+
 
 <button type="button" onclick="JavaScript: toggleRequired()">
 Toggle Required
@@ -132,6 +134,7 @@ Toggle Required
     Custom program:<br>
     <textarea name="epl" cols="60" rows="20"></textarea><br>
   </div>
+  Note: save-video currently opens dialog on stimulus.html window asking to save video after experiment finishes or is reset<br>
   <button type="button" id="load" onclick="JavaScript: loadButton()">
   Load
   </button>
