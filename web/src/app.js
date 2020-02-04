@@ -123,6 +123,9 @@ router.post("/window", (ctx) => {
 
 
 router.post("/next-stimulus",  (ctx) => {
+    // TODO: create local .stim file during runtime, or at least a preliminary
+    // one that is later aligned by flicker
+    // requires modifying client-side to send back startTime for each stimulus
     // console.log("next-stimulus", ctx.session)
     const sid = ctx.request.header.sid
     const stimulus = program[sid].next()
@@ -159,6 +162,8 @@ function makeLabNotebook(labNotebook) {
     labNotebook.flickerVersion = 0.3
     labNotebook.gitSHA = GIT_SHA
 
+    // TODO: autosave lab notebooks to DATADIR/lab_notebooks/2020-01-30.yaml
+    // also auto-append each notebook
     console.log("labNotebook", labNotebook)
     return "---\n" + yaml.safeDump(labNotebook)
 }
@@ -201,7 +206,9 @@ router.post("/start-program", ctx => {
         io.broadcast("video", stimulusQueue)
         ctx.body = makeLabNotebook(labNotebook)
 		// init folders / logs
-		let vidname, stream
+        let vidname, stream
+        // TODO should use same date for each file (mp4, stim, yaml)
+        // add to a global dict for sid lookup
 		vidname = DATADIR + "renders/" + (new Date().toISOString())
 		fs.mkdirSync(vidname, { recursive: true })
 		stream = fs.createWriteStream(vidname+".txt", {flags:'a'})
