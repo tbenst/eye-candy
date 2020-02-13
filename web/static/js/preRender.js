@@ -1,6 +1,8 @@
 import {SimpleIDB} from '/js/simpleIDB.js';
 import {DeterministicRandom} from '/js/random.js';
 // note: cannot import store due to use of `window`
+// Dev note if updating: must cache invalidate for ctrl shift r on
+// http://localhost:3000/js/preRender.js 
 
 const loggerChannel = new BroadcastChannel('logger');
 loggerChannel.postMessage("Initialized WebWorker.")

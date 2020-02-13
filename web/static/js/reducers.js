@@ -15,6 +15,10 @@ export function eyeCandyApp(state, action) {
             return Object.assign({}, state, {
                 stimulus: action.stimulus
             })
+        case SET_START_DATE:
+            return Object.assign({}, state, {
+                startDate: action.startDate
+            })
         case INCREMENT_STIMULUS_INDEX:
             let index = state.stimulusIndex + 1
             localStorage.setItem("stimulusIndex", index)

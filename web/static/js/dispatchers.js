@@ -338,6 +338,10 @@ export function tickDispatcher(timeDelta) {
     const state = store.getState()
 
     // initialize for time=0
+    // TODO: perhaps should check first if timeDelta will invalidate
+    // stimulus based on lifespan. If so, should skip, and can initialize
+    // new stimulus with the timeDelta above previous lifespan, reducing slop at the cost of
+    // potentially displaying a stimulus for less than lifespan
     if (state.stimulus!=undefined ) {
         store.dispatch(timetickAC(timeDelta))
         store.dispatch(stimulusTickAC(timeDelta))
@@ -346,7 +350,7 @@ export function tickDispatcher(timeDelta) {
     // check if stimulus expired then update signal light
     if (state.stimulus===undefined ||
         state.stimulus.age >= state.stimulus.lifespan) {
-
+        // TODO: no stimulusTick is dispatched!
         newStimulusDispatcher()
     }
     switch(state.signalLight) {

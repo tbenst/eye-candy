@@ -151,12 +151,11 @@ router.get("/count", ctx => {
     ctx.body = session;
 })
 
-function makeLabNotebook(labNotebook) {
+function makeLabNotebook(labNotebook, date) {
     labNotebook.windowHeight = windows[labNotebook.sid].windowHeight
     labNotebook.windowWidth = windows[labNotebook.sid].windowWidth
     delete labNotebook.sid
     // TODO generate date cllient side
-    const date = new Date()
     labNotebook.date = date
     labNotebook.version = 0.5
     labNotebook.flickerVersion = 0.3
@@ -188,11 +187,13 @@ router.post("/start-program", ctx => {
 
     labNotebook.epl = program[sid].epl
 
+    const date = new Date()
+
     if (submitButton==="start") {
         console.log("start program")
         let stimulusQueue = initStimulusQueue(program[sid])
-        io.broadcast("run", stimulusQueue)
-        ctx.body = makeLabNotebook(labNotebook)
+        io.broadcast("run", {stimulusQueue: stimulusQueue, date: date})
+        ctx.body = makeLabNotebook(labNotebook, date)
     } else if (submitButton==="preview") {
         let s = program[sid].next()
         ctx.body = ""
@@ -203,8 +204,8 @@ router.post("/start-program", ctx => {
     } else if (submitButton==="save-video") {
         console.log("start video")
         let stimulusQueue = initStimulusQueue(program[sid])
-        io.broadcast("video", stimulusQueue)
-        ctx.body = makeLabNotebook(labNotebook)
+        io.broadcast("video", {stimulusQueue: stimulusQueue, date: date})
+        ctx.body = makeLabNotebook(labNotebook, date)
 		// init folders / logs
         let vidname, stream
         // TODO should use same date for each file (mp4, stim, yaml)

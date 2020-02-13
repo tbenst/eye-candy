@@ -1,4 +1,4 @@
-import { canvas } from "/js/store.js";
+import { canvas, store } from "/js/store.js";
 // TODO remove -- below is for debugging with test.js why the extra frame
 // sneaks in at begining of video if user doesn't save previous video
 // appears to not happen if just a SOLID stimuli as last frame in prev video
@@ -23,7 +23,14 @@ const mimeType = "video/x-matroska"
 const extension = ".mkv"
 
 // TODO for some reason, all of profile/constraint/level configuration is ignored + gives same size video
+// MediaRecorder.isTypeSupported() lies on chrome 
 // seems to be good enough for now
+
+// others to explore:
+// huffyuv
+// dirac lossless
+// libx264 -crf 0 -preset ultrafast 
+
 
 // avc1.PPCCLL
 // profile number (PP), constraint set flags (CC), and level (LL)
@@ -47,6 +54,8 @@ let recordOptions = {
   mimeType: `${mimeType}; ${codecs}`
 };
 export let canvasRecorder = new MediaRecorder(canvasStream, recordOptions);
+// could check mimeType canvasRecorder.mimeType
+// https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/mimeType
 canvasRecorder.ondataavailable = handleDataAvailable;
 
 function handleDataAvailable(event) {
@@ -96,13 +105,13 @@ function downloadVideo() {
   let blob = new Blob(recordedChunks, {
     type: mimeType
   });
+  const state = store.getState()
   let url = URL.createObjectURL(blob);
   let a = document.createElement("a");
   document.body.appendChild(a);
   a.style = "display: none";
   a.href = url;
-  let dateStr = new Date().toISOString()
-  a.download = `${dateStr}_eyecandy${extension}`;
+  a.download = `${state.startDate}_eyecandy${extension}`;
   console.log("pre-click")
   a.click();
   window.URL.revokeObjectURL(url);
@@ -115,13 +124,13 @@ function downloadFrameLog() {
   let blob = new Blob(frameLog, {
     type: "text/plain"
   });
+  const state = store.getState()
   let url = URL.createObjectURL(blob);
   let a = document.createElement("a");
   document.body.appendChild(a);
   a.style = "display: none";
   a.href = url;
-  let dateStr = new Date().toISOString()
-  a.download = `${dateStr}_eyecandy_frames.log`;
+  a.download = `${state.startDate}_eyecandy_frames.log`;
   a.click();
   frameLog = initFrameLog.slice()
   window.URL.revokeObjectURL(url);

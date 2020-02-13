@@ -55,15 +55,16 @@ export const storeInitialState = {
     frameNum: 0,
     stimulusIndex: -1,
     stimulusQueue: [],
-    graphics: []
+    graphics: [],
+    startDate: ""
 }
 
 
 // USE THIS FOR NO LOGGER
-export let store = createStore(eyeCandyApp, storeInitialState)
+// export let store = createStore(eyeCandyApp, storeInitialState)
 
 // USE THIS FOR LOGGER
-// export let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
+export let store = createStore(eyeCandyApp, storeInitialState, applyMiddleware( logger ))
 
 // GET FROM SERVER (NOT OPERATIONAL)
 // let store = createStore(todoApp, window.STATE_FROM_SERVER)
@@ -172,17 +173,17 @@ async function loadPreRenderForStimuli(stimulusQueue) {
     return stimulusQueue
 }
 
-socket.on("run", async (stimulusQueue) => {
-    // TODO load preRender images
+socket.on("run", async ({stimulusQueue, date}) => {
     console.log("socket 'run'")
+    store.dispatch(setStartDate(date))
     stimulusQueue = await loadPreRenderForStimuli(stimulusQueue)
     store.dispatch(setStimulusQueueAC(stimulusQueue))
     store.dispatch(setStatusAC(STATUS.STARTED))
 })
 
-socket.on("video", async (stimulusQueue) => {
-    // TODO load preRender images
-    console.log("socket 'video'")
+socket.on("video", async ({stimulusQueue, date}) => {
+    console.log("socket 'video' (save-video)")
+    store.dispatch(setStartDate(date))
     stimulusQueue = await loadPreRenderForStimuli(stimulusQueue)
     store.dispatch(setStimulusQueueAC(stimulusQueue))
     store.dispatch(setStatusAC(STATUS.VIDEO))
@@ -285,6 +286,8 @@ async function preRenderWebWorkers(preRender, preRenderHash, renderPrefix) {
     // console.log("preRenderFuncStr", preRenderFuncStr)
     const args = preRender.args
     const nJobs = args.nJobs
+
+    // console.log("preRenderWW args: ", args)
 
     if (nJobs>0) {
         // use webworkers

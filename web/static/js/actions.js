@@ -16,6 +16,7 @@ export const ADD_GRAPHIC = "ADD_GRAPHIC"
 export const REMOVE_GRAPHIC = "REMOVE_GRAPHIC"
 export const GRAPHICS_TICK = "GRAPHICS_TICK"
 export const SET_SIGNAL_LIGHT = "SET_SIGNAL_LIGHT"
+export const SET_START_DATE = "SET_START_DATE"
 export const RESET = "RESET"
 
 // Define states for readability
@@ -151,3 +152,4 @@ export const setStimulusQueueAC = makeAccessorAC(SET_STIMULUS_QUEUE, "stimulusQu
 export const setStimulusAC = makeAccessorAC(SET_STIMULUS, "stimulus")
 export const setGraphicsAC = makeAccessorAC(SET_GRAPHICS, "graphics")
 export const setSignalLightAC = makeAccessorAC(SET_SIGNAL_LIGHT, "signalLight")
+export const setStartDate = makeAccessorAC(SET_START_DATE, "startDate")
