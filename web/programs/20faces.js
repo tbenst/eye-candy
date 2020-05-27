@@ -1,4 +1,4 @@
-const metadata = {name: "20faces", version: "0.2.0"}
+const metadata = {name: "20faces", version: "0.2.1"}
 const duration = 0.5
 const repetitions = 60
 const scaleX = 2
@@ -32,7 +32,7 @@ for (let rep = 0; rep < repetitions; rep++) {
       imageClass = [ n, isMale, isSmiling ]
       im = new Image(duration, "black", imageSrc, fixationPoint, [scaleX, scaleY],
       {class: imageClass, classLabels: classLabels,
-        group: id, cohort: cohort, block: id})
+        group: id, cohort: cohort, block: true})
       before = new Wait(duration, {group: id, block: true})
       after = new Wait(r.randi(30,45)/60, {group: id})
       stimuli.push([before, im, after])
