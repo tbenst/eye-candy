@@ -68,7 +68,7 @@ function graphicsDispatcher() {
             if (stimulus.age === 0) {
                 gratingDispatcher(stimulus.lifespan, stimulus.width, stimulus.barColor, stimulus.backgroundColor,
                     stimulus.speed, stimulus.angle,
-                    sinusoidal=true)
+                    true) // sinusoidal=true
                 // increment count by 1 after bar is dispatched
             }
             break
