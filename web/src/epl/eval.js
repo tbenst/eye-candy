@@ -5,6 +5,7 @@ const Types = require("./types")
 const Render = require("./render")
 const Random = require("./random")
 const Misc = require("./misc")
+const Generators = require("./generators")
 
 const math = require("./math")
 const {DATADIR} = require('../vars.js')
@@ -14,7 +15,7 @@ const R = require("ramda")
 // this object has all values usable in EPL
 // TODO: should this also be available for preRenderFuncWrapper?
 let EPL = Object.assign({log: console.log, JSON: JSON, DATADIR: DATADIR}, {R: R},
-                        Types,Render,Random,math,Misc)
+                        Types, Render, Random, math, Misc, Generators)
 
 function compileJSProgram(programJS,seed, windowHeight, windowWidth) {
     console.log('compiling EPL.')
