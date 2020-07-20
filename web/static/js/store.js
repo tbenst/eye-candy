@@ -153,11 +153,11 @@ export async function loadImageForStimulus(stimulus, preRenderHash) {
         stimulus.value.image !== undefined &&
         typeof(stimulus.value.image)==="string") {
             image = new Image()
-            console.log("queueStim inside elif", stimulus)
+            // console.log("queueStim inside elif", stimulus)
             image.src = stimulus.value.image
             stimulus.value.image = image
         }
-    console.log("queueStim post if", stimulus, "hash", preRenderHash)
+    // console.log("queueStim post if", stimulus, "hash", preRenderHash)
     // if stimulus.value.image already an image, do nothing
     return stimulus
 }
@@ -168,6 +168,7 @@ async function loadPreRenderForStimuli(stimulusQueue) {
     const preRenderHash = localStorage.getItem("preRenderHash")
     for (let s in stimulusQueue) {
         stimulus = stimulusQueue[s]
+        // console.log("loadPreRenderForStimuli stimulus", stimulus)
         stimulus = await loadImageForStimulus(stimulus, preRenderHash)
     }
     return stimulusQueue
