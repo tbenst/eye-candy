@@ -1,4 +1,16 @@
+const {Bar, Grating, Image, Video, Solid,
+       Chirp, Wait, Checkerboard} = require("./types")
+const {PI, ceil, floor, pow, sqrt, cos, sin, round} = require("./math")
+const {calcBarLifespan} = require("./render")
+const {flatten} = require("./misc")
 // functions to be included in EPL namespace
+
+// If updating celltyping, be sure to bump version in celltypeMeta
+// also note that this is currently dangerous to update, as it will
+// change the execution of EPL from older versions and result in bad .stim files
+
+// TODO remove need for this function by saving the .stim file directly
+// may want to wait for the electron code rebasing first
 
 // run each generator sequentially
 function* concat_generators(...generators) {
@@ -118,17 +130,52 @@ function* celltypingPreRender(binaryNoiseNframes, randomSeed, checkerH, checkerW
 
 exports.celltypingPreRender = celltypingPreRender
 
-// Note: still must define stimulusGenerator in EPL
-// e.g. `stimulusGenerator = celltyping`
-// chunksize: make as large as memory permits
-function* celltyping(randomSeed, windowHeight, windowWidth, binaryNoiseDuration,
-                     hz, chunkSize) {
+const binaryNoiseDuration = 5*60
+const frameRate = 60
+const hz = 5
+const binaryNoiseLifespan = 1 / hz
+const binaryNoiseNframes = hz*binaryNoiseDuration
+const chunkSize = 50
+let checkerH = 40
+let checkerW = 40
+
+function createCelltypingPreRenderArgs(r) {
+  const nJobs = Math.ceil(binaryNoiseNframes / chunkSize)
+  const remainder = Math.ceil(binaryNoiseNframes % chunkSize)
+
+  // deterministic seed for caching
+  const renderSeed = 242424
+
+  let preRenderArgs = { nJobs: nJobs, startIdx: [], version: "binary_noise_v1"}
+  let startIdx = 0
+  for (let i = 0; i < nJobs; i++) {
+    if (i === (nJobs - 1) && remainder !== 0) {
+      preRenderArgs[i] = [remainder, renderSeed+i, checkerH, checkerW]
+    } else {
+      preRenderArgs[i] = [chunkSize, renderSeed+i, checkerH, checkerW]
+    }
+    preRenderArgs["startIdx"].push(startIdx)
+    startIdx = startIdx + chunkSize
+  }
+
+  return preRenderArgs
+}
+
+exports.celltypingPreRenderArgs = createCelltypingPreRenderArgs()
+
+// we need to create closure that includes the random number generator,
+// so we use the function factory pattern
+function createCelltypingGen(r, windowHeight, windowWidth) {
+  
+  // Note: still must define stimulusGenerator in EPL
+  // e.g. `stimulusGenerator = celltyping`
+  // chunksize: make as large as memory permits
   const binaryNoiseLifespan = 1 / hz
   const binaryNoiseNframes = hz*binaryNoiseDuration
   let checkerH = 40
   let checkerW = 40
-  const nJobs = ceil(binaryNoiseNframes / chunkSize)
-  const remainder = ceil(binaryNoiseNframes % chunkSize)
+  const nJobs = Math.ceil(binaryNoiseNframes / chunkSize)
+  const remainder = Math.ceil(binaryNoiseNframes % chunkSize)
   
   // deterministic seed for caching
   const renderSeed = 242424
@@ -148,21 +195,24 @@ function* celltyping(randomSeed, windowHeight, windowWidth, binaryNoiseDuration,
     startIdx = startIdx + chunkSize
   }
   
-  const celltypeMeta = {group: r.uuid(), label: "celltype"}
+  let celltypeMeta = {group: r.uuid(), label: "celltype"}
   
   celltypeStimuli = []
   celltypeStimuli.push(new Wait(3, celltypeMeta))
-  celltypeStimuli.push(new Solid(3, "white", celltypeMeta))
+  celltypeStimuli.push(new Solid(0.5, "white", celltypeMeta))
   celltypeStimuli.push(new Wait(3, celltypeMeta))
   // gray is #808080 or 0.5*"white"
-  celltypeStimuli.push(new Solid(3, "gray", celltypeMeta))
-  // start at 0.5 and increase
-  // baden params: 8 sec, f1~=0.75Hz, f1~=20Hz (or 40??).
+  celltypeStimuli.push(new Solid(2, "gray", celltypeMeta))
+  // frequency chirp.
   // negative PI/2 to rise first from (127,127,127)
-  celltypeStimuli.push(new Chirp(8, 0.75, 15, 127.5, 127.5, 8, -PI/2, celltypeMeta))
+  celltypeStimuli.push(new Chirp(8, 0.5, 5, 127.5, 127.5, 8, -PI/2, celltypeMeta))
   celltypeStimuli.push(new Wait(3, celltypeMeta))
-  // baden params: 8 sec, 2Hz, constrast: 1/30, 1/30, 1/15, 1/10, ... linear to full contrast
+  
+  // Amplitude chirp
+  // baden params: 8 sec, 2Hz,
+  // constrast: 1/30, 1/30, 1/15, 1/10, ... linear to full contrast
   celltypeStimuli.push(new Chirp(8, 2, 2, 4, 127.5, 8, -PI/2, celltypeMeta))
+  celltypeStimuli.push(new Wait(2, celltypeMeta))
   
   // moving bars
   // baden params: 0.3 × 1 mm bright bar moving at 1 mm s−1
@@ -170,22 +220,42 @@ function* celltyping(randomSeed, windowHeight, windowWidth, binaryNoiseDuration,
   // 110 px = (1/34.91*(13.09+12.54)/2 * 300)
   // speed = deg/um * (xpix/deg + ypix/deg)/2 * um / s^2
   // 0.367 px / um; 367 px / mm
+
+  // new group for moving bars
+  celltypeMeta = {group: r.uuid(), label: "celltype"}
+
   let ctWidth = 110
   let ctSpeed = 367
-  let ctAngles = [...Array(24).keys()].map(x => (x*2+1)*PI/24)
+  let ctAngles = [...Array(32).keys()].map(x => (x*2+1)*PI/32)
   let ctLifespan = calcBarLifespan(ctSpeed,ctWidth,windowHeight,windowWidth)
+
+  let barStimuli = []
   for (let angle of ctAngles) {
-    celltypeStimuli.push(new Wait(2, celltypeMeta))
-    celltypeStimuli.push(new Bar(ctLifespan,"black",
+    barStimuli.push(new Bar(ctLifespan,"black",
       ctSpeed, ctWidth, angle, "white", celltypeMeta))
   }
+
+  // add wait in between
+  r.shuffle(barStimuli)
+  for (let stim of barStimuli) {
+    celltypeStimuli.push(new Wait(1, celltypeMeta))
+    celltypeStimuli.push(stim)
+  }
+
+  // new group for color flashes
+  celltypeMeta = {group: r.uuid(), label: "celltype"}
   
-  celltypeStimuli.push(new Wait(2, celltypeMeta))
-  celltypeStimuli.push(new Solid(3, "green", celltypeMeta))
+  celltypeStimuli.push(new Wait(3, celltypeMeta))
+  celltypeStimuli.push(new Solid(0.5, "red", celltypeMeta))
+  celltypeStimuli.push(new Wait(3, celltypeMeta))
+  celltypeStimuli.push(new Solid(0.5, "green", celltypeMeta))
   celltypeStimuli.push(new Wait(3, celltypeMeta))
   celltypeStimuli.push(new Solid(3, "blue", celltypeMeta))
   celltypeStimuli.push(new Wait(3, celltypeMeta))
   
+  // new group for binary noise
+  celltypeMeta = {group: r.uuid(), label: "celltype"}
+
   // perfectly balanced random sequence at 5 Hz yielding a total running time of 5 min
   // coarse binary grid
   let noiseStimuli = []
@@ -198,17 +268,16 @@ function* celltyping(randomSeed, windowHeight, windowWidth, binaryNoiseDuration,
   
   // shuffle binary frames that are cached instead of slow
   // pre-rendering each time
+  // TODO switch to white noise, mean=0.5, std=0.16 (linear light space)
   r.shuffle(noiseStimuli)
   celltypeStimuli = celltypeStimuli.concat(noiseStimuli)
-  
   
   function* stimulusGenerator() {
     for (s of celltypeStimuli) {
       yield s
     }
   }
-
   return stimulusGenerator
-}
-exports.celltyping = celltyping
-// **** END CELL TYPE ASSAY ****
+}  
+
+exports.celltyping = createCelltypingGen

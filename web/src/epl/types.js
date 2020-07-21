@@ -11,6 +11,7 @@ const STIMULUS = {
     CHECKERBOARD: "CHECKERBOARD",
     LETTER: "LETTER",
     TILED_LETTER: "TILED_LETTER",
+    WHITE_NOISE: "WHITE_NOISE",
     EYECHART: "EYECHART",
     IMAGE: "IMAGE",
     VIDEO: "VIDEO"
@@ -103,6 +104,21 @@ class TiledLetter extends Stimulus {
     }
 }
 exports.TiledLetter = TiledLetter
+
+class WhiteNoise extends Stimulus {
+    constructor(lifespan, mean, std, rows, cols, color, metadata) {
+        super(lifespan, "black", metadata)
+        this.stimulusType = STIMULUS.WHITE_NOISE
+        this.mean = mean
+        this.rows = rows
+        this.cols = cols
+        // standard deviation
+        this.std = std
+        // TODO: color white noise not implemented
+        this.color = False
+    }
+}
+exports.WhiteNoise = WhiteNoise
 
 class EyeChart extends Stimulus {
     constructor(lifespan, backgroundColor, letterMatrix, size, padding, color, metadata) {

@@ -109,6 +109,8 @@ function tickGraphic(state, graphic, timeDelta) {
             return tickChirp(graphic, timeDelta)
         case GRAPHIC.SINUSOIDAL_GRATING:
             return tickGrating(graphic, timeDelta)
+        case GRAPHIC.WHITE_NOISE:
+            return tickWhiteNoise(graphic)
         default:
             return graphic
     }
@@ -169,5 +171,35 @@ function tickChirp(chirp, timeDelta) {
         color: rgbToHex(newColor),
         age: t,
         debug: {t: t, beta: beta, phase: phase, scale: scale, timeFraction: timeFraction, amplitude: amplitude, colorVal: colorVal}
+    })
+}
+
+// normal distribution between [0,1]
+// https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve/39187274#39187274
+function randn_bm() {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while(v === 0) v = Math.random();
+    let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    num = num / 10.0 + 0.5; // Translate to 0 -> 1
+    if (num > 1 || num < 0) return randn_bm(); // resample between 0 and 1
+    return num;
+}
+
+// sample new white noise
+function tickWhiteNoise(graphic) {
+    var canvasPattern = document.createElement("canvas")
+    canvasPattern.width = graphic.cols
+    canvasPattern.height = graphic.rows
+    var contextPattern = canvasPattern.getContext("2d")
+    let nVals = graphic.cols * graphic.rows
+    const flatPixelArray = [...Array(nVals).keys()].map(x => randn_bm())
+    let imageData = new ImageData(flatPixelArray, windowWidth, windowHeight)
+    contextPattern.putImageData(imageData, 0, 0)
+    
+    var pattern = context.createPattern(canvasPattern,"no-repeat");
+
+    return Object.assign({}, graphic, {
+        pattern: pattern
     })
 }

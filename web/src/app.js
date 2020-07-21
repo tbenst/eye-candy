@@ -261,6 +261,11 @@ router.post("/analysis/start-program", ctx => {
     }
 })
 
+// TODO implement check of git SHA to ensure recreating same version of eyecandy
+// OR (better yet) remove need for this function by saving the .stim file directly
+// may want to wait for the electron code rebasing first
+// relevant now that EPL evaluation may change with updates/changes to
+// generators...
 router.post("/analysis/run-program", ctx => {
     console.log("analysis/run-program")
     const sid = uuid.v4()
