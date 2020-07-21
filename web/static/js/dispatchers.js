@@ -96,8 +96,7 @@ function graphicsDispatcher() {
         case STIMULUS.WHITE_NOISE:
             if (stimulus.age === 0) {
                 whiteNoiseDispatcher(stimulus.lifespan,
-                    stimulus.backgroundColor, stimulus.mean,
-                    stimulus.std, stimulus.rows, stimulus.cols,
+                    stimulus.rows, stimulus.cols,
                     stimulus.color)
             }
             break
@@ -221,7 +220,7 @@ function tiledLetterDispatcher(lifespan, letter, size, padding, color, backgroun
     }))
 }
 
-function whiteNoiseDispatcher(lifespan, backgroundColor,  mean, std, rows,
+function whiteNoiseDispatcher(lifespan, rows,
         cols, color) {
     var canvasPattern = document.createElement("canvas");
     canvasPattern.width = cols;
@@ -229,18 +228,15 @@ function whiteNoiseDispatcher(lifespan, backgroundColor,  mean, std, rows,
     var contextPattern = canvasPattern.getContext("2d");
 
     // initialize black pattern
-    contextPattern.fillStyle = backgroundColor
+    contextPattern.fillStyle = "black"
     contextPattern.fillRect(0, 0, canvasPattern.width, canvasPattern.height);
 
     var pattern = context.createPattern(canvasPattern,"no-repeat");
 
     // scale to fill
-    scale = [WIDTH/cols, HEIGHT/rows]
     store.dispatch(addGraphicAC({
         graphicType: GRAPHIC.WHITE_NOISE,
         pattern: pattern,
-        mean: mean,
-        std: std,
         rows: rows,
         cols: cols,
         color: color,

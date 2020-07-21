@@ -1,5 +1,7 @@
 import {storeInitialState} from '/js/store.js'
-import { rgbToHex, cos, sin,  } from '/js/logic.js'
+import { rgbToHex, cos, sin  } from '/js/logic.js'
+import {WIDTH, HEIGHT } from '/js/store.js'
+
 
 export function eyeCandyApp(state, action) {
     switch (action.type) {
@@ -174,7 +176,7 @@ function tickChirp(chirp, timeDelta) {
     })
 }
 
-// normal distribution between [0,1]
+// normal distribution between [0,255]
 // https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve/39187274#39187274
 function randn_bm() {
     let u = 0, v = 0;
@@ -183,7 +185,9 @@ function randn_bm() {
     let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
     num = num / 10.0 + 0.5; // Translate to 0 -> 1
     if (num > 1 || num < 0) return randn_bm(); // resample between 0 and 1
-    return num;
+    // convert to [0,255]
+    let n = Math.round(Math.pow(num,1/2.2)*255)
+    return n;
 }
 
 // sample new white noise
@@ -193,13 +197,19 @@ function tickWhiteNoise(graphic) {
     canvasPattern.height = graphic.rows
     var contextPattern = canvasPattern.getContext("2d")
     let nVals = graphic.cols * graphic.rows
-    const flatPixelArray = [...Array(nVals).keys()].map(x => randn_bm())
-    let imageData = new ImageData(flatPixelArray, windowWidth, windowHeight)
+    let flatPixelArray = new Uint8ClampedArray(nVals*4)
+    let val
+    for (var p = 0; p < nVals; p++) {
+        val = randn_bm()
+        flatPixelArray[p*4] = val // red
+        flatPixelArray[p*4+1] = val // green
+        flatPixelArray[p*4+2] = val // blue
+        flatPixelArray[p*4+3] = 255 // alpha
+    }
+    let imageData = new ImageData(flatPixelArray, graphic.cols, graphic.rows)
     contextPattern.putImageData(imageData, 0, 0)
-    
-    var pattern = context.createPattern(canvasPattern,"no-repeat");
 
     return Object.assign({}, graphic, {
-        pattern: pattern
+        pattern: canvasPattern
     })
 }

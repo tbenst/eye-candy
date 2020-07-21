@@ -106,16 +106,13 @@ class TiledLetter extends Stimulus {
 exports.TiledLetter = TiledLetter
 
 class WhiteNoise extends Stimulus {
-    constructor(lifespan, mean, std, rows, cols, color, metadata) {
+    constructor(lifespan, rows, cols, color, metadata) {
         super(lifespan, "black", metadata)
         this.stimulusType = STIMULUS.WHITE_NOISE
-        this.mean = mean
         this.rows = rows
         this.cols = cols
-        // standard deviation
-        this.std = std
         // TODO: color white noise not implemented
-        this.color = False
+        this.color = false
     }
 }
 exports.WhiteNoise = WhiteNoise

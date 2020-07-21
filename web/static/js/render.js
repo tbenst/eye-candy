@@ -106,6 +106,7 @@ export function renderImage(context, image, fixationPoint, scale) {
 }
 
 export function renderWhiteNoise(context, image) {
+    context.imageSmoothingEnabled = false
     context.drawImage(image, 0, 0, WIDTH, HEIGHT)
 }
 
