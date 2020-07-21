@@ -93,6 +93,13 @@ function graphicsDispatcher() {
                     stimulus.padding, stimulus.color,stimulus.backgroundColor, stimulus.angle)
             }
             break
+        case STIMULUS.WHITE_NOISE:
+            if (stimulus.age === 0) {
+                whiteNoiseDispatcher(stimulus.lifespan,
+                    stimulus.rows, stimulus.cols,
+                    stimulus.color)
+            }
+            break
     }
 }
 
@@ -208,6 +215,31 @@ function tiledLetterDispatcher(lifespan, letter, size, padding, color, backgroun
         graphicType: GRAPHIC.PATTERN,
         pattern: pattern,
         angle: angle,
+        lifespan: lifespan,
+        age: 0
+    }))
+}
+
+function whiteNoiseDispatcher(lifespan, rows,
+        cols, color) {
+    var canvasPattern = document.createElement("canvas");
+    canvasPattern.width = cols;
+    canvasPattern.height = rows;
+    var contextPattern = canvasPattern.getContext("2d");
+
+    // initialize black pattern
+    contextPattern.fillStyle = "black"
+    contextPattern.fillRect(0, 0, canvasPattern.width, canvasPattern.height);
+
+    var pattern = context.createPattern(canvasPattern,"no-repeat");
+
+    // scale to fill
+    store.dispatch(addGraphicAC({
+        graphicType: GRAPHIC.WHITE_NOISE,
+        pattern: pattern,
+        rows: rows,
+        cols: cols,
+        color: color,
         lifespan: lifespan,
         age: 0
     }))

@@ -105,6 +105,11 @@ export function renderImage(context, image, fixationPoint, scale) {
     context.drawImage(image, deltaX, deltaY, X, Y)
 }
 
+export function renderWhiteNoise(context, image) {
+    context.imageSmoothingEnabled = false
+    context.drawImage(image, 0, 0, WIDTH, HEIGHT)
+}
+
 export function renderVideo(context, video, scale) {
     if(video.paused){
           video.play();
@@ -145,6 +150,9 @@ export function render(context, state) {
                 break
             case GRAPHIC.PATTERN:
                 renderPattern(context, graphic.pattern, graphic.angle)
+                break
+            case GRAPHIC.WHITE_NOISE:
+                renderWhiteNoise(context, graphic.pattern)
                 break
             case GRAPHIC.GRATING:
                 renderGrating(context, graphic.pattern, graphic.width, graphic.angle, graphic.position)

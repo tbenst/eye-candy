@@ -1,5 +1,7 @@
 import {storeInitialState} from '/js/store.js'
-import { rgbToHex, cos, sin,  } from '/js/logic.js'
+import { rgbToHex, cos, sin  } from '/js/logic.js'
+import {WIDTH, HEIGHT } from '/js/store.js'
+
 
 export function eyeCandyApp(state, action) {
     switch (action.type) {
@@ -109,6 +111,8 @@ function tickGraphic(state, graphic, timeDelta) {
             return tickChirp(graphic, timeDelta)
         case GRAPHIC.SINUSOIDAL_GRATING:
             return tickGrating(graphic, timeDelta)
+        case GRAPHIC.WHITE_NOISE:
+            return tickWhiteNoise(graphic)
         default:
             return graphic
     }
@@ -169,5 +173,43 @@ function tickChirp(chirp, timeDelta) {
         color: rgbToHex(newColor),
         age: t,
         debug: {t: t, beta: beta, phase: phase, scale: scale, timeFraction: timeFraction, amplitude: amplitude, colorVal: colorVal}
+    })
+}
+
+// normal distribution between [0,255]
+// https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve/39187274#39187274
+function randn_bm() {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while(v === 0) v = Math.random();
+    let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    num = num / 10.0 + 0.5; // Translate to 0 -> 1
+    if (num > 1 || num < 0) return randn_bm(); // resample between 0 and 1
+    // convert to [0,255]
+    let n = Math.round(Math.pow(num,1/2.2)*255)
+    return n;
+}
+
+// sample new white noise
+function tickWhiteNoise(graphic) {
+    var canvasPattern = document.createElement("canvas")
+    canvasPattern.width = graphic.cols
+    canvasPattern.height = graphic.rows
+    var contextPattern = canvasPattern.getContext("2d")
+    let nVals = graphic.cols * graphic.rows
+    let flatPixelArray = new Uint8ClampedArray(nVals*4)
+    let val
+    for (var p = 0; p < nVals; p++) {
+        val = randn_bm()
+        flatPixelArray[p*4] = val // red
+        flatPixelArray[p*4+1] = val // green
+        flatPixelArray[p*4+2] = val // blue
+        flatPixelArray[p*4+3] = 255 // alpha
+    }
+    let imageData = new ImageData(flatPixelArray, graphic.cols, graphic.rows)
+    contextPattern.putImageData(imageData, 0, 0)
+
+    return Object.assign({}, graphic, {
+        pattern: canvasPattern
     })
 }
