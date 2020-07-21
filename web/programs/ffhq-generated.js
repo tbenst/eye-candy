@@ -38,17 +38,13 @@ r.shuffle(stimuli)
 stimuli = flatten(stimuli)
 stimuli = measureIntegrity(stimuli)
 
-// let celltyping_stimuli = celltyping(r, windowHeight, windowWidth, 25,40)()
-// var stimulusGenerator = concat_generators(celltyping_stimuli, stimuli)
-// stimulusGenerator = stimuli
-// stimulusGenerator = celltyping_stimuli
-
+let celltyping_generator = celltyping(r, windowHeight, windowWidth, 25,40)()
 
 function* stimulusGenerator() {
     // run celltyping first
-    // for (s of celltyping_stimuli) {
-    //   yield s
-    // }
+    for (s of celltyping_generator) {
+      yield s
+    }
     // then run ffhq
     for (s of stimuli) {
         yield s
