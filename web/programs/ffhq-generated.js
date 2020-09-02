@@ -6,7 +6,7 @@ const scaleY = 1.1
 let images = [...Array(10000).keys()].map(x => String(x).padStart(4,"0"))
 
 // First 5000 images only
-// images = images.slice(0,5000)
+images = images.slice(0,5000)
 
 // Second 5000 images only
 // images = images.slice(5000,10000)
